@@ -4,7 +4,6 @@ from BatteryCell import BatteryCell
 
 
 class BatteryModule:
-
     LOWER_MODULE_TEMP_LIMIT = -10  # °C
     UPPER_MODULE_TEMP_LIMIT = 50  # °C
     LOWER_CHIP_TEMP_LIMIT = -20  # °C
