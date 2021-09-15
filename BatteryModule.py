@@ -1,3 +1,8 @@
+from typing import List
+
+from BatteryCell import BatteryCell
+
+
 class BatteryModule:
 
     LOWER_MODULE_TEMP_LIMIT = -10  # °C
@@ -8,12 +13,20 @@ class BatteryModule:
     UPPER_VOLTAGE_LIMIT = 50.4  # V
 
     def __init__(self):
-        self.cells: list = None
+        self.cells: List[BatteryCell] = None
         self.voltage: float = None
         self.module_temp1: float = None
         self.module_temp2: float = None
         self.chip_temp: float = None
         self.heartbeat_timestamp: int = None
+
+    def get_soc(self) -> float:
+        soc_sum: float = 0
+
+        for cell in self.cells:
+            soc_sum += cell.get_soc()
+
+        return soc_sum / len(self.cells)
 
     def trigger_missed_heartbeat_event(self):
         # todo
