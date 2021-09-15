@@ -12,26 +12,26 @@ class BatterySystem:
         self.voltage: float = 0
         self.current: float = 0
 
-    def get_soc(self):
-        # todo: collect socs for all cells and return the average value
-        pass
+    def get_soc(self) -> float:
+        soc_sum: float = 0
 
-    def get_power(self):
+        for module in self.battery_modules:
+            soc_sum += module.get_soc()
+
+        return soc_sum / len(self.battery_modules)
+
+    def get_highest_cell_temp(self) -> float:
         # todo
         pass
 
-    def get_highest_cell_temp(self):
+    def get_lowest_cell_temp(self) -> float:
         # todo
         pass
 
-    def get_lowest_cell_temp(self):
+    def get_highest_cell_voltage(self) -> float:
         # todo
         pass
 
-    def get_highest_cell_voltage(self):
-        # todo
-        pass
-
-    def get_highest_voltage_cells(self):
+    def get_highest_voltage_cells(self) -> float:
         # todo
         pass
