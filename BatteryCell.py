@@ -1,4 +1,3 @@
-from BatteryModule import BatteryModule
 from SocCurve import SocCurve
 
 
@@ -8,14 +7,13 @@ class BatteryCell:
     LOWER_VOLTAGE_LIMIT_WARNING: float = 3.2  # V
     UPPER_VOLTAGE_LIMIT_WARNING: float = 4.15  # V
 
-    def __init__(self, soc_curve: SocCurve, battery_module: BatteryModule):
+    def __init__(self, soc_curve: SocCurve):
         # Uninitialized values
         self.voltage: float = 0
         self.balance_pin_state: bool = False
         self.is_initialized: bool = False
 
         self.soc_curve: SocCurve = soc_curve
-        self.parent_module: BatteryModule = battery_module
 
     def get_soc(self) -> float:
         return self.soc_curve.voltage_to_soc(self.voltage)
