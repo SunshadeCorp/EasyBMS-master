@@ -19,9 +19,6 @@ class SocCurve:
         # todo
         pass
 
-    def linear_interpolate(self, lower, upper, value, ):
-        pass
-
     def voltage_to_soc(self, cell_voltage):
         assert 0 < cell_voltage < 5
 
