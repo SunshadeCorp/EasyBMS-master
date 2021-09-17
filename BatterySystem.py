@@ -14,7 +14,7 @@ class BatterySystem:
     LOWER_CURRENT_LIMIT_CRITICAL: float = -32  # A
     UPPER_CURRENT_LIMIT_CRITICAL: float = 32  # A
 
-    def __init__(self, battery_modules: List[BatteryModule]):
+    def __init__(self, battery_modules: List[BatteryModule]) -> None:
         # Uninitialized values
         self.voltage: float = 0
         self.current: float = 0
@@ -22,7 +22,7 @@ class BatterySystem:
         self.is_initialized = False
         self.battery_modules: list = battery_modules
 
-    def update_measurements(self, voltage: float, current: float):
+    def update_measurements(self, voltage: float, current: float) -> None:
         self.voltage = voltage
         self.current = current
         self.is_initialized = True
