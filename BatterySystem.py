@@ -29,12 +29,12 @@ class BatterySystem:
 
         if self.has_critical_voltage():
             pass
-        elif self.has_warning_voltage(self):
+        elif self.has_warning_voltage():
             pass
 
         if self.has_critical_current():
             pass
-        elif self.has_warning_current(self):
+        elif self.has_warning_current():
             pass
 
     def has_critical_voltage(self) -> bool:
@@ -44,10 +44,10 @@ class BatterySystem:
         return self.voltage < self.LOWER_VOLTAGE_LIMIT_WARNING or self.voltage > self.UPPER_VOLTAGE_LIMIT_WARNING
 
     def has_critical_current(self) -> bool:
-        return self.voltage < self.LOWER_CURRENT_LIMIT_CRITICAL or self.voltage > self.UPPER_CURRENT_LIMIT_CRITICAL
+        return self.current < self.LOWER_CURRENT_LIMIT_CRITICAL or self.current > self.UPPER_CURRENT_LIMIT_CRITICAL
 
     def has_warning_current(self) -> bool:
-        return self.voltage < self.LOWER_CURRENT_LIMIT_WARNING or self.voltage > self.UPPER_CURRENT_LIMIT_WARNING
+        return self.current < self.LOWER_CURRENT_LIMIT_WARNING or self.current > self.UPPER_CURRENT_LIMIT_WARNING
 
     def get_soc(self) -> float:
         soc_sum: float = 0
