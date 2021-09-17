@@ -19,7 +19,7 @@ class BatteryModule:
     LOWER_VOLTAGE_LIMIT_WARNING: float = 38.4  # V
     UPPER_VOLTAGE_LIMIT_WARNING: float = 49.8  # V
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.cells: List[BatteryCell] = None
         self.voltage: float = None
         self.module_temp1: float = None
@@ -35,7 +35,7 @@ class BatteryModule:
 
         return soc_sum / len(self.cells)
 
-    def update_measurements(self, temp1: float, temp2: float, voltage, chip_temp):
+    def update_measurements(self, temp1: float, temp2: float, voltage, chip_temp) -> None:
         self.module_temp1 = temp1
         self.module_temp2 = temp2
         self.voltage = voltage
@@ -93,22 +93,22 @@ class BatteryModule:
     def has_warning_voltage(self) -> bool:
         return self.voltage < self.LOWER_VOLTAGE_LIMIT_WARNING or self.voltage > self.UPPER_VOLTAGE_LIMIT_WARNING
 
-    def trigger_missed_heartbeat_event(self):
+    def trigger_missed_heartbeat_event(self) -> None:
         # todo
         pass
 
-    def trigger_critical_temperature_event(self):
+    def trigger_critical_temperature_event(self) -> None:
         # todo
         pass
 
-    def trigger_implausible_temperature_event(self):
+    def trigger_implausible_temperature_event(self) -> None:
         # todo
         pass
 
-    def trigger_critical_module_voltage_event(self):
+    def trigger_critical_module_voltage_event(self) -> None:
         # todo
         pass
 
-    def trigger_implausible_module_voltage_event(self):
+    def trigger_implausible_module_voltage_event(self) -> None:
         # todo
         pass
