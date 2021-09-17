@@ -7,7 +7,7 @@ class BatteryCell:
     LOWER_VOLTAGE_LIMIT_WARNING: float = 3.2  # V
     UPPER_VOLTAGE_LIMIT_WARNING: float = 4.15  # V
 
-    def __init__(self, soc_curve: SocCurve):
+    def __init__(self, soc_curve: SocCurve) -> None:
         # Uninitialized values
         self.voltage: float = 0
         self.balance_pin_state: bool = False
@@ -31,25 +31,25 @@ class BatteryCell:
         elif self.has_warning_voltage():
             self.trigger_warning_voltage_event()
 
-    def start_balance_discharge(self):
+    def start_balance_discharge(self) -> None:
         # todo
         pass
 
-    def stop_balance_discharge(self):
+    def stop_balance_discharge(self) -> None:
         # todo
         pass
 
     def is_balance_discharging(self) -> bool:
         return self.balance_pin_state
 
-    def trigger_implausible_voltage_event(self):
+    def trigger_implausible_voltage_event(self) -> None:
         # todo
         pass
 
-    def trigger_critical_voltage_event(self):
+    def trigger_critical_voltage_event(self) -> None:
         # todo
         pass
 
-    def trigger_warning_voltage_event(self):
+    def trigger_warning_voltage_event(self) -> None:
         # todo
         pass
