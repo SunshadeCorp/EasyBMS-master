@@ -26,7 +26,6 @@ class BatteryModule:
 
     def __init__(self) -> None:
         # Uninitialized
-        self.cells: List[BatteryCell] = None
         self.voltage: float = None
         self.module_temp1: float = None
         self.module_temp2: float = None
@@ -40,7 +39,12 @@ class BatteryModule:
         # Events
         self.module_temp_event = MeasurementEvent()
         self.chip_temp_event = MeasurementEvent()
+        self.voltage_event = MeasurementEvent()
         self.heartbeat_event = HeartbeatEvent()
+
+        self.cells: List[BatteryCell] = []
+        for i in range(1, 12):
+            self.cells.insert(BatteryCell())
 
     def heartbeat_monitor_thread(self):
         while self.keep_monitoring_heartbeats:
@@ -67,21 +71,20 @@ class BatteryModule:
 
         self.heartbeat_event.on_heartbeat()
 
-        # todo
         if self.has_critical_module_temp():
-            pass
+            self.module_temp_event.on_critical()
         elif self.has_warning_module_temp():
-            pass
+            self.module_temp_event.on_warning()
 
         if self.has_critical_chip_temp():
-            pass
+            self.chip_temp_event.on_critical()
         elif self.has_warning_chip_temp():
-            pass
+            self.chip_temp_event.on_warning()
 
         if self.has_critical_voltage():
-            pass
+            self.voltage_event.on_critical()
         elif self.has_warning_voltage():
-            pass
+            self.voltage_event.on_warning()
 
     def has_warning_module_temp1(self) -> bool:
         return self.module_temp1 < self.LOWER_MODULE_TEMP_LIMIT_WARNING \
