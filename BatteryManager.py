@@ -1,11 +1,15 @@
 from BatterySystem import BatterySystem
-
+from HeartbeatEvent import HeartbeatEvent
+from BatteryModule import BatteryModule
 
 class BatteryManager:
     battery_system = None
 
     def __init__(self, battery_system: BatterySystem) -> None:
         self.battery_system = battery_system
+
+        for module in self.battery_system.battery_modules:
+            module.heartbeat_event.on_heartbeat_missed += self.on_heartbeat_missed
 
     def balance(self) -> None:
         # todo
@@ -52,3 +56,6 @@ class BatteryManager:
     def on_implausible_cell_voltage(self) -> None:
         # todo
         pass
+
+    def on_heartbeat_missed(self, event: HeartbeatEvent) -> bool:
+        print("Heartbeat missed on esp: " + event.esp_number)

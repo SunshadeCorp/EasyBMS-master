@@ -44,7 +44,7 @@ class BatterySystemLimitsTest(unittest.TestCase):
         self.assertFalse(self.battery_system.has_critical_voltage())
 
     def test_warning_voltage_lower2(self):
-        voltage = 404
+        voltage = 434
         current = 0
         self.battery_system.update_measurements(voltage, current)
         self.assertTrue(self.battery_system.has_warning_voltage())

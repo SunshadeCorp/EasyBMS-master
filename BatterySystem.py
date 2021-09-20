@@ -1,10 +1,11 @@
 from typing import List
 
 from BatteryModule import BatteryModule
+from MeasurementEvent import MeasurementEvent
 
 
 class BatterySystem:
-    LOWER_VOLTAGE_LIMIT_CRITICAL: float = 403.2  # V
+    LOWER_VOLTAGE_LIMIT_CRITICAL: float = 432.0  # V
     UPPER_VOLTAGE_LIMIT_CRITICAL: float = 604.8  # V
     LOWER_VOLTAGE_LIMIT_WARNING: float = 460.8  # V
     UPPER_VOLTAGE_LIMIT_WARNING: float = 597.6  # V
@@ -20,7 +21,11 @@ class BatterySystem:
         self.current: float = 0
 
         self.is_initialized = False
-        self.battery_modules: list = battery_modules
+        self.battery_modules: List[BatteryModule] = battery_modules
+
+        # Events
+        self.current_event = MeasurementEvent()
+        self.voltage_event = MeasurementEvent()
 
     def update_measurements(self, voltage: float, current: float) -> None:
         self.voltage = voltage
@@ -69,6 +74,6 @@ class BatterySystem:
         # todo
         pass
 
-    def get_highest_voltage_cells(self) -> float:
+    def get_highest_voltage_cells(self, number) -> float:
         # todo
         pass
