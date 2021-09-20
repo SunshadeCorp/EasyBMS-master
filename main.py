@@ -5,6 +5,9 @@ from typing import Any, Dict
 
 import paho.mqtt.client as mqtt
 
+from BatteryManager import BatteryManager
+from BatterySystem import BatterySystem
+
 
 class EasyBMSMaster:
     def __init__(self):
@@ -63,6 +66,10 @@ class EasyBMSMaster:
 
 
 if __name__ == '__main__':
+    # number_of_battery_modules = 12
+    # battery_system = BatterySystem(number_of_battery_modules)
+    # battery_manager = BatteryManager(battery_system)
+
     easy_bms_master = EasyBMSMaster()
     mqtt_client_thread = threading.Thread(name='EasyBMSMaster', target=easy_bms_master.loop, daemon=True)
     mqtt_client_thread.start()
