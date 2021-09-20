@@ -15,17 +15,23 @@ class BatterySystem:
     LOWER_CURRENT_LIMIT_CRITICAL: float = -32  # A
     UPPER_CURRENT_LIMIT_CRITICAL: float = 32  # A
 
-    def __init__(self, battery_modules: List[BatteryModule]) -> None:
+    def __init__(self, number_of_modules: int) -> None:
+        assert 1 >= number_of_modules <= 12
+
         # Uninitialized values
         self.voltage: float = 0
         self.current: float = 0
 
         self.is_initialized = False
-        self.battery_modules: List[BatteryModule] = battery_modules
 
         # Events
         self.current_event = MeasurementEvent()
         self.voltage_event = MeasurementEvent()
+
+        self.battery_modules: List[BatteryModule] = []
+        for module_id in range(1, number_of_modules):
+            module = BatteryModule(module_id)
+            self.battery_modules.insert(module)
 
     def update_measurements(self, voltage: float, current: float) -> None:
         self.voltage = voltage
@@ -33,14 +39,14 @@ class BatterySystem:
         self.is_initialized = True
 
         if self.has_critical_voltage():
-            pass
+            self.voltage_event.on_critical()
         elif self.has_warning_voltage():
-            pass
+            self.voltage_event.on_warning()
 
         if self.has_critical_current():
-            pass
+            self.current_event.on_critical()
         elif self.has_warning_current():
-            pass
+            self.current_event.on_warning()
 
     def has_critical_voltage(self) -> bool:
         return self.voltage < self.LOWER_VOLTAGE_LIMIT_CRITICAL or self.voltage > self.UPPER_VOLTAGE_LIMIT_CRITICAL
