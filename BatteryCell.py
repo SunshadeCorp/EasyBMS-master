@@ -1,8 +1,9 @@
+from MeasurementEvent import MeasurementEvent
 from SocCurve import SocCurve
 
 
 class BatteryCell:
-    LOWER_VOLTAGE_LIMIT_CRITICAL: float = 2.8  # V
+    LOWER_VOLTAGE_LIMIT_CRITICAL: float = 3.0  # V
     UPPER_VOLTAGE_LIMIT_CRITICAL: float = 4.2  # V
     LOWER_VOLTAGE_LIMIT_WARNING: float = 3.2  # V
     UPPER_VOLTAGE_LIMIT_WARNING: float = 4.15  # V
@@ -14,6 +15,9 @@ class BatteryCell:
         self.is_initialized: bool = False
 
         self.soc_curve: SocCurve = soc_curve
+
+        # Events
+        self.voltage_event = MeasurementEvent()
 
     def get_soc(self) -> float:
         return self.soc_curve.voltage_to_soc(self.voltage)
@@ -41,15 +45,3 @@ class BatteryCell:
 
     def is_balance_discharging(self) -> bool:
         return self.balance_pin_state
-
-    def trigger_implausible_voltage_event(self) -> None:
-        # todo
-        pass
-
-    def trigger_critical_voltage_event(self) -> None:
-        # todo
-        pass
-
-    def trigger_warning_voltage_event(self) -> None:
-        # todo
-        pass
