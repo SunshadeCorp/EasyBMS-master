@@ -33,6 +33,11 @@ class BatteryManager:
             module.voltage_event.on_warning += self.on_module_voltage_warning
             module.voltage_event.on_implausible += self.on_implausible_module_voltage
 
+            for cell in module.cells:
+                cell.voltage_event.on_critial += self.on_critical_cell_voltage
+                cell.voltage_event.on_warning += self.on_cell_voltage_warning
+                cell.voltage_event.on_implausible += self.on_implausible_cell_voltage
+
     def balance(self) -> None:
         pass
 
@@ -59,7 +64,7 @@ class BatteryManager:
         self.trigger_safety_disconnect()
 
     def on_critical_module_voltage(self, module: BatteryModule) -> None:
-        print("[CRITICAL] module voltage on module " + module.id + ": " + module.voltage + "V")#
+        print("[CRITICAL] module voltage on module " + module.id + ": " + module.voltage + "V")  #
         self.trigger_safety_disconnect()
 
     def on_critical_cell_voltage(self, cell: BatteryCell) -> None:
@@ -109,7 +114,7 @@ class BatteryManager:
         self.trigger_safety_disconnect()
 
     def on_implausible_module_voltage(self, module: BatteryModule) -> None:
-        print("[IMPLAUSIBLE] module voltage on module " + module.id + ": " + module.voltage + "V")#
+        print("[IMPLAUSIBLE] module voltage on module " + module.id + ": " + module.voltage + "V")  #
         self.trigger_safety_disconnect()
 
     def on_implausible_cell_voltage(self, cell: BatteryCell) -> None:

@@ -3,6 +3,8 @@ from SocCurve import SocCurve
 
 
 class BatteryCell:
+    LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = -1000  # V
+    UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = 1000  # V
     LOWER_VOLTAGE_LIMIT_CRITICAL: float = 3.0  # V
     UPPER_VOLTAGE_LIMIT_CRITICAL: float = 4.2  # V
     LOWER_VOLTAGE_LIMIT_WARNING: float = 3.2  # V
@@ -24,17 +26,24 @@ class BatteryCell:
         return self.soc_curve.voltage_to_soc(self.voltage)
 
     def has_critical_voltage(self) -> bool:
-        return self.voltage < self.LOWER_CRITICAL_VOLTAGE_LIMIT or self.voltage > self.UPPER_VOLTAGE_CRITICAL__LIMIT
+        return self.voltage < self.LOWER_VOLTAGE_LIMIT_CRITICAL or self.voltage > self.UPPER_VOLTAGE_LIMIT_CRITICAL
 
     def has_warning_voltage(self) -> bool:
-        return self.voltage < self.LOWER_WARNING_VOLTAGE_LIMIT or self.voltage > self.UPPER_WARNING_VOLTAGE_LIMIT
+        return self.voltage < self.LOWER_VOLTAGE_LIMIT_WARNING or self.voltage > self.UPPER_VOLTAGE_LIMIT_WARNING
+
+    def has_implausible_voltage(self) -> bool:
+        return self.voltage < self.LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE \
+               or self.voltage > self.UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE
 
     def update_voltage(self, voltage: float):
         self.voltage = voltage
-        if self.has_critical_voltage():
+        if self.has_implausible_voltage():
+            self.voltage_event.on_implausible(self)
+        elif self.has_critical_voltage():
             self.voltage_event.on_critical(self)
         elif self.has_warning_voltage():
             self.voltage_event.on_warning(self)
+
 
     def start_balance_discharge(self) -> None:
         # todo
