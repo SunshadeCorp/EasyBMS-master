@@ -61,7 +61,10 @@ class BatteryModule:
                 self.heartbeat_event.on_heartbeat_missed()
             time.sleep(1000)
 
-    def get_soc(self) -> float:
+    def temp(self) -> float:
+        return (self.module_temp1 + self.module_temp2) / 2.0
+
+    def soc(self) -> float:
         soc_sum: float = 0
 
         for cell in self.cells:
