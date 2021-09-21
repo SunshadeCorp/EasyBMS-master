@@ -34,7 +34,7 @@ class BatterySystem:
         self.voltage_event = MeasurementEvent()
 
         self.battery_modules: List[BatteryModule] = []
-        for module_id in range(1, number_of_modules):
+        for module_id in range(0, number_of_modules):
             module = BatteryModule(module_id)
             self.battery_modules.append(module)
 
@@ -104,10 +104,10 @@ class BatterySystem:
 
     def get_highest_cell_voltage(self) -> float:
         cell_list = self.get_cells()
-        cell_list.sort(key=lambda x: x.voltage, reverse = True)
+        cell_list.sort(key=lambda x: x.voltage, reverse=True)
         return cell_list[0].voltage
 
     def get_highest_voltage_cells(self, number) -> List[BatteryCell]:
         cell_list = self.get_cells()
-        cell_list.sort(key=lambda x: x.voltage, reverse = True)
-        return cell_list[0:(number-1)]
+        cell_list.sort(key=lambda x: x.voltage, reverse=True)
+        return cell_list[0:(number - 1)]
