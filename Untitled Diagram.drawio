@@ -1,0 +1,39 @@
+<mxfile host="app.diagrams.net" modified="2021-09-21T21:02:17.766Z" agent="5.0 (Windows)" etag="PwI7PP0U6-1LkLdtlmtO" version="15.2.5" type="github">
+  <diagram id="6a731a19-8d31-9384-78a2-239565b7b9f0" name="Page-1">
+    <mxGraphModel dx="981" dy="519" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="start" style="shape=mxgraph.flowchart.terminator;strokeWidth=2;gradientColor=none;gradientDirection=north;fontStyle=0;html=1;" parent="1" vertex="1">
+          <mxGeometry x="260" y="60" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="&lt;div&gt;Hole alle &lt;br&gt;&lt;/div&gt;&lt;div&gt;Zellspannungen&lt;/div&gt;" style="shape=mxgraph.flowchart.data;strokeWidth=2;gradientColor=none;gradientDirection=north;fontStyle=0;html=1;" parent="1" vertex="1">
+          <mxGeometry x="240.5" y="130" width="159" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="7" style="fontStyle=1;strokeColor=#003366;strokeWidth=1;html=1;" parent="1" source="2" target="3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8" style="fontStyle=1;strokeColor=#003366;strokeWidth=1;html=1;" parent="1" source="3" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="320" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="As8NUsJZpkAplVv55lTX-58" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="As8NUsJZpkAplVv55lTX-55" target="As8NUsJZpkAplVv55lTX-57">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="As8NUsJZpkAplVv55lTX-55" value="Alles okay sonst?&lt;br&gt;&lt;div&gt;Keine &lt;br&gt;&lt;/div&gt;&lt;div&gt;Notabschaltung aktiv?&lt;/div&gt;" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="220" y="250" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="As8NUsJZpkAplVv55lTX-60" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="As8NUsJZpkAplVv55lTX-57" target="As8NUsJZpkAplVv55lTX-59">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="As8NUsJZpkAplVv55lTX-57" value="&lt;div&gt;Berechne höchste&lt;/div&gt;&lt;div&gt; n Zellspannungen&lt;/div&gt;&lt;div&gt;und merke die Zellen&lt;br&gt;&lt;/div&gt;" style="shape=mxgraph.flowchart.data;strokeWidth=2;gradientColor=none;gradientDirection=north;fontStyle=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="240.5" y="400" width="159" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="As8NUsJZpkAplVv55lTX-59" value="&lt;div&gt;Berechne höchste&lt;/div&gt;&lt;div&gt;und nieddrigste&lt;/div&gt;&lt;div&gt; Zellspannung&lt;/div&gt;" style="shape=mxgraph.flowchart.data;strokeWidth=2;gradientColor=none;gradientDirection=north;fontStyle=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="240.5" y="530" width="159" height="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
