@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2021-09-21T21:20:06.662Z" agent="5.0 (Windows)" etag="wv_1FR7LwmEV81KzEcbq" version="15.2.9" type="github">
+<mxfile host="app.diagrams.net" modified="2021-09-21T21:26:36.358Z" agent="5.0 (Windows)" etag="2zb9z28iodX6luxYOIaA" version="15.2.9" type="github">
   <diagram id="6a731a19-8d31-9384-78a2-239565b7b9f0" name="Page-1">
     <mxGraphModel dx="1422" dy="752" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="none" math="0" shadow="0">
       <root>
@@ -41,17 +41,64 @@
             <mxPoint x="90" y="520" as="targetPoint" />
           </mxGeometry>
         </mxCell>
+        <mxCell id="77T18frlUKOqGSXx3T2g-16" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="77T18frlUKOqGSXx3T2g-12">
+          <mxGeometry x="-0.4479" y="4" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="77T18frlUKOqGSXx3T2g-19" value="nein" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="77T18frlUKOqGSXx3T2g-12">
+          <mxGeometry x="-0.4479" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="77T18frlUKOqGSXx3T2g-21" value="ja" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="77T18frlUKOqGSXx3T2g-8" target="77T18frlUKOqGSXx3T2g-20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
         <mxCell id="77T18frlUKOqGSXx3T2g-8" value="&lt;div&gt;Höchste - niedrigste&lt;/div&gt;&lt;div&gt; &amp;gt; min_cellDiff &lt;/div&gt;" style="rhombus;whiteSpace=wrap;html=1;fontStyle=0;strokeWidth=2;gradientDirection=north;" vertex="1" parent="1">
           <mxGeometry x="220" y="690" width="200" height="110" as="geometry" />
         </mxCell>
         <mxCell id="77T18frlUKOqGSXx3T2g-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="77T18frlUKOqGSXx3T2g-13" target="2">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="77T18frlUKOqGSXx3T2g-13" value="&lt;div&gt;mache für 5 &lt;br&gt;&lt;/div&gt;&lt;div&gt;Minuten nichts&lt;/div&gt;" style="shape=mxgraph.flowchart.data;strokeWidth=2;gradientColor=none;gradientDirection=north;fontStyle=0;html=1;" vertex="1" parent="1">
+        <mxCell id="77T18frlUKOqGSXx3T2g-13" value="Warte &lt;b&gt;relax_time&lt;/b&gt;" style="shape=mxgraph.flowchart.data;strokeWidth=2;gradientColor=none;gradientDirection=north;fontStyle=0;html=1;" vertex="1" parent="1">
           <mxGeometry x="20" y="440" width="159" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="77T18frlUKOqGSXx3T2g-15" value="&lt;div&gt;&lt;b&gt;Inputs:&lt;/b&gt;&lt;/div&gt;&lt;div&gt;-&lt;b&gt;min_cellDiff&lt;/b&gt; - minimale Zellspannungsdifferenz, ab der der Balancer anfängt zu arbeiten (etwa 10mV)&lt;br&gt;&lt;/div&gt;&lt;div&gt;-&lt;b&gt;max_cellDiff&lt;/b&gt; - maximale Zellspannungsdifferenz, wo klar ist, irgendwas ist kapuutt (etwa 0,5V)&lt;/div&gt;&lt;div&gt;-&lt;b&gt;alle Zellspannungen&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;-Generelle Alarmmeldungen&lt;br&gt;&lt;/b&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+        <mxCell id="77T18frlUKOqGSXx3T2g-15" value="&lt;div&gt;&lt;b&gt;Inputs:&lt;/b&gt;&lt;/div&gt;&lt;div&gt;-&lt;b&gt;min_cellDiff&lt;/b&gt; - minimale Zellspannungsdifferenz, ab der der Balancer anfängt zu arbeiten (etwa 10mV)&lt;br&gt;&lt;/div&gt;&lt;div&gt;-&lt;b&gt;max_cellDiff&lt;/b&gt; - maximale Zellspannungsdifferenz, wo klar ist, irgendwas ist kapuutt (etwa 0,5V)&lt;/div&gt;&lt;div&gt;-&lt;b&gt;alle Zellspannungen&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;-Generelle Alarmmeldungen&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;-discharge_time -&lt;/b&gt; Zeit, die die Balancer Pins aktiv sind bevor sie wieder ausgeschaltet werden&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;-relax_time -&lt;/b&gt; Zeit in der der Balancer wartet bis die Zellen relaxiert haben (etwa 1 Minute)&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="560" y="50" width="580" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="77T18frlUKOqGSXx3T2g-26" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="77T18frlUKOqGSXx3T2g-20" target="77T18frlUKOqGSXx3T2g-25">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="77T18frlUKOqGSXx3T2g-20" value="&lt;div&gt;Höchste - niedrigste&lt;/div&gt;&lt;div&gt;&amp;nbsp;&amp;gt; max_cellDiff &lt;/div&gt;" style="rhombus;whiteSpace=wrap;html=1;fontStyle=0;strokeWidth=2;gradientDirection=north;" vertex="1" parent="1">
+          <mxGeometry x="230" y="895" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="77T18frlUKOqGSXx3T2g-28" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="77T18frlUKOqGSXx3T2g-25">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="320" y="1210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="77T18frlUKOqGSXx3T2g-25" value="&lt;div&gt;Setzt Discharge Bits&lt;/div&gt;&lt;div&gt;für die n höchsten &lt;br&gt;&lt;/div&gt;&lt;div&gt;Zellen&lt;br&gt;&lt;/div&gt;" style="shape=mxgraph.flowchart.data;strokeWidth=2;gradientColor=none;gradientDirection=north;fontStyle=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="240.5" y="1040" width="159" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="77T18frlUKOqGSXx3T2g-31" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="77T18frlUKOqGSXx3T2g-29" target="77T18frlUKOqGSXx3T2g-30">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="77T18frlUKOqGSXx3T2g-29" value="&lt;div&gt;Setzt Discharge Bits&lt;/div&gt;&lt;div&gt;für die n höchsten &lt;br&gt;&lt;/div&gt;&lt;div&gt;Zellen&lt;br&gt;&lt;/div&gt;" style="shape=mxgraph.flowchart.data;strokeWidth=2;gradientColor=none;gradientDirection=north;fontStyle=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="240.5" y="1210" width="159" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="77T18frlUKOqGSXx3T2g-33" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="77T18frlUKOqGSXx3T2g-30" target="77T18frlUKOqGSXx3T2g-32">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="77T18frlUKOqGSXx3T2g-30" value="&lt;div&gt;Warte&lt;/div&gt;&lt;div&gt; discharge_time&lt;/div&gt;" style="shape=mxgraph.flowchart.data;strokeWidth=2;gradientColor=none;gradientDirection=north;fontStyle=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="240.5" y="1370" width="159" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="77T18frlUKOqGSXx3T2g-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="77T18frlUKOqGSXx3T2g-32">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="90" y="512" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="77T18frlUKOqGSXx3T2g-32" value="&lt;div&gt;Reset Discharge Bits&lt;/div&gt;&lt;div&gt;aller Zellen&lt;br&gt;&lt;/div&gt;" style="shape=mxgraph.flowchart.data;strokeWidth=2;gradientColor=none;gradientDirection=north;fontStyle=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="240.5" y="1530" width="159" height="80" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
