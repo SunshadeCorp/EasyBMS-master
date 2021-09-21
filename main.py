@@ -5,8 +5,8 @@ from typing import Any, Dict
 
 import paho.mqtt.client as mqtt
 
-from BatteryManager import BatteryManager
-from BatterySystem import BatterySystem
+from battery_manager import BatteryManager
+from battery_system import BatterySystem
 
 
 class EasyBMSMaster:
@@ -66,9 +66,15 @@ class EasyBMSMaster:
 
 
 if __name__ == '__main__':
-    # number_of_battery_modules = 12
-    # battery_system = BatterySystem(number_of_battery_modules)
-    # battery_manager = BatteryManager(battery_system)
+    '''
+    number_of_battery_modules = 12
+    battery_system = BatterySystem(number_of_battery_modules)
+    battery_manager = BatteryManager(battery_system)
+
+    while True:
+        battery_manager.balance()
+        time.sleep(1)
+    '''
 
     easy_bms_master = EasyBMSMaster()
     mqtt_client_thread = threading.Thread(name='EasyBMSMaster', target=easy_bms_master.loop, daemon=True)
@@ -77,3 +83,4 @@ if __name__ == '__main__':
     scheduler = sched.scheduler()
     scheduler.enter(1, 1, easy_bms_master.send_heartbeat)
     scheduler.run()
+

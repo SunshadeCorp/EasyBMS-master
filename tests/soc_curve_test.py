@@ -1,6 +1,6 @@
 import unittest
 
-from SocCurve import SocCurve
+from soc_curve import SocCurve
 
 
 class SocCurveTest(unittest.TestCase):
