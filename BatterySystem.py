@@ -39,14 +39,14 @@ class BatterySystem:
         self.is_initialized = True
 
         if self.has_critical_voltage():
-            self.voltage_event.on_critical()
+            self.voltage_event.on_critical(self)
         elif self.has_warning_voltage():
-            self.voltage_event.on_warning()
+            self.voltage_event.on_warning(self)
 
         if self.has_critical_current():
-            self.current_event.on_critical()
+            self.current_event.on_critical(self)
         elif self.has_warning_current():
-            self.current_event.on_warning()
+            self.current_event.on_warning(self)
 
     def has_critical_voltage(self) -> bool:
         return self.voltage < self.LOWER_VOLTAGE_LIMIT_CRITICAL or self.voltage > self.UPPER_VOLTAGE_LIMIT_CRITICAL
