@@ -39,10 +39,16 @@ class BatteryManager:
                 cell.voltage_event.on_implausible += self.on_implausible_cell_voltage
 
     def balance(self) -> None:
-        pass
+        highest_cells = self.battery_system.get_highest_voltage_cells(5)
+        '''
+        for cell in highest_cells:
+            cell.start_balance_discharge()
+        '''
+        # todo only balance for 5-10 seconds
+        print("TODO: implement balancing algorithm")
 
     def trigger_safety_disconnect(self) -> None:
-        pass
+        print("TODO: implement safety disconnect")
 
     # Event handling for critical events
 

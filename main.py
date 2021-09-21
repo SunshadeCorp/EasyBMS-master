@@ -65,22 +65,24 @@ class EasyBMSMaster:
             # print(msg.payload)
 
 
+def balance_task():
+    battery_manager.balance()
+
+    delay = 5  # seconds
+    priority = 1
+    scheduler.enter(delay, priority, battery_manager.balance)
+
+
 if __name__ == '__main__':
-    '''
     number_of_battery_modules = 12
     battery_system = BatterySystem(number_of_battery_modules)
     battery_manager = BatteryManager(battery_system)
-
-    while True:
-        battery_manager.balance()
-        time.sleep(1)
-    '''
 
     easy_bms_master = EasyBMSMaster()
     mqtt_client_thread = threading.Thread(name='EasyBMSMaster', target=easy_bms_master.loop, daemon=True)
     mqtt_client_thread.start()
 
     scheduler = sched.scheduler()
-    scheduler.enter(1, 1, easy_bms_master.send_heartbeat)
+    scheduler.enter(0, 1, easy_bms_master.send_heartbeat)
+    scheduler.enter(0, 1, balance_task)
     scheduler.run()
-
