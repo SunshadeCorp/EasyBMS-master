@@ -85,20 +85,29 @@ class BatterySystem:
 
         return soc_sum / len(self.battery_modules)
 
-    def get_highest_cell_temp(self) -> float:
-        # todo
-        pass
+    def get_cells(self) -> List[BatteryCell]:
+        cell_list: List[BatteryCell] = []
 
-    def get_lowest_cell_temp(self) -> float:
-        # todo
-        pass
+        for module in self.battery_modules:
+            for cell in module.cells:
+                cell_list.append(cell)
+
+        return cell_list
+
+    def get_highest_cell_temp(self) -> float:
+        sorted_modules = sorted(self.battery_modules, key=lambda x: x.temp(), reverse=True)
+        return sorted_modules[0]
+
+    def get_lowest_module_temp(self) -> float:
+        sorted_modules = sorted(self.battery_modules, key=lambda x: x.temp())
+        return sorted_modules[0].temp()
 
     def get_highest_cell_voltage(self) -> float:
-        # todo
-        pass
+        cell_list = self.get_cells()
+        cell_list.sort(key=lambda x: x.voltage, reverse = True)
+        return cell_list[0].voltage
 
     def get_highest_voltage_cells(self, number) -> List[BatteryCell]:
-        # 1. create list of cell objects
-        # 2. sort cell objects by voltage
-        # 3. return list of n highest cells
-        pass
+        cell_list = self.get_cells()
+        cell_list.sort(key=lambda x: x.voltage, reverse = True)
+        return cell_list[0:(number-1)]
