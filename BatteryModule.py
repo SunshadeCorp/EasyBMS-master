@@ -24,7 +24,7 @@ class BatteryModule:
 
     ESP_TIMEOUT: float = 5.000  # Seconds
 
-    def __init__(self) -> None:
+    def __init__(self, module_id: int) -> None:
         # Uninitialized
         self.voltage: float = None
         self.module_temp1: float = None
@@ -33,7 +33,7 @@ class BatteryModule:
         self.last_esp_uptime: int = None
         self.last_esp_uptime_in_own_time: float = None
 
-        # Initialized
+        self.id = module_id
         self.keep_monitoring_heartbeats: bool = True
 
         # Events
@@ -44,7 +44,7 @@ class BatteryModule:
 
         self.cells: List[BatteryCell] = []
         for i in range(1, 12):
-            self.cells.insert(BatteryCell())
+            self.cells.insert(BatteryCell(i, module_id))
 
     def heartbeat_monitor_thread(self):
         while self.keep_monitoring_heartbeats:
@@ -72,19 +72,19 @@ class BatteryModule:
         self.heartbeat_event.on_heartbeat()
 
         if self.has_critical_module_temp():
-            self.module_temp_event.on_critical()
+            self.module_temp_event.on_critical(self)
         elif self.has_warning_module_temp():
-            self.module_temp_event.on_warning()
+            self.module_temp_event.on_warning(self)
 
         if self.has_critical_chip_temp():
-            self.chip_temp_event.on_critical()
+            self.chip_temp_event.on_critical(self)
         elif self.has_warning_chip_temp():
-            self.chip_temp_event.on_warning()
+            self.chip_temp_event.on_warning(self)
 
         if self.has_critical_voltage():
-            self.voltage_event.on_critical()
+            self.voltage_event.on_critical(self)
         elif self.has_warning_voltage():
-            self.voltage_event.on_warning()
+            self.voltage_event.on_warning(self)
 
     def has_warning_module_temp1(self) -> bool:
         return self.module_temp1 < self.LOWER_MODULE_TEMP_LIMIT_WARNING \

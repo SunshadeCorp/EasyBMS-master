@@ -8,13 +8,15 @@ class BatteryCell:
     LOWER_VOLTAGE_LIMIT_WARNING: float = 3.2  # V
     UPPER_VOLTAGE_LIMIT_WARNING: float = 4.15  # V
 
-    def __init__(self) -> None:
+    def __init__(self, cell_id: int, module_id: int) -> None:
         # Uninitialized values
         self.voltage: float = 0
         self.balance_pin_state: bool = False
         self.is_initialized: bool = False
 
         # Initialized values
+        self.id = cell_id
+        self.module_id = module_id
         self.voltage_event = MeasurementEvent()
         self.soc_curve = SocCurve()
 
@@ -30,9 +32,9 @@ class BatteryCell:
     def update_voltage(self, voltage: float):
         self.voltage = voltage
         if self.has_critical_voltage():
-            self.trigger_critical_voltage_event()
+            self.voltage_event.on_critical(self)
         elif self.has_warning_voltage():
-            self.trigger_warning_voltage_event()
+            self.voltage_event.on_warning(self)
 
     def start_balance_discharge(self) -> None:
         # todo
