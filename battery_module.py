@@ -1,9 +1,9 @@
 import time
 from typing import List
 
-from BatteryCell import BatteryCell
-from HeartbeatEvent import HeartbeatEvent
-from MeasurementEvent import MeasurementEvent
+from battery_cell import BatteryCell
+from heartbeat_event import HeartbeatEvent
+from measurement_event import MeasurementEvent
 
 
 class BatteryModule:

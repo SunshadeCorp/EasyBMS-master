@@ -1,8 +1,8 @@
 from typing import List
 
-from BatteryCell import BatteryCell
-from BatteryModule import BatteryModule
-from MeasurementEvent import MeasurementEvent
+from battery_cell import BatteryCell
+from battery_module import BatteryModule
+from measurement_event import MeasurementEvent
 
 
 class BatterySystem:
@@ -21,7 +21,7 @@ class BatterySystem:
     UPPER_CURRENT_LIMIT_WARNING: float = 30  # A
 
     def __init__(self, number_of_modules: int) -> None:
-        assert 1 >= number_of_modules <= 12
+        assert 1 <= number_of_modules <= 12
 
         # Uninitialized values
         self.voltage: float = 0
