@@ -1,5 +1,5 @@
-from MeasurementEvent import MeasurementEvent
-from SocCurve import SocCurve
+from measurement_event import MeasurementEvent
+from soc_curve import SocCurve
 
 
 class BatteryCell:

@@ -1,6 +1,6 @@
 import unittest
 
-from BatterySystem import BatterySystem
+from battery_system import BatterySystem
 
 
 class BatterySystemLimitsTest(unittest.TestCase):

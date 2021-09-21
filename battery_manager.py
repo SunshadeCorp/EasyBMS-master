@@ -1,7 +1,7 @@
-from BatteryCell import BatteryCell
-from BatterySystem import BatterySystem
-from HeartbeatEvent import HeartbeatEvent
-from BatteryModule import BatteryModule
+from battery_cell import BatteryCell
+from battery_system import BatterySystem
+from heartbeat_event import HeartbeatEvent
+from battery_module import BatteryModule
 
 
 class BatteryManager:
@@ -34,7 +34,7 @@ class BatteryManager:
             module.voltage_event.on_implausible += self.on_implausible_module_voltage
 
             for cell in module.cells:
-                cell.voltage_event.on_critial += self.on_critical_cell_voltage
+                cell.voltage_event.on_critical += self.on_critical_cell_voltage
                 cell.voltage_event.on_warning += self.on_cell_voltage_warning
                 cell.voltage_event.on_implausible += self.on_implausible_cell_voltage
 
