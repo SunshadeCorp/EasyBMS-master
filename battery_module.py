@@ -49,7 +49,7 @@ class BatteryModule:
         self.heartbeat_event = HeartbeatEvent()
 
         self.cells: List[BatteryCell] = []
-        for i in range(1, 12):
+        for i in range(0, 12):
             new_cell = BatteryCell(i, self.id)
             self.cells.append(new_cell)
 
@@ -72,15 +72,9 @@ class BatteryModule:
 
         return soc_sum / len(self.cells)
 
-    def update_measurements(self, temp1: float, temp2: float, voltage: float, chip_temp: float,
-                            esp_uptime: int) -> None:
+    def update_module_temps(self, temp1: float, temp2: float) -> None:
         self.module_temp1 = temp1
         self.module_temp2 = temp2
-        self.voltage = voltage
-        self.chip_temp = chip_temp
-        self.last_esp_uptime = esp_uptime
-
-        self.heartbeat_event.on_heartbeat()
 
         if self.has_implausible_module_temp():
             self.module_temp_event.on_implausible(self)
@@ -89,12 +83,8 @@ class BatteryModule:
         elif self.has_warning_module_temp():
             self.module_temp_event.on_warning(self)
 
-        if self.has_implausible_chip_temp():
-            self.chip_temp_event.on_implausible(self)
-        elif self.has_critical_chip_temp():
-            self.chip_temp_event.on_critical(self)
-        elif self.has_warning_chip_temp():
-            self.chip_temp_event.on_warning(self)
+    def update_module_voltage(self, module_voltage: float) -> None:
+        self.voltage = module_voltage
 
         if self.has_implausible_voltage():
             self.voltage_event.on_implausible(self)
@@ -102,6 +92,20 @@ class BatteryModule:
             self.voltage_event.on_critical(self)
         elif self.has_warning_voltage():
             self.voltage_event.on_warning(self)
+
+    def update_chip_temp(self, chip_temp: float) -> None:
+        self.chip_temp = chip_temp
+
+        if self.has_implausible_chip_temp():
+            self.chip_temp_event.on_implausible(self)
+        elif self.has_critical_chip_temp():
+            self.chip_temp_event.on_critical(self)
+        elif self.has_warning_chip_temp():
+            self.chip_temp_event.on_warning(self)
+
+    def update_esp_uptime(self, esp_uptime: int) -> None:
+        self.last_esp_uptime = esp_uptime
+        self.heartbeat_event.on_heartbeat()
 
     def has_warning_module_temp1(self) -> bool:
         return self.module_temp1 < self.LOWER_MODULE_TEMP_LIMIT_WARNING \
