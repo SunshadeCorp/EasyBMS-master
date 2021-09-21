@@ -53,81 +53,79 @@ class BatteryManager:
     # Event handling for critical events
 
     def on_critical_battery_system_voltage(self, system: BatterySystem) -> None:
-        print("[CRITICAL] battery system voltage: " + self.battery_system.voltage + "V")
+        print(f'[CRITICAL] battery system voltage: {self.battery_system.voltage}V')
         self.trigger_safety_disconnect()
 
     def on_critical_battery_system_current(self, system: BatterySystem) -> None:
-        print("[CRITICAL] battery system current: " + self.battery_system.current + "A")
+        print(f'[CRITICAL] battery system current: {self.battery_system.current}A')
         self.trigger_safety_disconnect()
 
     def on_critical_module_temperature(self, module: BatteryModule) -> None:
-        print("[CRITICAL] module temperature on module " + module.id + ": "
-              + module.module_temp1 + "°C, " + module.module_temp2 + "°C")
+        print(f'[CRITICAL] module temperature on module {module.id}: {module.module_temp1}°C, {module.module_temp2}°C')
         self.trigger_safety_disconnect()
 
     def on_critical_chip_temperature(self, module: BatteryModule) -> None:
-        print("[CRITICAL] chip temperature on module " + module.id + ": " + module.chip_temp + "°C")
+        print(f'[CRITICAL] chip temperature on module {module.id}: {module.chip_temp}°C')
         self.trigger_safety_disconnect()
 
     def on_critical_module_voltage(self, module: BatteryModule) -> None:
-        print("[CRITICAL] module voltage on module " + module.id + ": " + module.voltage + "V")  #
+        print(f'[CRITICAL] module voltage on module {module.id}: {module.voltage}V')  #
         self.trigger_safety_disconnect()
 
     def on_critical_cell_voltage(self, cell: BatteryCell) -> None:
-        print("[CRITICAL] cell voltage on module " + cell.module_id + ", cell " + cell.id + ": " + cell.voltage)
+        print(f'[CRITICAL] cell voltage on module {cell.module_id}, cell {cell.id}: {cell.voltage}')
         self.trigger_safety_disconnect()
 
     # Event handling for warning events
 
     def on_battery_system_current_warning(self, system: BatterySystem) -> None:
-        print("[WARNING] battery system voltage: " + self.battery_system.voltage + "V")
+        print(f'[WARNING] battery system voltage: {self.battery_system.voltage}V')
 
     def on_battery_system_voltage_warning(self, system: BatterySystem) -> None:
-        print("[WARNING] battery system current: " + self.battery_system.current + "A")
+        print(f'[WARNING] battery system current: {self.battery_system.current}A')
 
     def on_module_temperature_warning(self, module: BatteryModule) -> None:
-        print("[WARNING] module temperature on module " + module.id + ": "
-              + module.module_temp1 + "°C, " + module.module_temp2 + "°C")
+        print(f'[WARNING] module temperature on module {module.id}: {module.module_temp1}°C, {module.module_temp2}°C')
 
     def on_chip_temperature_warning(self, module: BatteryModule) -> None:
-        print("[WARNING] chip temperature on module " + module.id + ": " + module.chip_temp + "°C")
+        print(f'[WARNING] chip temperature on module {module.id}: {module.chip_temp}°C')
 
     def on_module_voltage_warning(self, module: BatteryModule) -> None:
-        print("[WARNING] module voltage on module " + module.id + ": " + module.voltage + "V")
+        print(f'[WARNING] module voltage on module {module.id}: {module.voltage}V')
 
     def on_cell_voltage_warning(self, cell: BatteryCell) -> None:
-        print("[WARNING] cell voltage on module " + cell.module_id + ", cell " + cell.id + ": " + cell.voltage)
+        print(f'[WARNING] cell voltage on module {cell.module_id}, cell {cell.id}: {cell.voltage}')
 
     # Event handling for implausible values
     # Todo: implement loud failing for development time
     # notify user of implausible state and shut off the system
 
     def on_implausible_battery_system_voltage(self, system: BatterySystem) -> None:
-        print("[IMPLAUSIBLE] battery system voltage: " + self.battery_system.voltage + "V")
+        print(f'[IMPLAUSIBLE] battery system voltage: {self.battery_system.voltage}V')
         self.trigger_safety_disconnect()
 
     def on_implausible_battery_system_current(self, system: BatterySystem) -> None:
-        print("[IMPLAUSIBLE] battery system current: " + self.battery_system.current + "A")
+        print(f'[IMPLAUSIBLE] battery system current: {self.battery_system.current}A')
         self.trigger_safety_disconnect()
 
     def on_implausible_module_temperature(self, module: BatteryModule) -> None:
-        print("[IMPLAUSIBLE] module temperature on module " + module.id + ": "
-              + module.module_temp1 + "°C, " + module.module_temp2 + "°C")
+        print(
+            f'[IMPLAUSIBLE] module temperature on module {module.id}: {module.module_temp1}°C, {module.module_temp2}°C')
         self.trigger_safety_disconnect()
 
     def on_implausible_chip_temperature(self, module: BatteryModule) -> None:
-        print("[IMPLAUSIBLE] chip temperature on module " + module.id + ": " + module.chip_temp + "°C")
+        print(f'[IMPLAUSIBLE] chip temperature on module {module.id}: {module.chip_temp}°C')
         self.trigger_safety_disconnect()
 
     def on_implausible_module_voltage(self, module: BatteryModule) -> None:
-        print("[IMPLAUSIBLE] module voltage on module " + module.id + ": " + module.voltage + "V")  #
+        print(f'[IMPLAUSIBLE] module voltage on module {module.id}: {module.voltage}V')
         self.trigger_safety_disconnect()
 
     def on_implausible_cell_voltage(self, cell: BatteryCell) -> None:
-        print("[IMPLAUSIBLE] cell voltage on module " + cell.module_id + ", cell " + cell.id + ": " + cell.voltage)
+        print(f'[IMPLAUSIBLE] cell voltage on module {cell.module_id}, cell {cell.id}: {cell.voltage}')
         self.trigger_safety_disconnect()
 
     # Other event handlers
 
-    def on_heartbeat_missed(self, esp_number: int) -> bool:
-        print("Heartbeat missed on esp: " + esp_number)
+    def on_heartbeat_missed(self, esp_number: int) -> None:
+        print(f'Heartbeat missed on esp: {esp_number})')
