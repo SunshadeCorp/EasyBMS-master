@@ -68,7 +68,7 @@ class BatteryModule:
         soc_sum: float = 0
 
         for cell in self.cells:
-            soc_sum += cell.get_soc()
+            soc_sum += cell.soc()
 
         return soc_sum / len(self.cells)
 

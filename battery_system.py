@@ -77,15 +77,15 @@ class BatterySystem:
     def has_warning_current(self) -> bool:
         return self.current < self.LOWER_CURRENT_LIMIT_WARNING or self.current > self.UPPER_CURRENT_LIMIT_WARNING
 
-    def get_soc(self) -> float:
+    def soc(self) -> float:
         soc_sum: float = 0
 
         for module in self.battery_modules:
-            soc_sum += module.get_soc()
+            soc_sum += module.soc()
 
         return soc_sum / len(self.battery_modules)
 
-    def get_cells(self) -> List[BatteryCell]:
+    def cells(self) -> List[BatteryCell]:
         cell_list: List[BatteryCell] = []
 
         for module in self.battery_modules:
@@ -94,20 +94,37 @@ class BatterySystem:
 
         return cell_list
 
-    def get_highest_cell_temp(self) -> float:
+    def highest_cell_temp(self) -> float:
         sorted_modules = sorted(self.battery_modules, key=lambda x: x.temp(), reverse=True)
-        return sorted_modules[0]
+        return sorted_modules[0].temp()
 
-    def get_lowest_module_temp(self) -> float:
+    def lowest_module_temp(self) -> float:
         sorted_modules = sorted(self.battery_modules, key=lambda x: x.temp())
         return sorted_modules[0].temp()
 
-    def get_highest_cell_voltage(self) -> float:
-        cell_list = self.get_cells()
+    def highest_cell_voltage(self) -> float:
+        cell_list = self.cells()
         cell_list.sort(key=lambda x: x.voltage, reverse=True)
         return cell_list[0].voltage
 
-    def get_highest_voltage_cells(self, number) -> List[BatteryCell]:
-        cell_list = self.get_cells()
+    def lowest_cell_voltage(self) -> float:
+        cell_list = self.cells()
+        cell_list.sort(key=lambda x: x.voltage, reverse=False)
+        return cell_list[0].voltage
+
+    def highest_voltage_cells(self, number) -> List[BatteryCell]:
+        cell_list = self.cells()
         cell_list.sort(key=lambda x: x.voltage, reverse=True)
         return cell_list[0:(number - 1)]
+
+    def is_in_relax_time(self) -> bool:
+        for cell in self.cells():
+            if cell.is_relaxing():
+                return True
+        return False
+
+    def is_currently_balancing(self) -> bool:
+        for cell in self.cells():
+            if cell.is_balance_discharging():
+                return True
+        return False

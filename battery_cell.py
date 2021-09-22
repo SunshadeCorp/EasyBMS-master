@@ -22,7 +22,7 @@ class BatteryCell:
         self.voltage_event = MeasurementEvent()
         self.soc_curve = SocCurve()
 
-    def get_soc(self) -> float:
+    def soc(self) -> float:
         return self.soc_curve.voltage_to_soc(self.voltage)
 
     def has_critical_voltage(self) -> bool:
@@ -44,14 +44,14 @@ class BatteryCell:
         elif self.has_warning_voltage():
             self.voltage_event.on_warning(self)
 
+    def is_relaxing(self) -> bool:
+        print('[NOT IMPLEMENTED] BatteryCell:is_relaxing()')
+        return True
 
-    def start_balance_discharge(self) -> None:
-        # todo
-        pass
-
-    def stop_balance_discharge(self) -> None:
-        # todo
-        pass
+    def start_balance_discharge(self, balance_time: float) -> None:
+        # todo: send command to esp
+        self.balance_pin_state = True
+        print('[NOT IMPLEMENTED] BatteryCell:start_balance_discharge()')
 
     def is_balance_discharging(self) -> bool:
         return self.balance_pin_state
