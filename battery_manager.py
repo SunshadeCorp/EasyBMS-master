@@ -95,11 +95,11 @@ class BatteryManager:
         self.trigger_safety_disconnect()
 
     def on_critical_module_voltage(self, module: BatteryModule) -> None:
-        print(f'[CRITICAL] module voltage on module {module.id}: {module.voltage}V')  #
+        print(f'[CRITICAL] module voltage on module {module.id}: {module.voltage}V')
         self.trigger_safety_disconnect()
 
     def on_critical_cell_voltage(self, cell: BatteryCell) -> None:
-        print(f'[CRITICAL] cell voltage on module {cell.module_id}, cell {cell.id}: {cell.voltage}')
+        print(f'[CRITICAL] cell voltage on module {cell.module_id}, cell {cell.id}: {cell.voltage}V')
         self.trigger_safety_disconnect()
 
     # Event handling for warning events
@@ -120,7 +120,7 @@ class BatteryManager:
         print(f'[WARNING] module voltage on module {module.id}: {module.voltage}V')
 
     def on_cell_voltage_warning(self, cell: BatteryCell) -> None:
-        print(f'[WARNING] cell voltage on module {cell.module_id}, cell {cell.id}: {cell.voltage}')
+        print(f'[WARNING] cell voltage on module {cell.module_id}, cell {cell.id}: {cell.voltage}V')
 
     # Event handling for implausible values
     # Todo: implement loud failing for development time
@@ -148,7 +148,7 @@ class BatteryManager:
         self.trigger_safety_disconnect()
 
     def on_implausible_cell_voltage(self, cell: BatteryCell) -> None:
-        print(f'[IMPLAUSIBLE] cell voltage on module {cell.module_id}, cell {cell.id}: {cell.voltage}')
+        print(f'[IMPLAUSIBLE] cell voltage on module {cell.module_id}, cell {cell.id}: {cell.voltage}V')
         self.trigger_safety_disconnect()
 
     # Other event handlers
