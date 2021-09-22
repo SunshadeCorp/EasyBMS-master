@@ -5,6 +5,11 @@ from battery_module import BatteryModule
 
 
 class BatteryManager:
+    MIN_CELL_DIFF_FOR_BALANCING: float = 0.010  # V
+    MAX_CELL_DIFF_FOR_BALANCING: float = 0.5  # V
+    BALANCE_DISCHARGE_TIME: float = 5.0  # Seconds
+    BALANCE_RELAX_TIME: float = 60  # Seconds
+
     def __init__(self, battery_system: BatterySystem) -> None:
         self.battery_system: BatterySystem = battery_system
 
@@ -38,17 +43,38 @@ class BatteryManager:
                 cell.voltage_event.on_warning += self.on_cell_voltage_warning
                 cell.voltage_event.on_implausible += self.on_implausible_cell_voltage
 
+    def is_in_emergency_state(self) -> bool:
+        print('[NOT IMPLEMENTED] BatteryManager:is_in_emergency_state()')
+        return True
+
     def balance(self) -> None:
-        highest_cells = self.battery_system.get_highest_voltage_cells(5)
-        '''
+        if self.battery_system.is_in_relax_time() or self.battery_system.is_currently_balancing():
+            return
+
+        if self.is_in_emergency_state():
+            print('[WARNING] System is in emergency state and will not perform balancing.')
+            return
+
+        highest_voltage = self.battery_system.highest_cell_voltage()
+        lowest_voltage = self.battery_system.lowest_cell_voltage()
+
+        if highest_voltage - lowest_voltage < self.MIN_CELL_DIFF_FOR_BALANCING:
+            return
+
+        if highest_voltage - lowest_voltage > self.MAX_CELL_DIFF_FOR_BALANCING:
+            print('[WARNING] Difference in cell voltages is too high for balancing.'
+                  'The system will not perform balancing')
+            return
+
+        highest_cells = self.battery_system.highest_voltage_cells(5)
+
         for cell in highest_cells:
-            cell.start_balance_discharge()
-        '''
-        # todo only balance for 5-10 seconds
-        print("TODO: implement balancing algorithm")
+            cell.start_balance_discharge(self.BALANCE_DISCHARGE_TIME)
+
+        # Cells are now discharging until the BMS slave resets the balance pins
 
     def trigger_safety_disconnect(self) -> None:
-        print("TODO: implement safety disconnect")
+        print('[NOT IMPLEMENTED] BatteryManager:trigger_safety_disconnect()')
 
     # Event handling for critical events
 
