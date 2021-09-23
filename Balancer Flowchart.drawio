@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2021-09-22T21:54:34.923Z" agent="5.0 (Windows)" etag="QiUaqO1dysJYEJTME07b" version="15.3.0" type="github">
+<mxfile host="app.diagrams.net" modified="2021-09-23T09:42:22.959Z" agent="5.0 (Windows)" etag="7tKTUFLzrtsVtyZ1-fYB" version="15.3.0" type="github">
   <diagram id="6a731a19-8d31-9384-78a2-239565b7b9f0" name="Page-1">
     <mxGraphModel dx="1422" dy="752" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="none" math="0" shadow="0">
       <root>
@@ -77,7 +77,7 @@
         <mxCell id="77T18frlUKOqGSXx3T2g-13" value="Warte &lt;b&gt;relax_time&lt;/b&gt;" style="shape=mxgraph.flowchart.data;strokeWidth=2;gradientColor=none;gradientDirection=north;fontStyle=0;html=1;" parent="1" vertex="1">
           <mxGeometry x="20" y="440" width="159" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="77T18frlUKOqGSXx3T2g-15" value="&lt;div&gt;&lt;b&gt;Inputs:&lt;/b&gt;&lt;/div&gt;&lt;div&gt;-&lt;b&gt;min_cellDiff&lt;/b&gt; - minimale Zellspannungsdifferenz, ab der der Balancer anfängt zu arbeiten (etwa 10mV)&lt;br&gt;&lt;/div&gt;&lt;div&gt;-&lt;b&gt;max_cellDiff&lt;/b&gt; - maximale Zellspannungsdifferenz, wo klar ist, irgendwas ist kapuutt (etwa 0,5V)&lt;/div&gt;&lt;div&gt;-&lt;b&gt;alle Zellspannungen&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;-Generelle Alarmmeldungen&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;-discharge_time -&lt;/b&gt; Zeit, die die Balancer Pins aktiv sind bevor sie wieder ausgeschaltet werden&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;-relax_time -&lt;/b&gt; Zeit in der der Balancer wartet bis die Zellen relaxiert haben (etwa 1 Minute)&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+        <mxCell id="77T18frlUKOqGSXx3T2g-15" value="&lt;div&gt;&lt;b&gt;Inputs:&lt;/b&gt;&lt;/div&gt;&lt;div&gt;-&lt;b&gt;min_cellDiff&lt;/b&gt; - minimale Zellspannungsdifferenz, ab der der Balancer anfängt zu arbeiten (etwa 10mV)&lt;br&gt;&lt;/div&gt;&lt;div&gt;-&lt;b&gt;max_cellDiff&lt;/b&gt; - maximale Zellspannungsdifferenz, wo klar ist, irgendwas ist kapuutt (etwa 0,5V)&lt;/div&gt;&lt;div&gt;-&lt;b&gt;alle Zellspannungen&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;-Generelle Alarmmeldungen&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;-discharge_time -&lt;/b&gt; Zeit, die die Balancer Pins aktiv sind bevor sie wieder ausgeschaltet werden (etwa 5s)&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;-relax_time -&lt;/b&gt; Zeit in der der Balancer wartet bis die Zellen relaxiert haben (etwa 1 Minute)&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;Outputs:&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;-CellDiff&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;-Discharge Pins&lt;/b&gt;&lt;br&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="560" y="50" width="580" height="190" as="geometry" />
         </mxCell>
         <mxCell id="77T18frlUKOqGSXx3T2g-26" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="77T18frlUKOqGSXx3T2g-20" target="77T18frlUKOqGSXx3T2g-25" edge="1">
@@ -114,10 +114,10 @@
         <mxCell id="77T18frlUKOqGSXx3T2g-32" value="&lt;div&gt;Reset Discharge Bits&lt;/div&gt;&lt;div&gt;aller Zellen&lt;br&gt;&lt;/div&gt;" style="shape=mxgraph.flowchart.data;strokeWidth=2;gradientColor=none;gradientDirection=north;fontStyle=0;html=1;" parent="1" vertex="1">
           <mxGeometry x="240.5" y="1530" width="159" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="Qxgk9tP6GJtS6y6YZx59-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="Qxgk9tP6GJtS6y6YZx59-8" target="77T18frlUKOqGSXx3T2g-8">
+        <mxCell id="Qxgk9tP6GJtS6y6YZx59-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="Qxgk9tP6GJtS6y6YZx59-8" target="77T18frlUKOqGSXx3T2g-8" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="Qxgk9tP6GJtS6y6YZx59-8" value="&lt;div&gt;&lt;div&gt;Höchste - niedrigste&lt;/div&gt;&lt;div&gt;= CellDiff&lt;/div&gt;&lt;/div&gt;" style="shape=mxgraph.flowchart.data;strokeWidth=2;gradientColor=none;gradientDirection=north;fontStyle=0;html=1;" vertex="1" parent="1">
+        <mxCell id="Qxgk9tP6GJtS6y6YZx59-8" value="&lt;div&gt;&lt;div&gt;Höchste - niedrigste&lt;/div&gt;&lt;div&gt;= CellDiff&lt;/div&gt;&lt;/div&gt;" style="shape=mxgraph.flowchart.data;strokeWidth=2;gradientColor=none;gradientDirection=north;fontStyle=0;html=1;" parent="1" vertex="1">
           <mxGeometry x="240.5" y="610" width="159" height="80" as="geometry" />
         </mxCell>
       </root>
