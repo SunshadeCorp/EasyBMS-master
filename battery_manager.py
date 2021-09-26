@@ -45,7 +45,7 @@ class BatteryManager:
 
     def is_in_emergency_state(self) -> bool:
         print('[NOT IMPLEMENTED] BatteryManager:is_in_emergency_state()')
-        return True
+        return False
 
     def balance(self) -> None:
         if self.battery_system.is_in_relax_time() or self.battery_system.is_currently_balancing():
@@ -79,8 +79,9 @@ class BatteryManager:
     # Event handling for critical events
 
     def on_critical_battery_system_voltage(self, system: BatterySystem) -> None:
-        print(f'[CRITICAL] battery system voltage: {self.battery_system.voltage}V')
-        self.trigger_safety_disconnect()
+        pass
+        # print(f'[CRITICAL] battery system voltage: {self.battery_system.voltage}V')
+        # self.trigger_safety_disconnect()
 
     def on_critical_battery_system_current(self, system: BatterySystem) -> None:
         print(f'[CRITICAL] battery system current: {self.battery_system.current}A')
@@ -108,7 +109,8 @@ class BatteryManager:
         print(f'[WARNING] battery system voltage: {self.battery_system.voltage}V')
 
     def on_battery_system_voltage_warning(self, system: BatterySystem) -> None:
-        print(f'[WARNING] battery system current: {self.battery_system.current}A')
+        # print(f'[WARNING] battery system current: {self.battery_system.current}A')
+        pass
 
     def on_module_temperature_warning(self, module: BatteryModule) -> None:
         print(f'[WARNING] module temperature on module {module.id}: {module.module_temp1}°C, {module.module_temp2}°C')
@@ -127,12 +129,14 @@ class BatteryManager:
     # notify user of implausible state and shut off the system
 
     def on_implausible_battery_system_voltage(self, system: BatterySystem) -> None:
-        print(f'[IMPLAUSIBLE] battery system voltage: {self.battery_system.voltage}V')
-        self.trigger_safety_disconnect()
+        # print(f'[IMPLAUSIBLE] battery system voltage: {self.battery_system.voltage}V')
+        # self.trigger_safety_disconnect()
+        pass
 
     def on_implausible_battery_system_current(self, system: BatterySystem) -> None:
         print(f'[IMPLAUSIBLE] battery system current: {self.battery_system.current}A')
         self.trigger_safety_disconnect()
+        pass
 
     def on_implausible_module_temperature(self, module: BatteryModule) -> None:
         print(
