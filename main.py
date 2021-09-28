@@ -98,13 +98,14 @@ class EasyBMSMaster:
 
                 elif topic.startswith('cell/'):
                     cell_number, sub_topic = self.topic_extract_number(topic)
+                    battery_cell = battery_module.cells[cell_number - 1]
                     if sub_topic == 'voltage':
-                        battery_module.cells[cell_number - 1].update_voltage(float(payload))
+                        battery_cell.update_voltage(float(payload))
                     elif sub_topic == 'is_balancing':
                         if payload == '1':
-                            battery_module.cells[cell_number - 1].balance_pin_state = True
+                            battery_cell.balance_pin_state = True
                         else:
-                            battery_module.cells[cell_number - 1].on_balance_discharged_stopped()
+                            battery_cell.on_balance_discharged_stopped()
                 elif topic == 'module_voltage':
                     battery_module.update_module_voltage(float(payload))
                 elif topic == 'module_temps':
