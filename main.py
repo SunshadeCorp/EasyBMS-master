@@ -3,11 +3,10 @@ import sched
 import time
 import yaml
 from pathlib import Path
+from typing import Any, Dict
 
-from battery_cell import BatteryCell
 from battery_manager import BatteryManager
 from battery_system import BatterySystem
-from typing import Any, Dict
 
 
 def get_config(filename: str) -> Dict:
@@ -30,6 +29,10 @@ class EasyBMSMaster:
         self.mqtt_client.username_pw_set(credentials['username'], credentials['password'])
         self.mqtt_client.will_set('master/core/available', 'offline', retain=True)
         self.mqtt_client.connect(host=master_config['mqtt_server'], port=master_config['mqtt_port'], keepalive=60)
+
+        for battery_module in battery_system.battery_modules:
+            for battery_cell in battery_module.cells:
+                battery_cell.communication_event.send_balance_request += self.send_balance_request
 
         self.last_time = {}
         self.lines_to_write = {}
@@ -70,15 +73,9 @@ class EasyBMSMaster:
         number = int(number[:number.find('/')])
         return number, sub_topic
 
-    def send_balance_request_class(self, cell: BatteryCell, balance_time_ms: int):
-        for i, battery_module in enumerate(battery_system.battery_modules):
-            for j, battery_cell in enumerate(battery_module.cells):
-                if battery_cell is cell:
-                    self.send_balance_request(i, j, balance_time_ms)
-
-    def send_balance_request(self, module_number: int, cell_number: int, balance_time_ms: int):
+    def send_balance_request(self, module_number: int, cell_number: int, balance_time_s: float):
         self.mqtt_client.publish(topic=f'esp-module/{module_number + 1}/cell/{cell_number + 1}/balance_request',
-                                 payload=f'{balance_time_ms}')
+                                 payload=f'{int(balance_time_s * 1000)}')
 
     def mqtt_on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
         if time.time() - self.last_log_time >= 60:  # log time diffs
@@ -107,7 +104,7 @@ class EasyBMSMaster:
                         if payload == '1':
                             battery_module.cells[cell_number - 1].balance_pin_state = True
                         else:
-                            battery_module.cells[cell_number - 1].balance_pin_state = False
+                            battery_module.cells[cell_number - 1].on_balance_discharged_stopped()
                 elif topic == 'module_voltage':
                     battery_module.update_module_voltage(float(payload))
                 elif topic == 'module_temps':

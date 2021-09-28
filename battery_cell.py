@@ -1,4 +1,5 @@
 import time
+from events import Events
 
 from measurement_event import MeasurementEvent
 from soc_curve import SocCurve
@@ -23,6 +24,7 @@ class BatteryCell:
         self.id = cell_id
         self.module_id = module_id
         self.voltage_event = MeasurementEvent()
+        self.communication_event = Events(events=('send_balance_request',))
         self.soc_curve = SocCurve()
         self.last_discharge_time: float = 0
 
@@ -49,12 +51,12 @@ class BatteryCell:
             self.voltage_event.on_warning(self)
 
     def is_relaxing(self) -> bool:
-        print('[TODO] on_balance_discharged_stopped needs to be called by mqtt')
         now: float = time.time()
         return (now - self.last_discharge_time) < self.RELAX_TIME
 
     def start_balance_discharge(self, balance_time: float) -> None:
-        # todo: send command to esp
+        assert len(self.communication_event.send_balance_request) > 0
+        self.communication_event.send_balance_request(self.module_id, self.id, balance_time)
         self.balance_pin_state = True
         print('[NOT IMPLEMENTED] BatteryCell:start_balance_discharge()')
 
