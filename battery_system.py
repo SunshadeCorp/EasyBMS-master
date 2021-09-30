@@ -8,10 +8,6 @@ from measurement_event import MeasurementEvent
 class BatterySystem:
     LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = -10000  # V
     UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = 10000  # V
-    LOWER_VOLTAGE_LIMIT_CRITICAL: float = 432.0  # V
-    UPPER_VOLTAGE_LIMIT_CRITICAL: float = 604.8  # V
-    LOWER_VOLTAGE_LIMIT_WARNING: float = 460.8  # V
-    UPPER_VOLTAGE_LIMIT_WARNING: float = 597.6  # V
 
     LOWER_CURRENT_LIMIT_IMPLAUSIBLE: float = -500  # A
     UPPER_CURRENT_LIMIT_IMPLAUSIBLE: float = 500  # A
@@ -27,6 +23,11 @@ class BatterySystem:
         self.voltage: float = 0
         self.current: float = 0
 
+        self.lower_voltage_limit_critical: float = 0  # V
+        self.upper_voltage_limit_critical: float = 0  # V
+        self.lower_voltage_limit_warning: float = 0  # V
+        self.upper_voltage_limit_warning: float = 0  # V
+
         self.is_initialized = False
 
         # Events
@@ -37,6 +38,11 @@ class BatterySystem:
         for module_id in range(0, number_of_modules):
             module = BatteryModule(module_id)
             self.battery_modules.append(module)
+
+        self.lower_voltage_limit_warning += number_of_modules * BatteryModule.LOWER_VOLTAGE_LIMIT_WARNING
+        self.upper_voltage_limit_warning += number_of_modules * BatteryModule.UPPER_VOLTAGE_LIMIT_WARNING
+        self.lower_voltage_limit_critical += number_of_modules * BatteryModule.LOWER_VOLTAGE_LIMIT_CRITICAL
+        self.upper_voltage_limit_critical += number_of_modules * BatteryModule.UPPER_VOLTAGE_LIMIT_CRITICAL
 
     def update_measurements(self, voltage: float, current: float) -> None:
         self.voltage = voltage
