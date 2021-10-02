@@ -52,6 +52,7 @@ class BatteryManager:
 
     def balance(self) -> None:
         if self.battery_system.is_in_relax_time() or self.battery_system.is_currently_balancing():
+            print('Battery System is balancing.')
             return
 
         if self.is_in_emergency_state():
@@ -61,10 +62,14 @@ class BatteryManager:
         highest_voltage = self.battery_system.highest_cell_voltage()
         lowest_voltage = self.battery_system.lowest_cell_voltage()
 
+        cell_diff: float = highest_voltage - lowest_voltage
+
+        print(f'cell_diff: {cell_diff}')
+
         if highest_voltage - lowest_voltage < self.MIN_CELL_DIFF_FOR_BALANCING:
             return
 
-        if highest_voltage - lowest_voltage > self.MAX_CELL_DIFF_FOR_BALANCING:
+        if cell_diff > self.MAX_CELL_DIFF_FOR_BALANCING:
             print('[WARNING] Difference in cell voltages is too high for balancing.'
                   'The system will not perform balancing')
             return
@@ -160,4 +165,5 @@ class BatteryManager:
         print(f'Heartbeat missed on module: {module.id})')
 
     def on_heartbeat(self, module: BatteryModule) -> None:
-        print(f'Got heartbeat on module: {module.id}')
+        # print(f'Got heartbeat on module: {module.id}')
+        pass
