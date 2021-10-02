@@ -2,6 +2,7 @@ from battery_cell import BatteryCell
 from battery_system import BatterySystem
 from heartbeat_event import HeartbeatEvent
 from battery_module import BatteryModule
+from main import EasyBMSMaster
 
 
 class BatteryManager:
@@ -10,8 +11,9 @@ class BatteryManager:
     BALANCE_DISCHARGE_TIME: float = 5.0  # Seconds
     BALANCE_RELAX_TIME: float = 60  # Seconds
 
-    def __init__(self, battery_system: BatterySystem) -> None:
+    def __init__(self, battery_system: BatterySystem, slave_communicator: EasyBMSMaster) -> None:
         self.battery_system: BatterySystem = battery_system
+        self.slave_communicator: EasyBMSMaster = slave_communicator
 
         # Register battery system event handlers
         self.battery_system.voltage_event.on_critical += self.on_critical_battery_system_voltage
@@ -74,10 +76,11 @@ class BatteryManager:
         # Cells are now discharging until the BMS slave resets the balance pins
 
     def trigger_safety_disconnect(self) -> None:
-        print('[NOT IMPLEMENTED] BatteryManager:trigger_safety_disconnect()')
+        # todo: retry several times to ensure message delivery
+        self.slave_communicator.open_battery_plus_relay()
+        self.slave_communicator.open_battery_minus_relay()
 
     # Event handling for critical events
-
     def on_critical_battery_system_voltage(self, system: BatterySystem) -> None:
         print(f'[CRITICAL] battery system voltage: {self.battery_system.voltage}V')
         self.trigger_safety_disconnect()

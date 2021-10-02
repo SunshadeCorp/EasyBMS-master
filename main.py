@@ -73,6 +73,18 @@ class EasyBMSMaster:
         number = int(number[:number.find('/')])
         return number, sub_topic
 
+    def open_battery_plus_relay(self):
+        self.mqtt_client.publish(topic=f'master/relays/battery_plus', payload=f'off')
+
+    def open_battery_minus_relay(self):
+        self.mqtt_client.publish(topic=f'master/relays/battery_minus', payload=f'off')
+
+    def close_battery_plus_relay(self):
+        self.mqtt_client.publish(topic=f'master/relays/battery_plus', payload=f'on')
+
+    def close_battery_minus_relay(self):
+        self.mqtt_client.publish(topic=f'master/relays/battery_minus', payload=f'on')
+
     def send_balance_request(self, module_number: int, cell_number: int, balance_time_s: float):
         self.mqtt_client.publish(topic=f'esp-module/{module_number + 1}/cell/{cell_number + 1}/balance_request',
                                  payload=f'{int(balance_time_s * 1000)}')
@@ -122,10 +134,10 @@ def balance_task():
 
 if __name__ == '__main__':
     config = get_config('config.yaml')
-    battery_system = BatterySystem(config['number_of_battery_modules'])
-    battery_manager = BatteryManager(battery_system)
-
     easy_bms_master = EasyBMSMaster(config)
+
+    battery_system = BatterySystem(config['number_of_battery_modules'])
+    battery_manager = BatteryManager(battery_system, easy_bms_master)
 
     scheduler = sched.scheduler()
     scheduler.enter(delay=0, priority=1, action=easy_bms_master.send_heartbeat)
