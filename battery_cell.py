@@ -55,10 +55,10 @@ class BatteryCell:
         return (now - self.last_discharge_time) < self.RELAX_TIME
 
     def start_balance_discharge(self, balance_time: float) -> None:
+        # Assert that there is a listener reacting to this event
         assert len(self.communication_event.send_balance_request) > 0
         self.communication_event.send_balance_request(self.module_id, self.id, balance_time)
         self.balance_pin_state = True
-        print('[NOT IMPLEMENTED] BatteryCell:start_balance_discharge()')
 
     def on_balance_discharged_stopped(self) -> None:
         self.balance_pin_state = False
