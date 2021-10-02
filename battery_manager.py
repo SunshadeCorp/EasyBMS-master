@@ -66,7 +66,8 @@ class BatteryManager:
 
         print(f'cell_diff: {cell_diff}')
 
-        if highest_voltage - lowest_voltage < self.MIN_CELL_DIFF_FOR_BALANCING:
+        if cell_diff < self.MIN_CELL_DIFF_FOR_BALANCING:
+            print('Min cell diff was not reached')
             return
 
         if cell_diff > self.MAX_CELL_DIFF_FOR_BALANCING:
@@ -77,6 +78,7 @@ class BatteryManager:
         highest_cells = self.battery_system.highest_voltage_cells(5)
 
         for cell in highest_cells:
+            print(f'start discharching a cell {cell.module_id}:{cell.id}')
             cell.start_balance_discharge(self.BALANCE_DISCHARGE_TIME)
 
         # Cells are now discharging until the BMS slave resets the balance pins
