@@ -27,6 +27,7 @@ class BatteryManager:
         # Register battery module event handlers
         for module in self.battery_system.battery_modules:
             module.heartbeat_event.on_heartbeat_missed += self.on_heartbeat_missed
+            module.heartbeat_event.on_heartbeat += self.on_heartbeat
 
             module.module_temp_event.on_critical += self.on_critical_module_temperature
             module.module_temp_event.on_warning += self.on_module_temperature_warning
@@ -156,5 +157,8 @@ class BatteryManager:
 
     # Other event handlers
 
-    def on_heartbeat_missed(self, esp_number: int) -> None:
-        print(f'Heartbeat missed on esp: {esp_number})')
+    def on_heartbeat_missed(self, module: BatteryModule) -> None:
+        print(f'Heartbeat missed on module: {module.id})')
+
+    def on_heartbeat(self, module: BatteryModule) -> None:
+        print(f'Got heartbeat on module: {module.id}')
