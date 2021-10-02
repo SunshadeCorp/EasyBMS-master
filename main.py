@@ -35,11 +35,11 @@ class EasyBMSMaster:
                 battery_cell.communication_event.send_balance_request += self.send_balance_request
 
         self.last_time = {}
-        self.lines_to_write = {}
-        self.last_log_time = time.time()
-        for i in range(12):
-            self.last_time[i + 1] = 0
-            self.lines_to_write[i + 1] = []
+        # self.lines_to_write = {}
+        # self.last_log_time = time.time()
+        # for i in range(12):
+        #     self.last_time[i + 1] = 0
+        #     self.lines_to_write[i + 1] = []
 
         self.mqtt_client.loop_start()
 
@@ -58,13 +58,13 @@ class EasyBMSMaster:
             self.mqtt_client.subscribe(f'esp-module/{i + 1}/chip_temp')
         self.mqtt_client.publish('master/core/available', 'online', retain=True)
 
-    def write_logs(self):
-        self.last_log_time = time.time()
-        for i in self.lines_to_write:
-            with open(f'logs/esp-module{i}.log', 'a+') as file:
-                for line in self.lines_to_write[i]:
-                    print(line, file=file)
-                self.lines_to_write[i].clear()
+    # def write_logs(self):
+    #     self.last_log_time = time.time()
+    #     for i in self.lines_to_write:
+    #         with open(f'logs/esp-module{i}.log', 'a+') as file:
+    #             for line in self.lines_to_write[i]:
+    #                 print(line, file=file)
+    #             self.lines_to_write[i].clear()
 
     @staticmethod
     def topic_extract_number(topic: str) -> (int, str,):
@@ -73,25 +73,21 @@ class EasyBMSMaster:
         number = int(number[:number.find('/')])
         return number, sub_topic
 
-    def open_battery_plus_relay(self):
-        self.mqtt_client.publish(topic=f'master/relays/battery_plus', payload=f'off')
+    def open_battery_relays(self):
+        self.mqtt_client.publish(topic='master/relays/battery_plus/set', payload='off')
+        self.mqtt_client.publish(topic='master/relays/battery_precharge/set', payload='off')
+        self.mqtt_client.publish(topic='master/relays/battery_minus/set', payload='off')
 
-    def open_battery_minus_relay(self):
-        self.mqtt_client.publish(topic=f'master/relays/battery_minus', payload=f'off')
-
-    def close_battery_plus_relay(self):
-        self.mqtt_client.publish(topic=f'master/relays/battery_plus', payload=f'on')
-
-    def close_battery_minus_relay(self):
-        self.mqtt_client.publish(topic=f'master/relays/battery_minus', payload=f'on')
+    def close_battery_perform_precharge(self):
+        self.mqtt_client.publish(topic='master/relays/perform_precharge', payload='on')
 
     def send_balance_request(self, module_number: int, cell_number: int, balance_time_s: float):
         self.mqtt_client.publish(topic=f'esp-module/{module_number + 1}/cell/{cell_number + 1}/balance_request',
                                  payload=f'{int(balance_time_s * 1000)}')
 
     def mqtt_on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
-        if time.time() - self.last_log_time >= 60:  # log time diffs
-            self.write_logs()
+        # if time.time() - self.last_log_time >= 60:  # log time diffs
+        #     self.write_logs()
 
         if msg.topic.startswith('esp-module/'):
             esp_number, topic = self.topic_extract_number(msg.topic)
@@ -105,7 +101,7 @@ class EasyBMSMaster:
                     if self.last_time[esp_number] != 0:  # log time diffs
                         diff = current_time - self.last_time[esp_number] - 1000
                         self.mqtt_client.publish(topic=f'esp-module/{esp_number}/timediff', payload=f'{diff}')
-                        self.lines_to_write[esp_number].append(f'{current_time},{diff}')
+                    #     self.lines_to_write[esp_number].append(f'{current_time},{diff}')
                     self.last_time[esp_number] = current_time
 
                 elif topic.startswith('cell/'):

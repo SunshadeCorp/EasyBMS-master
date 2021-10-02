@@ -20,15 +20,13 @@ class BatterySystem:
         assert 1 <= number_of_modules <= 12
 
         # Uninitialized values
-        self.voltage: float = 0
-        self.current: float = 0
+        self.voltage: float = float('nan')
+        self.current: float = float('nan')
 
-        self.lower_voltage_limit_critical: float = 0  # V
-        self.upper_voltage_limit_critical: float = 0  # V
-        self.lower_voltage_limit_warning: float = 0  # V
-        self.upper_voltage_limit_warning: float = 0  # V
-
-        self.is_initialized = False
+        self.lower_voltage_limit_warning: float = number_of_modules * BatteryModule.LOWER_VOLTAGE_LIMIT_WARNING
+        self.upper_voltage_limit_warning: float = number_of_modules * BatteryModule.UPPER_VOLTAGE_LIMIT_WARNING
+        self.lower_voltage_limit_critical: float = number_of_modules * BatteryModule.LOWER_VOLTAGE_LIMIT_CRITICAL
+        self.upper_voltage_limit_critical: float = number_of_modules * BatteryModule.UPPER_VOLTAGE_LIMIT_CRITICAL
 
         # Events
         self.current_event = MeasurementEvent()
@@ -39,15 +37,8 @@ class BatterySystem:
             module = BatteryModule(module_id)
             self.battery_modules.append(module)
 
-        self.lower_voltage_limit_warning += number_of_modules * BatteryModule.LOWER_VOLTAGE_LIMIT_WARNING
-        self.upper_voltage_limit_warning += number_of_modules * BatteryModule.UPPER_VOLTAGE_LIMIT_WARNING
-        self.lower_voltage_limit_critical += number_of_modules * BatteryModule.LOWER_VOLTAGE_LIMIT_CRITICAL
-        self.upper_voltage_limit_critical += number_of_modules * BatteryModule.UPPER_VOLTAGE_LIMIT_CRITICAL
-
-    def update_measurements(self, voltage: float, current: float) -> None:
+    def update_voltage(self, voltage: float) -> None:
         self.voltage = voltage
-        self.current = current
-        self.is_initialized = True
 
         if self.has_implausible_voltage():
             self.voltage_event.on_implausible(self)
@@ -55,6 +46,9 @@ class BatterySystem:
             self.voltage_event.on_critical(self)
         elif self.has_warning_voltage():
             self.voltage_event.on_warning(self)
+
+    def update_current(self, current: float) -> None:
+        self.current = current
 
         if self.has_implausible_current():
             self.current_event.on_implausible(self)
