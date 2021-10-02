@@ -2,7 +2,7 @@ from battery_cell import BatteryCell
 from battery_system import BatterySystem
 from heartbeat_event import HeartbeatEvent
 from battery_module import BatteryModule
-from main import EasyBMSMaster
+from slave_communicator import SlaveCommunicator
 
 
 class BatteryManager:
@@ -11,9 +11,9 @@ class BatteryManager:
     BALANCE_DISCHARGE_TIME: float = 5.0  # Seconds
     BALANCE_RELAX_TIME: float = 60  # Seconds
 
-    def __init__(self, battery_system: BatterySystem, slave_communicator: EasyBMSMaster) -> None:
+    def __init__(self, battery_system: BatterySystem, slave_communicator: SlaveCommunicator) -> None:
         self.battery_system: BatterySystem = battery_system
-        self.slave_communicator: EasyBMSMaster = slave_communicator
+        self.slave_communicator: SlaveCommunicator = slave_communicator
 
         # Register battery system event handlers
         self.battery_system.voltage_event.on_critical += self.on_critical_battery_system_voltage

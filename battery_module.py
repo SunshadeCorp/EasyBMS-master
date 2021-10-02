@@ -58,7 +58,7 @@ class BatteryModule:
             own_time: float = time.time()
 
             if self.last_esp_uptime_in_own_time - own_time > self.ESP_TIMEOUT:
-                self.heartbeat_event.on_heartbeat_missed()
+                self.heartbeat_event.on_heartbeat_missed(self)
             time.sleep(1000)
 
     def temp(self) -> float:
@@ -105,7 +105,7 @@ class BatteryModule:
 
     def update_esp_uptime(self, esp_uptime: int) -> None:
         self.last_esp_uptime = esp_uptime
-        self.heartbeat_event.on_heartbeat()
+        self.heartbeat_event.on_heartbeat(self)
 
     def has_warning_module_temp1(self) -> bool:
         return self.module_temp1 < self.LOWER_MODULE_TEMP_LIMIT_WARNING \
