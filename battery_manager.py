@@ -78,8 +78,7 @@ class BatteryManager:
 
     def trigger_safety_disconnect(self) -> None:
         # todo: retry several times to ensure message delivery
-        self.slave_communicator.open_battery_plus_relay()
-        self.slave_communicator.open_battery_minus_relay()
+        self.slave_communicator.open_battery_relays()
 
     # Event handling for critical events
     def on_critical_battery_system_voltage(self, system: BatterySystem) -> None:
