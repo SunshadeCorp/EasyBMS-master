@@ -68,10 +68,10 @@ class BatterySystem:
                or self.voltage > self.UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE
 
     def has_critical_voltage(self) -> bool:
-        return self.voltage < self.LOWER_VOLTAGE_LIMIT_CRITICAL or self.voltage > self.UPPER_VOLTAGE_LIMIT_CRITICAL
+        return self.voltage < self.lower_voltage_limit_critical or self.voltage > self.upper_voltage_limit_critical
 
     def has_warning_voltage(self) -> bool:
-        return self.voltage < self.LOWER_VOLTAGE_LIMIT_WARNING or self.voltage > self.UPPER_VOLTAGE_LIMIT_WARNING
+        return self.voltage < self.lower_voltage_limit_warning or self.voltage > self.upper_voltage_limit_warning
 
     def has_implausible_current(self) -> bool:
         return self.current < self.LOWER_CURRENT_LIMIT_IMPLAUSIBLE \
