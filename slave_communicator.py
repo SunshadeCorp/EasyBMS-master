@@ -120,6 +120,6 @@ class SlaveCommunicator:
                     battery_module.update_module_voltage(float(payload))
                 elif topic == 'module_temps':
                     module_temps = payload.split(',')
-                    battery_module.update_module_temps(module_temps[0], module_temps[1])
+                    battery_module.update_module_temps(float(module_temps[0]), float(module_temps[1]))
                 elif topic == 'chip_temp':
                     battery_module.update_chip_temp(float(payload))
