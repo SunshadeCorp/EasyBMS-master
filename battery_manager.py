@@ -52,11 +52,11 @@ class BatteryManager:
 
     def balance(self) -> None:
         if self.battery_system.is_in_relax_time() or self.battery_system.is_currently_balancing():
-            print('Battery System is balancing.')
+            print('Battery System is balancing.', flush=True)
             return
 
         if self.is_in_emergency_state():
-            print('[WARNING] System is in emergency state and will not perform balancing.')
+            print('[WARNING] System is in emergency state and will not perform balancing.', flush=True)
             return
 
         highest_voltage = self.battery_system.highest_cell_voltage()
@@ -64,7 +64,7 @@ class BatteryManager:
 
         cell_diff: float = highest_voltage - lowest_voltage
 
-        print(f'cell_diff: {cell_diff}')
+        print(f'cell_diff: {cell_diff}', flush=True)
 
         if cell_diff < self.MIN_CELL_DIFF_FOR_BALANCING:
             print('Min cell diff was not reached')
@@ -89,27 +89,28 @@ class BatteryManager:
 
     # Event handling for critical events
     def on_critical_battery_system_voltage(self, system: BatterySystem) -> None:
-        print(f'[CRITICAL] battery system voltage: {self.battery_system.voltage}V')
+        print(f'[CRITICAL] battery system voltage: {self.battery_system.voltage}V', flush=True)
         self.trigger_safety_disconnect()
 
     def on_critical_battery_system_current(self, system: BatterySystem) -> None:
-        print(f'[CRITICAL] battery system current: {self.battery_system.current}A')
+        print(f'[CRITICAL] battery system current: {self.battery_system.current}A', flush=True)
         self.trigger_safety_disconnect()
 
     def on_critical_module_temperature(self, module: BatteryModule) -> None:
-        print(f'[CRITICAL] module temperature on module {module.id}: {module.module_temp1}°C, {module.module_temp2}°C')
+        print(f'[CRITICAL] module temperature on module {module.id}: {module.module_temp1}°C, {module.module_temp2}°C',
+              flush=True)
         self.trigger_safety_disconnect()
 
     def on_critical_chip_temperature(self, module: BatteryModule) -> None:
-        print(f'[CRITICAL] chip temperature on module {module.id}: {module.chip_temp}°C')
+        print(f'[CRITICAL] chip temperature on module {module.id}: {module.chip_temp}°C', flush=True)
         self.trigger_safety_disconnect()
 
     def on_critical_module_voltage(self, module: BatteryModule) -> None:
-        print(f'[CRITICAL] module voltage on module {module.id}: {module.voltage}V')
+        print(f'[CRITICAL] module voltage on module {module.id}: {module.voltage}V', flush=True)
         self.trigger_safety_disconnect()
 
     def on_critical_cell_voltage(self, cell: BatteryCell) -> None:
-        print(f'[CRITICAL] cell voltage on module {cell.module_id}, cell {cell.id}: {cell.voltage}V')
+        print(f'[CRITICAL] cell voltage on module {cell.module_id}, cell {cell.id}: {cell.voltage}V', flush=True)
         self.trigger_safety_disconnect()
 
     # Event handling for warning events
@@ -137,28 +138,29 @@ class BatteryManager:
     # notify user of implausible state and shut off the system
 
     def on_implausible_battery_system_voltage(self, system: BatterySystem) -> None:
-        print(f'[IMPLAUSIBLE] battery system voltage: {self.battery_system.voltage}V')
+        print(f'[IMPLAUSIBLE] battery system voltage: {self.battery_system.voltage}V', flush=True)
         self.trigger_safety_disconnect()
 
     def on_implausible_battery_system_current(self, system: BatterySystem) -> None:
-        print(f'[IMPLAUSIBLE] battery system current: {self.battery_system.current}A')
+        print(f'[IMPLAUSIBLE] battery system current: {self.battery_system.current}A', flush=True)
         self.trigger_safety_disconnect()
 
     def on_implausible_module_temperature(self, module: BatteryModule) -> None:
         print(
-            f'[IMPLAUSIBLE] module temperature on module {module.id}: {module.module_temp1}°C, {module.module_temp2}°C')
+            f'[IMPLAUSIBLE] module temperature on module {module.id}: {module.module_temp1}°C, {module.module_temp2}°C',
+            flush=True)
         self.trigger_safety_disconnect()
 
     def on_implausible_chip_temperature(self, module: BatteryModule) -> None:
-        print(f'[IMPLAUSIBLE] chip temperature on module {module.id}: {module.chip_temp}°C')
+        print(f'[IMPLAUSIBLE] chip temperature on module {module.id}: {module.chip_temp}°C', flush=True)
         self.trigger_safety_disconnect()
 
     def on_implausible_module_voltage(self, module: BatteryModule) -> None:
-        print(f'[IMPLAUSIBLE] module voltage on module {module.id}: {module.voltage}V')
+        print(f'[IMPLAUSIBLE] module voltage on module {module.id}: {module.voltage}V', flush=True)
         self.trigger_safety_disconnect()
 
     def on_implausible_cell_voltage(self, cell: BatteryCell) -> None:
-        print(f'[IMPLAUSIBLE] cell voltage on module {cell.module_id}, cell {cell.id}: {cell.voltage}V')
+        print(f'[IMPLAUSIBLE] cell voltage on module {cell.module_id}, cell {cell.id}: {cell.voltage}V', flush=True)
         self.trigger_safety_disconnect()
 
     # Other event handlers

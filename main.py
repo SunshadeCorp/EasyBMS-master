@@ -12,7 +12,7 @@ from slave_communicator import SlaveCommunicator, get_config
 
 def balance_task():
     battery_manager.balance()
-    scheduler.enter(delay=5, priority=1, action=battery_manager.balance)  # delay in seconds
+    scheduler.enter(delay=5, priority=1, action=balance_task)  # delay in seconds
 
 
 if __name__ == '__main__':
