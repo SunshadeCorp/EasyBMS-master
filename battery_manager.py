@@ -61,7 +61,11 @@ class BatteryManager:
             print('[WARNING] System is in emergency state and will not perform balancing.', flush=True)
             return
 
-        highest_voltage = self.battery_system.highest_cell_voltage()
+        try:
+            highest_voltage = self.battery_system.highest_cell_voltage()
+        except TypeError:
+            print(f'TypeError: some voltages not set! {self.battery_system}')
+            return
         lowest_voltage = self.battery_system.lowest_cell_voltage()
 
         cell_diff: float = highest_voltage - lowest_voltage

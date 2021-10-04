@@ -57,20 +57,26 @@ class SlaveCommunicator:
 
     def send_battery_system_state(self):
         for battery_module in self._battery_system.battery_modules:
-            min_cell: BatteryCell = battery_module.min_voltage_cell()
-            max_cell: BatteryCell = battery_module.max_voltage_cell()
-            self._mqtt_client.publish(topic=f'esp-module/{min_cell.module_id + 1}/min_cell_voltage',
-                                      payload=f'{min_cell.voltage}')
-            self._mqtt_client.publish(topic=f'esp-module/{max_cell.module_id + 1}/max_cell_voltage',
-                                      payload=f'{max_cell.voltage}')
+            try:
+                min_cell: BatteryCell = battery_module.min_voltage_cell()
+                max_cell: BatteryCell = battery_module.max_voltage_cell()
+                self._mqtt_client.publish(topic=f'esp-module/{min_cell.module_id + 1}/min_cell_voltage',
+                                          payload=f'{min_cell.voltage}')
+                self._mqtt_client.publish(topic=f'esp-module/{max_cell.module_id + 1}/max_cell_voltage',
+                                          payload=f'{max_cell.voltage}')
+            except TypeError:
+                pass
         try:
             soc: float = self._battery_system.soc()
             soc *= 100.0
             self._mqtt_client.publish(topic=f'master/can/battery/soc/set', payload=f'{soc:.2f}')
-        except AssertionError:
+        except TypeError:
             pass
-        self._mqtt_client.publish(topic=f'master/core/calculated_system_voltage',
-                                  payload=f'{self._battery_system.calculated_voltage():.2f}')
+        try:
+            self._mqtt_client.publish(topic=f'master/core/calculated_system_voltage',
+                                      payload=f'{self._battery_system.calculated_voltage():.2f}')
+        except TypeError:
+            pass
 
     @staticmethod
     def _topic_extract_number(topic: str) -> (int, str,):
