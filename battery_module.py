@@ -32,12 +32,12 @@ class BatteryModule:
 
     def __init__(self, module_id: int) -> None:
         # Uninitialized
-        self.voltage: float = None
-        self.module_temp1: float = None
-        self.module_temp2: float = None
-        self.chip_temp: float = None
-        self.last_esp_uptime: int = None
-        self.last_esp_uptime_in_own_time: float = None
+        self.voltage: float or None = None
+        self.module_temp1: float or None = None
+        self.module_temp2: float or None = None
+        self.chip_temp: float or None = None
+        self.last_esp_uptime: int or None = None
+        self.last_esp_uptime_in_own_time: float or None = None
 
         self.id = module_id
         self.keep_monitoring_heartbeats: bool = True

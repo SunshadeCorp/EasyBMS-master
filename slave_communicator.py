@@ -86,7 +86,7 @@ class SlaveCommunicator:
     #             self._lines_to_write[i].clear()
 
     def _mqtt_on_connect(self, client: mqtt.Client, userdata: Any, flags: Dict, rc: int):
-        for i in range(12):
+        for i in range(len(self._battery_system.battery_modules)):
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/uptime')
             for j in range(12):
                 self._mqtt_client.subscribe(f'esp-module/{i + 1}/cell/{j + 1}/voltage')
@@ -94,6 +94,8 @@ class SlaveCommunicator:
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/module_voltage')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/module_temps')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/chip_temp')
+        self._mqtt_client.subscribe('esp-module/1/total_system_voltage')
+        self._mqtt_client.subscribe(f'esp-module/{len(self._battery_system.battery_modules)}/total_system_current')
         self._mqtt_client.publish('master/core/available', 'online', retain=True)
 
     def _mqtt_on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
@@ -132,3 +134,7 @@ class SlaveCommunicator:
                     battery_module.update_module_temps(float(module_temps[0]), float(module_temps[1]))
                 elif topic == 'chip_temp':
                     battery_module.update_chip_temp(float(payload))
+                elif topic == 'total_system_voltage':
+                    self._battery_system.update_voltage(float(payload))
+                elif topic == 'total_system_current':
+                    self._battery_system.update_current(float(payload))
