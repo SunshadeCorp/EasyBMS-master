@@ -37,6 +37,12 @@ class BatterySystem:
             module = BatteryModule(module_id)
             self.battery_modules.append(module)
 
+    def __str__(self):
+        modules_string = ''
+        for battery_module in self.battery_modules:
+            modules_string += f'{battery_module}\n'
+        return f'System: {self.voltage:.2f}V {self.current:.2f}A Modules:\n{modules_string}'
+
     def update_voltage(self, voltage: float) -> None:
         self.voltage = voltage
 

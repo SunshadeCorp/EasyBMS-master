@@ -1,3 +1,5 @@
+import time
+
 from battery_cell import BatteryCell
 from battery_system import BatterySystem
 from heartbeat_event import HeartbeatEvent
@@ -52,7 +54,7 @@ class BatteryManager:
 
     def balance(self) -> None:
         if self.battery_system.is_in_relax_time() or self.battery_system.is_currently_balancing():
-            print('Battery System is balancing.', flush=True)
+            print(f'{time.time():.0f} Battery System is balancing. {self.battery_system}', flush=True)
             return
 
         if self.is_in_emergency_state():
@@ -64,7 +66,7 @@ class BatteryManager:
 
         cell_diff: float = highest_voltage - lowest_voltage
 
-        print(f'cell_diff: {cell_diff}', flush=True)
+        print(f'cell_diff: {cell_diff:.2f}V', flush=True)
 
         if cell_diff < self.MIN_CELL_DIFF_FOR_BALANCING:
             print('Min cell diff was not reached')
