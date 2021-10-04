@@ -20,8 +20,8 @@ class BatterySystem:
         assert 1 <= number_of_modules <= 12
 
         # Uninitialized values
-        self.voltage: float = float('nan')
-        self.current: float = float('nan')
+        self.voltage: float or None = None
+        self.current: float or None = None
 
         self.lower_voltage_limit_warning: float = number_of_modules * BatteryModule.LOWER_VOLTAGE_LIMIT_WARNING
         self.upper_voltage_limit_warning: float = number_of_modules * BatteryModule.UPPER_VOLTAGE_LIMIT_WARNING
@@ -40,7 +40,13 @@ class BatterySystem:
     def __str__(self):
         modules_string = ''
         for battery_module in self.battery_modules:
-            modules_string += f'{battery_module}\n'
+            cells_string = ''
+            for cell in battery_module.cells:
+                cells_string += (f'{cell.voltage:.2f}' + ('+' if cell.balance_pin_state else '')).ljust(7)
+            modules_string += f'{battery_module.voltage:.2f}V'.ljust(7) \
+                              + f'{battery_module.module_temp1:.1f}°C'.ljust(7) \
+                              + f'{battery_module.module_temp2:.1f}°C'.ljust(7) \
+                              + f'{cells_string}\n'
         return f'System: {self.voltage:.2f}V {self.current:.2f}A Modules:\n{modules_string}'
 
     def update_voltage(self, voltage: float) -> None:
