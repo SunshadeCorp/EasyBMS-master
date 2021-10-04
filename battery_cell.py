@@ -16,9 +16,8 @@ class BatteryCell:
 
     def __init__(self, cell_id: int, module_id: int) -> None:
         # Uninitialized values
-        self.voltage: float = 0
-        self.balance_pin_state: bool = False
-        self.is_initialized: bool = False
+        self.voltage: float or None = None
+        self.balance_pin_state: bool or None = False
 
         # Initialized values
         self.id = cell_id
