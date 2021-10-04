@@ -47,7 +47,8 @@ class BatterySystem:
                               + f'{battery_module.module_temp1:.1f}°C'.ljust(7) \
                               + f'{battery_module.module_temp2:.1f}°C'.ljust(7) \
                               + f'{cells_string}\n'
-        return f'System: {self.voltage:.2f}V {self.current:.2f}A Modules:\n{modules_string}'
+        return f'System: {self.voltage:.2f}V {self.current:.2f}A ' \
+               f'calculated: {self.calculated_voltage():.2f}V Modules:\n{modules_string}'
 
     def update_voltage(self, voltage: float) -> None:
         self.voltage = voltage
@@ -88,6 +89,9 @@ class BatterySystem:
 
     def has_warning_current(self) -> bool:
         return self.current < self.LOWER_CURRENT_LIMIT_WARNING or self.current > self.UPPER_CURRENT_LIMIT_WARNING
+
+    def calculated_voltage(self) -> float:
+        return sum(cell.voltage for cell in self.cells())
 
     def soc(self) -> float:
         soc_sum: float = 0

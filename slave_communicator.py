@@ -69,6 +69,8 @@ class SlaveCommunicator:
             self._mqtt_client.publish(topic=f'master/can/battery/soc/set', payload=f'{soc:.2f}')
         except AssertionError:
             pass
+        self._mqtt_client.publish(topic=f'master/core/calculated_system_voltage',
+                                  payload=f'{self._battery_system.calculated_voltage():.2f}')
 
     @staticmethod
     def _topic_extract_number(topic: str) -> (int, str,):
