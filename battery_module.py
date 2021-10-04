@@ -53,6 +53,18 @@ class BatteryModule:
             new_cell = BatteryCell(i, self.id)
             self.cells.append(new_cell)
 
+    def __str__(self):
+        cell_numbers_string = ''
+        cell_voltages_string = ''
+        cell_balancings_string = ''
+        for cell in self.cells:
+            cell_numbers_string += f'{cell.id:02d}'.ljust(7)
+            cell_voltages_string += f'{cell.voltage:.2f}'.ljust(7)
+            cell_balancings_string += f'{cell.balance_pin_state}'.ljust(7)
+        cells_string = f'{cell_numbers_string}\n{cell_voltages_string}\n{cell_balancings_string}\n'
+        return f'Module {self.id}: {self.voltage:.2f}V ' \
+               f'{self.module_temp1}°C {self.module_temp2}°C Cells:\n{cells_string}'
+
     def heartbeat_monitor_thread(self):
         while self.keep_monitoring_heartbeats:
             own_time: float = time.time()
@@ -161,3 +173,9 @@ class BatteryModule:
     def has_implausible_voltage(self) -> bool:
         return self.voltage < self.LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE \
                or self.voltage > self.UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE
+
+    def min_voltage_cell(self) -> BatteryCell:
+        return min(self.cells, key=lambda x: x.voltage)
+
+    def max_voltage_cell(self) -> BatteryCell:
+        return max(self.cells, key=lambda x: x.voltage)

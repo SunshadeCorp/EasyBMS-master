@@ -28,6 +28,9 @@ class BatteryCell:
         self.soc_curve = SocCurve()
         self.last_discharge_time: float = 0
 
+    def __str__(self):
+        return f'Module{self.module_id} Cell{self.id}: {self.voltage:.2f}V Balance:{self.balance_pin_state}'
+
     def soc(self) -> float:
         return self.soc_curve.voltage_to_soc(self.voltage)
 
@@ -61,8 +64,9 @@ class BatteryCell:
         self.balance_pin_state = True
 
     def on_balance_discharged_stopped(self) -> None:
-        self.balance_pin_state = False
-        self.last_discharge_time = time.time()
+        if self.balance_pin_state:
+            self.balance_pin_state = False
+            self.last_discharge_time = time.time()
 
     def is_balance_discharging(self) -> bool:
         return self.balance_pin_state
