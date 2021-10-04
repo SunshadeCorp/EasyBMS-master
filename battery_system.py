@@ -42,13 +42,25 @@ class BatterySystem:
         for battery_module in self.battery_modules:
             cells_string = ''
             for cell in battery_module.cells:
-                cells_string += (f'{cell.voltage:.2f}' + ('+' if cell.balance_pin_state else '')).ljust(7)
-            modules_string += f'{battery_module.voltage:.2f}V'.ljust(7) \
-                              + f'{battery_module.module_temp1:.1f}°C'.ljust(7) \
-                              + f'{battery_module.module_temp2:.1f}°C'.ljust(7) \
-                              + f'{cells_string}\n'
-        return f'System: {self.voltage:.2f}V {self.current:.2f}A ' \
-               f'calculated: {self.calculated_voltage():.2f}V Modules:\n{modules_string}'
+                try:
+                    cells_string += (f'{cell.voltage:.2f}' + ('+' if cell.balance_pin_state else '')).ljust(7)
+                except TypeError:
+                    cells_string += (f'{cell.voltage}' + ('' if cell.balance_pin_state is None else 'N')).ljust(7)
+            try:
+                modules_string += f'{battery_module.voltage:.2f}V'.ljust(7) \
+                                  + f'{battery_module.module_temp1:.1f}°C'.ljust(7) \
+                                  + f'{battery_module.module_temp2:.1f}°C'.ljust(7) \
+                                  + f'{cells_string}\n'
+            except TypeError:
+                modules_string += f'{battery_module.voltage}V'.ljust(7) \
+                                  + f'{battery_module.module_temp1}°C'.ljust(7) \
+                                  + f'{battery_module.module_temp2}°C'.ljust(7) \
+                                  + f'{cells_string}\n'
+        try:
+            return f'System: {self.voltage:.2f}V {self.current:.2f}A ' \
+                   f'calculated: {self.calculated_voltage():.2f}V Modules:\n{modules_string}'
+        except TypeError:
+            return f'System: {self.voltage}V {self.current}A Modules:\n{modules_string}'
 
     def update_voltage(self, voltage: float) -> None:
         self.voltage = voltage
