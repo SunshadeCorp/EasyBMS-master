@@ -73,8 +73,12 @@ class SlaveCommunicator:
         except TypeError:
             pass
         try:
+            calculated_voltage: float = self._battery_system.calculated_voltage()
             self._mqtt_client.publish(topic=f'master/core/calculated_system_voltage',
-                                      payload=f'{self._battery_system.calculated_voltage():.2f}')
+                                      payload=f'{calculated_voltage:.2f}')
+            current_power = self._battery_system.current * calculated_voltage
+            self._mqtt_client.publish(topic=f'master/core/system_power',
+                                      payload=f'{current_power:.2f}')
         except TypeError:
             pass
 
