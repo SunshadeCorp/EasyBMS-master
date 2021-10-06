@@ -110,6 +110,10 @@ class BatterySystem:
     def temp(self) -> float:
         return sum(battery_modules.temp() for battery_modules in self.battery_modules) / len(self.battery_modules)
 
+    def load_adjusted_soc(self) -> float:
+        return sum(module.load_adjusted_soc(self.current) for module in self.battery_modules) \
+               / len(self.battery_modules)
+
     def soc(self) -> float:
         return sum(module.soc() for module in self.battery_modules) / len(self.battery_modules)
 

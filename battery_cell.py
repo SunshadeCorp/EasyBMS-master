@@ -14,6 +14,8 @@ class BatteryCell:
     UPPER_VOLTAGE_LIMIT_WARNING: float = 4.15  # V
     RELAX_TIME: float = 60.0  # Seconds
 
+    INTERNAL_IMPEDANCE_2P: float = 0.000975  # Ohm
+
     def __init__(self, cell_id: int, module_id: int) -> None:
         # Uninitialized values
         self.voltage: float or None = None
@@ -29,6 +31,9 @@ class BatteryCell:
 
     def __str__(self):
         return f'Module{self.module_id} Cell{self.id}: {self.voltage:.2f}V Balance:{self.balance_pin_state}'
+
+    def load_adjusted_soc(self, current: float) -> float:
+        return self.soc_curve.voltage_to_soc(self.voltage + (self.INTERNAL_IMPEDANCE_2P * current))
 
     def soc(self) -> float:
         return self.soc_curve.voltage_to_soc(self.voltage)
