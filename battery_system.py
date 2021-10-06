@@ -104,6 +104,9 @@ class BatterySystem:
     def has_warning_current(self) -> bool:
         return not (self.LOWER_CURRENT_LIMIT_WARNING <= self.current <= self.UPPER_CURRENT_LIMIT_WARNING)
 
+    def load_adjusted_calculated_voltage(self) -> float:
+        return sum(cell.load_adjusted_voltage(self.current) for cell in self.cells())
+
     def calculated_voltage(self) -> float:
         return sum(cell.voltage for cell in self.cells())
 
