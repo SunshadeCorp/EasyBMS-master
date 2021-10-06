@@ -32,8 +32,11 @@ class BatteryCell:
     def __str__(self):
         return f'Module{self.module_id} Cell{self.id}: {self.voltage:.2f}V Balance:{self.balance_pin_state}'
 
+    def load_adjusted_voltage(self, current: float):
+        return self.voltage + (self.INTERNAL_IMPEDANCE_2P * current)
+
     def load_adjusted_soc(self, current: float) -> float:
-        return self.soc_curve.voltage_to_soc(self.voltage + (self.INTERNAL_IMPEDANCE_2P * current))
+        return self.soc_curve.voltage_to_soc(self.load_adjusted_voltage(current))
 
     def soc(self) -> float:
         return self.soc_curve.voltage_to_soc(self.voltage)
