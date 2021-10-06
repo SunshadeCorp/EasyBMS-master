@@ -84,6 +84,9 @@ class BatteryModule:
     def max_temp(self) -> float:
         return max(self.module_temp1, self.module_temp2)
 
+    def load_adjusted_soc(self, current: float) -> float:
+        return sum(cell.load_adjusted_soc(current) for cell in self.cells) / len(self.cells)
+
     def soc(self) -> float:
         return sum(cell.soc() for cell in self.cells) / len(self.cells)
 

@@ -19,7 +19,7 @@ class SocCurve:
         # todo
         pass
 
-    def voltage_to_soc(self, cell_voltage) -> float:
+    def voltage_to_soc(self, cell_voltage: float) -> float:
         assert 0 < cell_voltage < 5
 
         self.data_points = dict(sorted(self.data_points.items()))
