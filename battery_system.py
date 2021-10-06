@@ -62,6 +62,10 @@ class BatterySystem:
         except TypeError:
             return f'System: {self.voltage}V {self.current}A Modules:\n{modules_string}'
 
+    def check_heartbeats(self):
+        for battery_module in self.battery_modules:
+            battery_module.check_heartbeat()
+
     def update_voltage(self, voltage: float) -> None:
         self.voltage = voltage
 

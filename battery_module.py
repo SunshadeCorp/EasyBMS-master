@@ -65,12 +65,14 @@ class BatteryModule:
         return f'Module {self.id}: {self.voltage:.2f}V ' \
                f'{self.module_temp1}°C {self.module_temp2}°C Cells:\n{cells_string}'
 
+    def check_heartbeat(self):
+        own_time: float = time.time()
+        if own_time - self.last_esp_uptime_in_own_time > self.ESP_TIMEOUT:
+            self.heartbeat_event.on_heartbeat_missed(self)
+
     def heartbeat_monitor_thread(self):
         while self.keep_monitoring_heartbeats:
-            own_time: float = time.time()
-
-            if self.last_esp_uptime_in_own_time - own_time > self.ESP_TIMEOUT:
-                self.heartbeat_event.on_heartbeat_missed(self)
+            self.check_heartbeat()
             time.sleep(1000)
 
     def temp(self) -> float:
@@ -117,6 +119,7 @@ class BatteryModule:
 
     def update_esp_uptime(self, esp_uptime: int) -> None:
         self.last_esp_uptime = esp_uptime
+        self.last_esp_uptime_in_own_time = time.time()
         self.heartbeat_event.on_heartbeat(self)
 
     def has_warning_module_temp1(self) -> bool:
