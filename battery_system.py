@@ -111,21 +111,10 @@ class BatterySystem:
         return sum(battery_modules.temp() for battery_modules in self.battery_modules) / len(self.battery_modules)
 
     def soc(self) -> float:
-        soc_sum: float = 0
-
-        for module in self.battery_modules:
-            soc_sum += module.soc()
-
-        return soc_sum / len(self.battery_modules)
+        return sum(module.soc() for module in self.battery_modules) / len(self.battery_modules)
 
     def cells(self) -> List[BatteryCell]:
-        cell_list: List[BatteryCell] = []
-
-        for module in self.battery_modules:
-            for cell in module.cells:
-                cell_list.append(cell)
-
-        return cell_list
+        return [cell for module in self.battery_modules for cell in module.cells]
 
     def lowest_module_temp(self) -> float:
         return min(battery_modules.min_temp() for battery_modules in self.battery_modules)
@@ -134,14 +123,10 @@ class BatterySystem:
         return max(battery_modules.max_temp() for battery_modules in self.battery_modules)
 
     def highest_cell_voltage(self) -> float:
-        cell_list = self.cells()
-        cell_list.sort(key=lambda x: x.voltage, reverse=True)
-        return cell_list[0].voltage
+        return max(cell.voltage for cell in self.cells())
 
     def lowest_cell_voltage(self) -> float:
-        cell_list = self.cells()
-        cell_list.sort(key=lambda x: x.voltage, reverse=False)
-        return cell_list[0].voltage
+        return min(cell.voltage for cell in self.cells())
 
     def highest_voltage_cells(self, number) -> List[BatteryCell]:
         cell_list = self.cells()
