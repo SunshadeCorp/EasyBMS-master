@@ -33,15 +33,14 @@ class BatteryCell:
     def soc(self) -> float:
         return self.soc_curve.voltage_to_soc(self.voltage)
 
+    def has_implausible_voltage(self) -> bool:
+        return not (self.LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE <= self.voltage <= self.UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE)
+
     def has_critical_voltage(self) -> bool:
-        return self.voltage < self.LOWER_VOLTAGE_LIMIT_CRITICAL or self.voltage > self.UPPER_VOLTAGE_LIMIT_CRITICAL
+        return not (self.LOWER_VOLTAGE_LIMIT_CRITICAL <= self.voltage <= self.UPPER_VOLTAGE_LIMIT_CRITICAL)
 
     def has_warning_voltage(self) -> bool:
-        return self.voltage < self.LOWER_VOLTAGE_LIMIT_WARNING or self.voltage > self.UPPER_VOLTAGE_LIMIT_WARNING
-
-    def has_implausible_voltage(self) -> bool:
-        return self.voltage < self.LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE \
-               or self.voltage > self.UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE
+        return not (self.LOWER_VOLTAGE_LIMIT_WARNING <= self.voltage <= self.UPPER_VOLTAGE_LIMIT_WARNING)
 
     def update_voltage(self, voltage: float):
         self.voltage = voltage
