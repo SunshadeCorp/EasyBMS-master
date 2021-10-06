@@ -81,6 +81,15 @@ class SlaveCommunicator:
                                       payload=f'{current_power:.2f}')
         except TypeError:
             pass
+        try:
+            self._mqtt_client.publish(topic=f'master/can/battery/temp/set',
+                                      payload=f'{self._battery_system.temp():.2f}')
+            self._mqtt_client.publish(topic=f'master/can/battery/max_cell_temp/set',
+                                      payload=f'{self._battery_system.highest_module_temp():.2f}')
+            self._mqtt_client.publish(topic=f'master/can/battery/min_cell_temp/set',
+                                      payload=f'{self._battery_system.lowest_module_temp():.2f}')
+        except TypeError:
+            pass
 
     @staticmethod
     def _topic_extract_number(topic: str) -> (int, str,):
