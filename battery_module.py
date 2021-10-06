@@ -128,29 +128,28 @@ class BatteryModule:
         self.last_esp_uptime_in_own_time = time.time()
         self.heartbeat_event.on_heartbeat(self)
 
-    def has_warning_module_temp1(self) -> bool:
-        return self.module_temp1 < self.LOWER_MODULE_TEMP_LIMIT_WARNING \
-               or self.module_temp1 > self.UPPER_MODULE_TEMP_LIMIT_WARNING
+    def has_implausible_module_temp1(self) -> bool:
+        return not (self.LOWER_MODULE_TEMP_LIMIT_IMPLAUSIBLE <= self.module_temp1
+                    <= self.UPPER_MODULE_TEMP_LIMIT_IMPLAUSIBLE)
 
     def has_critical_module_temp1(self) -> bool:
-        return self.module_temp1 < self.LOWER_MODULE_TEMP_LIMIT_CRITICAL \
-               or self.module_temp1 > self.UPPER_MODULE_TEMP_LIMIT_CRITICAL
+        return not (self.LOWER_MODULE_TEMP_LIMIT_CRITICAL <= self.module_temp1 <= self.UPPER_MODULE_TEMP_LIMIT_CRITICAL)
 
-    def has_implausible_module_temp1(self) -> bool:
-        return self.module_temp1 < self.LOWER_MODULE_TEMP_LIMIT_IMPLAUSIBLE \
-               or self.module_temp1 > self.UPPER_MODULE_TEMP_LIMIT_IMPLAUSIBLE
-
-    def has_warning_module_temp2(self) -> bool:
-        return self.module_temp2 < self.LOWER_MODULE_TEMP_LIMIT_WARNING \
-               or self.module_temp2 > self.UPPER_MODULE_TEMP_LIMIT_WARNING
-
-    def has_critical_module_temp2(self) -> bool:
-        return self.module_temp2 < self.LOWER_MODULE_TEMP_LIMIT_CRITICAL \
-               or self.module_temp2 > self.UPPER_MODULE_TEMP_LIMIT_CRITICAL
+    def has_warning_module_temp1(self) -> bool:
+        return not (self.LOWER_MODULE_TEMP_LIMIT_WARNING <= self.module_temp1 <= self.UPPER_MODULE_TEMP_LIMIT_WARNING)
 
     def has_implausible_module_temp2(self) -> bool:
-        return self.module_temp2 < self.LOWER_MODULE_TEMP_LIMIT_IMPLAUSIBLE \
-               or self.module_temp2 > self.UPPER_MODULE_TEMP_LIMIT_IMPLAUSIBLE
+        return not (self.LOWER_MODULE_TEMP_LIMIT_IMPLAUSIBLE <= self.module_temp2
+                    <= self.UPPER_MODULE_TEMP_LIMIT_IMPLAUSIBLE)
+
+    def has_critical_module_temp2(self) -> bool:
+        return not (self.LOWER_MODULE_TEMP_LIMIT_CRITICAL <= self.module_temp2 <= self.UPPER_MODULE_TEMP_LIMIT_CRITICAL)
+
+    def has_warning_module_temp2(self) -> bool:
+        return not (self.LOWER_MODULE_TEMP_LIMIT_WARNING <= self.module_temp2 <= self.UPPER_MODULE_TEMP_LIMIT_WARNING)
+
+    def has_implausible_module_temp(self) -> bool:
+        return self.has_implausible_module_temp1() or self.has_implausible_module_temp2()
 
     def has_critical_module_temp(self) -> bool:
         return self.has_critical_module_temp1() or self.has_critical_module_temp2()
@@ -158,30 +157,23 @@ class BatteryModule:
     def has_warning_module_temp(self) -> bool:
         return self.has_warning_module_temp1() or self.has_warning_module_temp2()
 
-    def has_implausible_module_temp(self) -> bool:
-        return self.has_implausible_module_temp1() or self.has_implausible_module_temp2()
+    def has_implausible_chip_temp(self) -> bool:
+        return not (self.LOWER_CHIP_TEMP_LIMIT_IMPLAUSIBLE <= self.chip_temp <= self.UPPER_CHIP_TEMP_LIMIT_IMPLAUSIBLE)
 
     def has_critical_chip_temp(self) -> bool:
-        return self.chip_temp < self.LOWER_CHIP_TEMP_LIMIT_CRITICAL \
-               or self.chip_temp > self.UPPER_CHIP_TEMP_LIMIT_CRITICAL
+        return not (self.LOWER_CHIP_TEMP_LIMIT_CRITICAL <= self.chip_temp <= self.UPPER_CHIP_TEMP_LIMIT_CRITICAL)
 
     def has_warning_chip_temp(self) -> bool:
-        return self.chip_temp < self.LOWER_CHIP_TEMP_LIMIT_WARNING \
-               or self.chip_temp > self.UPPER_CHIP_TEMP_LIMIT_WARNING
-
-    def has_implausible_chip_temp(self) -> bool:
-        return self.chip_temp < self.LOWER_CHIP_TEMP_LIMIT_IMPLAUSIBLE \
-               or self.chip_temp > self.UPPER_CHIP_TEMP_LIMIT_IMPLAUSIBLE
-
-    def has_critical_voltage(self) -> bool:
-        return self.voltage < self.LOWER_VOLTAGE_LIMIT_CRITICAL or self.voltage > self.UPPER_VOLTAGE_LIMIT_CRITICAL
-
-    def has_warning_voltage(self) -> bool:
-        return self.voltage < self.LOWER_VOLTAGE_LIMIT_WARNING or self.voltage > self.UPPER_VOLTAGE_LIMIT_WARNING
+        return not (self.LOWER_CHIP_TEMP_LIMIT_WARNING <= self.chip_temp <= self.UPPER_CHIP_TEMP_LIMIT_WARNING)
 
     def has_implausible_voltage(self) -> bool:
-        return self.voltage < self.LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE \
-               or self.voltage > self.UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE
+        return not (self.LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE <= self.voltage <= self.UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE)
+
+    def has_critical_voltage(self) -> bool:
+        return not (self.LOWER_VOLTAGE_LIMIT_CRITICAL <= self.voltage <= self.UPPER_VOLTAGE_LIMIT_CRITICAL)
+
+    def has_warning_voltage(self) -> bool:
+        return not (self.LOWER_VOLTAGE_LIMIT_WARNING <= self.voltage <= self.UPPER_VOLTAGE_LIMIT_WARNING)
 
     def min_voltage_cell(self) -> BatteryCell:
         return min(self.cells, key=lambda x: x.voltage)

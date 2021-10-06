@@ -23,10 +23,10 @@ class BatterySystem:
         self.voltage: float or None = None
         self.current: float or None = None
 
-        self.lower_voltage_limit_warning: float = number_of_modules * BatteryModule.LOWER_VOLTAGE_LIMIT_WARNING
-        self.upper_voltage_limit_warning: float = number_of_modules * BatteryModule.UPPER_VOLTAGE_LIMIT_WARNING
         self.lower_voltage_limit_critical: float = number_of_modules * BatteryModule.LOWER_VOLTAGE_LIMIT_CRITICAL
         self.upper_voltage_limit_critical: float = number_of_modules * BatteryModule.UPPER_VOLTAGE_LIMIT_CRITICAL
+        self.lower_voltage_limit_warning: float = number_of_modules * BatteryModule.LOWER_VOLTAGE_LIMIT_WARNING
+        self.upper_voltage_limit_warning: float = number_of_modules * BatteryModule.UPPER_VOLTAGE_LIMIT_WARNING
 
         # Events
         self.current_event = MeasurementEvent()
@@ -87,24 +87,22 @@ class BatterySystem:
             self.current_event.on_warning(self)
 
     def has_implausible_voltage(self) -> bool:
-        return self.voltage < self.LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE \
-               or self.voltage > self.UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE
+        return not (self.LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE <= self.voltage <= self.UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE)
 
     def has_critical_voltage(self) -> bool:
-        return self.voltage < self.lower_voltage_limit_critical or self.voltage > self.upper_voltage_limit_critical
+        return not (self.lower_voltage_limit_critical <= self.voltage <= self.upper_voltage_limit_critical)
 
     def has_warning_voltage(self) -> bool:
-        return self.voltage < self.lower_voltage_limit_warning or self.voltage > self.upper_voltage_limit_warning
+        return not (self.lower_voltage_limit_warning <= self.voltage <= self.upper_voltage_limit_warning)
 
     def has_implausible_current(self) -> bool:
-        return self.current < self.LOWER_CURRENT_LIMIT_IMPLAUSIBLE \
-               or self.current > self.UPPER_CURRENT_LIMIT_IMPLAUSIBLE
+        return not (self.LOWER_CURRENT_LIMIT_IMPLAUSIBLE <= self.current <= self.UPPER_CURRENT_LIMIT_IMPLAUSIBLE)
 
     def has_critical_current(self) -> bool:
-        return self.current < self.LOWER_CURRENT_LIMIT_CRITICAL or self.current > self.UPPER_CURRENT_LIMIT_CRITICAL
+        return not (self.LOWER_CURRENT_LIMIT_CRITICAL <= self.current <= self.UPPER_CURRENT_LIMIT_CRITICAL)
 
     def has_warning_current(self) -> bool:
-        return self.current < self.LOWER_CURRENT_LIMIT_WARNING or self.current > self.UPPER_CURRENT_LIMIT_WARNING
+        return not (self.LOWER_CURRENT_LIMIT_WARNING <= self.current <= self.UPPER_CURRENT_LIMIT_WARNING)
 
     def calculated_voltage(self) -> float:
         return sum(cell.voltage for cell in self.cells())
