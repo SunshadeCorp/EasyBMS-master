@@ -78,6 +78,12 @@ class BatteryModule:
     def temp(self) -> float:
         return (self.module_temp1 + self.module_temp2) / 2.0
 
+    def min_temp(self) -> float:
+        return min(self.module_temp1, self.module_temp2)
+
+    def max_temp(self) -> float:
+        return max(self.module_temp1, self.module_temp2)
+
     def soc(self) -> float:
         soc_sum: float = 0
 
