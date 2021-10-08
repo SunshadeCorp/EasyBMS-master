@@ -1,3 +1,4 @@
+import time
 from typing import List
 
 from battery_cell import BatteryCell
@@ -15,6 +16,8 @@ class BatterySystem:
     UPPER_CURRENT_LIMIT_CRITICAL: float = 32  # A
     LOWER_CURRENT_LIMIT_WARNING: float = -30  # A
     UPPER_CURRENT_LIMIT_WARNING: float = 30  # A
+
+    SLIDING_WINDOW_TIME: float = 180.0  # seconds
 
     def __init__(self, number_of_modules: int) -> None:
         assert 1 <= number_of_modules <= 12
@@ -36,6 +39,8 @@ class BatterySystem:
         for module_id in range(0, number_of_modules):
             module = BatteryModule(module_id)
             self.battery_modules.append(module)
+
+        self.sliding_window_soc_values = []
 
     def __str__(self):
         modules_string = ''
@@ -112,6 +117,12 @@ class BatterySystem:
 
     def temp(self) -> float:
         return sum(battery_modules.temp() for battery_modules in self.battery_modules) / len(self.battery_modules)
+
+    def sliding_window_soc(self) -> float:
+        self.sliding_window_soc_values.append((time.time(), self.load_adjusted_soc()))
+        while self.sliding_window_soc_values[0][0] + self.SLIDING_WINDOW_TIME < time.time():
+            self.sliding_window_soc_values.pop(0)
+        return sum(soc_value[1] for soc_value in self.sliding_window_soc_values) / len(self.sliding_window_soc_values)
 
     def load_adjusted_soc(self) -> float:
         return sum(module.load_adjusted_soc(self.current) for module in self.battery_modules) \
