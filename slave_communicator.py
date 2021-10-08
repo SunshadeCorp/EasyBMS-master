@@ -67,7 +67,7 @@ class SlaveCommunicator:
             except TypeError:
                 pass
         try:
-            soc: float = self._battery_system.load_adjusted_soc()
+            soc: float = self._battery_system.sliding_window_soc()
             soc *= 100.0
             self._mqtt_client.publish(topic=f'master/can/battery/soc/set', payload=f'{soc:.2f}')
         except TypeError:
