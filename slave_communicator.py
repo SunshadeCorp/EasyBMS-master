@@ -67,9 +67,11 @@ class SlaveCommunicator:
             except TypeError:
                 pass
         try:
-            soc: float = self._battery_system.sliding_window_soc()
-            soc *= 100.0
-            self._mqtt_client.publish(topic=f'master/can/battery/soc/set', payload=f'{soc:.2f}')
+            self._mqtt_client.publish(topic=f'master/can/battery/soc/set',
+                                      payload=f'{self._battery_system.sliding_window_soc() * 100.0:.2f}')
+            self._mqtt_client.publish(topic=f'master/core/load_adjusted_soc',
+                                      payload=f'{self._battery_system.load_adjusted_soc() * 100.0:.2f}')
+            self._mqtt_client.publish(topic=f'master/core/soc', payload=f'{self._battery_system.soc() * 100.0:.2f}')
         except TypeError:
             pass
         try:
@@ -79,9 +81,8 @@ class SlaveCommunicator:
             current_power = self._battery_system.current * calculated_voltage
             self._mqtt_client.publish(topic=f'master/core/system_power',
                                       payload=f'{current_power:.2f}')
-            load_adjusted_calculated_voltage: float = self._battery_system.load_adjusted_calculated_voltage()
             self._mqtt_client.publish(topic=f'master/core/load_adjusted_calculated_voltage',
-                                      payload=f'{load_adjusted_calculated_voltage:.2f}')
+                                      payload=f'{self._battery_system.load_adjusted_calculated_voltage():.2f}')
         except TypeError:
             pass
         try:
