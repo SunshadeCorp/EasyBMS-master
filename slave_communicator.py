@@ -162,4 +162,5 @@ class SlaveCommunicator:
                 elif topic == 'total_system_voltage':
                     self._battery_system.update_voltage(float(payload))
                 elif topic == 'total_system_current':
-                    self._battery_system.update_current(float(payload))
+                    payload = payload.split(',')
+                    self._battery_system.update_current(float(payload[1]))
