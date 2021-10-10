@@ -48,7 +48,7 @@ class BatterySystem:
             cells_string = ''
             for cell in battery_module.cells:
                 try:
-                    cells_string += (f'{cell.voltage:.2f}' + ('+' if cell.balance_pin_state else '')).ljust(7)
+                    cells_string += (f'{cell.voltage:.3f}' + ('+' if cell.balance_pin_state else '')).ljust(7)
                 except TypeError:
                     cells_string += (f'{cell.voltage}' + ('' if cell.balance_pin_state is None else 'N')).ljust(7)
             try:
