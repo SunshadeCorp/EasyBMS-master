@@ -149,7 +149,7 @@ class BatterySystem:
     def highest_voltage_cells(self, number) -> List[BatteryCell]:
         cell_list = self.cells()
         cell_list.sort(key=lambda x: x.voltage, reverse=True)
-        return cell_list[0:(number - 1)]
+        return cell_list[0:number]
 
     def is_in_relax_time(self) -> bool:
         for cell in self.cells():
