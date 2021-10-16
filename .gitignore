@@ -1,6 +1,7 @@
 credentials.yaml
 pyvenv.cfg
 Scripts/
+slave_mapping.yaml
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,pycharm+all
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,pycharm+all

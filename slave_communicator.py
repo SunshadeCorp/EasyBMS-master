@@ -8,8 +8,9 @@ from utils import get_config
 
 
 class SlaveCommunicator:
-    def __init__(self, master_config, battery_system: BatterySystem):
+    def __init__(self, master_config: dict, battery_system: BatterySystem):
         credentials = get_config('credentials.yaml')
+        self._slave_mapping = get_config('slave_mapping.yaml')
 
         self._mqtt_client = mqtt.Client()
         self._mqtt_client.on_connect = self._mqtt_on_connect
@@ -17,6 +18,8 @@ class SlaveCommunicator:
 
         self._mqtt_client.username_pw_set(credentials['username'], credentials['password'])
         self._mqtt_client.will_set('master/core/available', 'offline', retain=True)
+        if master_config.get('mqtt_ssl', False):
+            self._mqtt_client.tls_set(credentials['mqtt_cert_path'])
         self._mqtt_client.connect(host=master_config['mqtt_server'], port=master_config['mqtt_port'], keepalive=60)
 
         self._battery_system = battery_system
@@ -96,11 +99,16 @@ class SlaveCommunicator:
             pass
 
     @staticmethod
+    def _topic_extract_id(topic: str) -> (str, str,):
+        extracted = topic[topic.find('/') + 1:]
+        sub_topic = extracted[extracted.find('/') + 1:]
+        extracted = extracted[:extracted.find('/')]
+        return extracted, sub_topic
+
+    @staticmethod
     def _topic_extract_number(topic: str) -> (int, str,):
-        number = topic[topic.find('/') + 1:]
-        sub_topic = number[number.find('/') + 1:]
-        number = int(number[:number.find('/')])
-        return number, sub_topic
+        extracted, sub_topic = SlaveCommunicator._topic_extract_id(topic)
+        return int(extracted), sub_topic
 
     # def _write_logs(self):
     #     self._last_log_time = time.time()
@@ -121,16 +129,19 @@ class SlaveCommunicator:
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/chip_temp')
         self._mqtt_client.subscribe('esp-module/1/total_system_voltage')
         self._mqtt_client.subscribe(f'esp-module/{len(self._battery_system.battery_modules)}/total_system_current')
+        for module_id in self._slave_mapping['slaves']:
+            self._mqtt_client.subscribe(f'esp-module/{module_id}/uptime')
         self._mqtt_client.publish('master/core/available', 'online', retain=True)
 
     def _mqtt_on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
         # if time.time() - self._last_log_time >= 60:  # log time diffs
         #     self._write_logs()
 
-        if msg.topic.startswith('esp-module/'):
-            esp_number, topic = self._topic_extract_number(msg.topic)
-            if len(msg.payload) > 0:
-                payload = msg.payload.decode()
+        if msg.topic.startswith('esp-module/') and len(msg.payload) > 0:
+            payload = msg.payload.decode()
+            extracted_id, topic = self._topic_extract_id(msg.topic)
+            if extracted_id.isdigit():
+                esp_number = int(extracted_id)
                 battery_module = self._battery_system.battery_modules[esp_number - 1]
                 if topic == 'uptime':
                     current_time = int(payload)
@@ -164,3 +175,11 @@ class SlaveCommunicator:
                 elif topic == 'total_system_current':
                     payload = payload.split(',')
                     self._battery_system.update_current(float(payload[1]))
+            elif extracted_id in self._slave_mapping['slaves']:
+                if topic == 'uptime':
+                    slave: dict = self._slave_mapping['slaves'][extracted_id]
+                    slave.get('total_current_measurer', False)
+                    config = f"{slave['number']},"
+                    config += f"{slave.get('total_voltage_measurer', False):d},"
+                    config += f"{slave.get('total_current_measurer', False):d}"
+                    self._mqtt_client.publish(f'esp-module/{extracted_id}/set_config', config)
