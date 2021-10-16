@@ -1,3 +1,5 @@
-mqtt_server: mosquitto
-mqtt_port: 1883
+mqtt_server: homeassistant.fritz.box
+mqtt_port: 8883
+mqtt_ssl: true
+
 number_of_battery_modules: 4

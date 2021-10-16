@@ -66,6 +66,9 @@ class BatteryModule:
                f'{self.module_temp1}°C {self.module_temp2}°C Cells:\n{cells_string}'
 
     def check_heartbeat(self):
+        if self.last_esp_uptime_in_own_time is None:
+            print(f'ESP-Module {self.id} last uptime not initialized!')
+            return
         own_time: float = time.time()
         if own_time - self.last_esp_uptime_in_own_time > self.ESP_TIMEOUT:
             self.heartbeat_event.on_heartbeat_missed(self)
