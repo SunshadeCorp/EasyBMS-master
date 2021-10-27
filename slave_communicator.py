@@ -73,7 +73,7 @@ class SlaveCommunicator:
             self._mqtt_client.publish(topic=f'master/core/load_adjusted_soc',
                                       payload=f'{self._battery_system.load_adjusted_soc() * 100.0:.2f}')
             self._mqtt_client.publish(topic=f'master/core/soc', payload=f'{self._battery_system.soc() * 100.0:.2f}')
-        except TypeError:
+        except (AssertionError, TypeError):
             pass
         try:
             calculated_voltage: float = self._battery_system.calculated_voltage()
