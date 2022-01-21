@@ -29,7 +29,7 @@ def info_task():
 if __name__ == '__main__':
     config = get_config('config.yaml')
     scheduler = sched.scheduler()
-    battery_system = BatterySystem(config['number_of_battery_modules'])
+    battery_system = BatterySystem(config['number_of_battery_modules'], config['number_of_serial_cells'])
     slave_communicator = SlaveCommunicator(config, battery_system)
     battery_manager = BatteryManager(battery_system, slave_communicator)
 

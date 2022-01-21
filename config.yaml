@@ -3,3 +3,4 @@ mqtt_port: 1883
 mqtt_ssl: false
 
 number_of_battery_modules: 4
+number_of_serial_cells: 12
