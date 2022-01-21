@@ -19,17 +19,18 @@ class BatterySystem:
 
     SLIDING_WINDOW_TIME: float = 180.0  # seconds
 
-    def __init__(self, number_of_modules: int) -> None:
-        assert 1 <= number_of_modules <= 12
+    def __init__(self, number_of_modules: int, number_of_serial_cells: int) -> None:
+        assert 1 <= number_of_modules <= 16
 
         # Uninitialized values
         self.voltage: float or None = None
         self.current: float or None = None
 
-        self.lower_voltage_limit_critical: float = number_of_modules * BatteryModule.LOWER_VOLTAGE_LIMIT_CRITICAL
-        self.upper_voltage_limit_critical: float = number_of_modules * BatteryModule.UPPER_VOLTAGE_LIMIT_CRITICAL
-        self.lower_voltage_limit_warning: float = number_of_modules * BatteryModule.LOWER_VOLTAGE_LIMIT_WARNING
-        self.upper_voltage_limit_warning: float = number_of_modules * BatteryModule.UPPER_VOLTAGE_LIMIT_WARNING
+        cells_total = number_of_modules * number_of_serial_cells
+        self.lower_voltage_limit_critical: float = cells_total * BatteryCell.LOWER_VOLTAGE_LIMIT_CRITICAL
+        self.upper_voltage_limit_critical: float = cells_total * BatteryCell.UPPER_VOLTAGE_LIMIT_CRITICAL
+        self.lower_voltage_limit_warning: float = cells_total * BatteryCell.LOWER_VOLTAGE_LIMIT_WARNING
+        self.upper_voltage_limit_warning: float = cells_total * BatteryCell.UPPER_VOLTAGE_LIMIT_WARNING
 
         # Events
         self.current_event = MeasurementEvent()
@@ -37,7 +38,7 @@ class BatterySystem:
 
         self.battery_modules: List[BatteryModule] = []
         for module_id in range(0, number_of_modules):
-            module = BatteryModule(module_id)
+            module = BatteryModule(module_id, number_of_serial_cells)
             self.battery_modules.append(module)
 
         self.sliding_window_soc_values = []

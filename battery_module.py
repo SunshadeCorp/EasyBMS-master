@@ -23,14 +23,10 @@ class BatteryModule:
 
     LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = -1000  # V
     UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = 1000  # V
-    LOWER_VOLTAGE_LIMIT_CRITICAL: float = 36.0  # V
-    UPPER_VOLTAGE_LIMIT_CRITICAL: float = 50.4  # V
-    LOWER_VOLTAGE_LIMIT_WARNING: float = 38.4  # V
-    UPPER_VOLTAGE_LIMIT_WARNING: float = 49.8  # V
 
     ESP_TIMEOUT: float = 5.000  # Seconds
 
-    def __init__(self, module_id: int) -> None:
+    def __init__(self, module_id: int, number_of_serial_cells: int) -> None:
         # Uninitialized
         self.voltage: float or None = None
         self.module_temp1: float or None = None
@@ -49,9 +45,14 @@ class BatteryModule:
         self.heartbeat_event = HeartbeatEvent()
 
         self.cells: List[BatteryCell] = []
-        for i in range(0, 12):
+        for i in range(0, number_of_serial_cells):
             new_cell = BatteryCell(i, self.id)
             self.cells.append(new_cell)
+
+        self.lower_voltage_limit_critical: float = number_of_serial_cells * BatteryCell.LOWER_VOLTAGE_LIMIT_CRITICAL
+        self.upper_voltage_limit_critical: float = number_of_serial_cells * BatteryCell.UPPER_VOLTAGE_LIMIT_CRITICAL
+        self.lower_voltage_limit_warning: float = number_of_serial_cells * BatteryCell.LOWER_VOLTAGE_LIMIT_WARNING
+        self.upper_voltage_limit_warning: float = number_of_serial_cells * BatteryCell.UPPER_VOLTAGE_LIMIT_WARNING
 
     def __str__(self):
         cell_numbers_string = ''
@@ -171,10 +172,10 @@ class BatteryModule:
         return not (self.LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE <= self.voltage <= self.UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE)
 
     def has_critical_voltage(self) -> bool:
-        return not (self.LOWER_VOLTAGE_LIMIT_CRITICAL <= self.voltage <= self.UPPER_VOLTAGE_LIMIT_CRITICAL)
+        return not (self.lower_voltage_limit_critical <= self.voltage <= self.upper_voltage_limit_critical)
 
     def has_warning_voltage(self) -> bool:
-        return not (self.LOWER_VOLTAGE_LIMIT_WARNING <= self.voltage <= self.UPPER_VOLTAGE_LIMIT_WARNING)
+        return not (self.lower_voltage_limit_warning <= self.voltage <= self.upper_voltage_limit_warning)
 
     def min_voltage_cell(self) -> BatteryCell:
         return min(self.cells, key=lambda x: x.voltage)
