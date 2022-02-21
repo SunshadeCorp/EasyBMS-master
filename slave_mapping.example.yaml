@@ -1,0 +1,11 @@
+slaves:
+  aabbccddeeff:
+    number: 1
+    total_voltage_measurer: true
+  bbccddeeffaa:
+    number: 2
+  ccddeeffaabb:
+    number: 3
+  ddeeffaabbcc:
+    number: 4
+    total_current_measurer: true
