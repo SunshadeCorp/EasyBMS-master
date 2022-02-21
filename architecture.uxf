@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="13.3">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>80</x>
+      <y>760</y>
+      <w>250</w>
+      <h>240</h>
+    </coordinates>
+    <panel_attributes>BatteryCell
+--
+voltage: float
+parent_module: BatteryModule
+balance_pin_state: bool
+soc_curve: SocCurve
+lower_voltage_limit: float
+upper_voltage_limit: float
+--
+getSoc(): float
+start_balance_discharge()
+stop_balance_discharge()
+is_balance_discharging(): bool
+trigger_implausible_voltage_event()
+trigger_critical_voltage_event()
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>80</x>
+      <y>370</y>
+      <w>300</w>
+      <h>320</h>
+    </coordinates>
+    <panel_attributes>BatteryModule
+--
+cells[]
+voltage: float
+module_temp1: float
+module_temp2: float
+chip_temp: float
+heartbeat_timestamp: int
+lower_module_temp_limit: float
+upper_module_temp_limit: float
+lower_chip_temp_limit: float
+upper_chip_temp_limit: float
+lower_voltage_limit: float
+upper_voltage_limit: float
+--
+trigger_missed_heartbeat_event()
+trigger_critical_temperature_event()
+trigger_implausable_temperature_event()
+trigger_critical_module_voltage_event()
+trigger_implausible_module_voltage_event()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>80</x>
+      <y>50</y>
+      <w>280</w>
+      <h>250</h>
+    </coordinates>
+    <panel_attributes>BatterySystem
+--
+modules[]: BatteryModule
+voltage: float
+current: float
+lower_voltage_limit: float
+upper_voltage_limit: float
+current_limit: float
+--
+get_soc(): float
+get_power(): float
+get_highest_cell_temp(): float
+get_lowest_cell_temp(): float
+get_highest_cell_voltage(): float
+get_highest_voltage_cells(): BatteryCells[]</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>110</x>
+      <y>290</y>
+      <w>50</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+1..n</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>110</x>
+      <y>680</y>
+      <w>50</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+1..n</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>420</x>
+      <y>800</y>
+      <w>260</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>SocCurve
+--
+data_points: dictionary&lt;float, float&gt;
+--
+voltage_to_soc(float): float</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>430</x>
+      <y>50</y>
+      <w>260</w>
+      <h>220</h>
+    </coordinates>
+    <panel_attributes>BatteryManager
+--
+-battery_system: BatterySystem
+--
+balance()
+trigger_safety_disconnect()
+on_critical_module_temperature()
+on_critical_chip_temperature()
+on_critical_module_voltage()
+on_critical_cell_voltage()
+on_implausible_module_temperature()
+on_implausible_chip_temperature()
+on_implausible_module_voltage()
+on_implausible_cell_voltage()
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>350</x>
+      <y>120</y>
+      <w>100</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+1..1</panel_attributes>
+    <additional_attributes>80.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>320</x>
+      <y>830</y>
+      <w>120</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+n..1</panel_attributes>
+    <additional_attributes>10.0;20.0;100.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>450</x>
+      <y>440</y>
+      <w>210</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>ModuleMonitoringThread?
+--
+run()
+stop()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>370</x>
+      <y>450</y>
+      <w>100</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+1..1</panel_attributes>
+    <additional_attributes>10.0;20.0;80.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>470</x>
+      <y>520</y>
+      <w>150</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>MqttCommunicator?</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>
