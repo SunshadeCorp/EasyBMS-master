@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-11-27T11:56:28.348Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36" etag="pXyoWT7wpHpqbHISNnpk" version="20.6.0" type="github">
+<mxfile host="app.diagrams.net" modified="2022-11-27T11:57:40.723Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36" etag="DzgTglZ7QZI28-McgSV_" version="20.6.0" type="github">
   <diagram name="Page-1" id="90a13364-a465-7bf4-72fc-28e22215d7a0">
     <mxGraphModel dx="3303.5" dy="827" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1.5" pageWidth="1169" pageHeight="826" background="none" math="0" shadow="0">
       <root>
@@ -17,7 +17,7 @@
           <mxGeometry x="920" y="230" width="220" height="140" as="geometry" />
         </mxCell>
         <mxCell id="h09nz31fdlpBYT6gw-4B-27" value="SSD" style="whiteSpace=wrap;html=1;shadow=1;fontSize=18;fillColor=#f5f5f5;strokeColor=#666666;verticalAlign=top;" parent="1" vertex="1">
-          <mxGeometry x="140" y="230" width="320" height="140" as="geometry" />
+          <mxGeometry x="280" y="230" width="180" height="140" as="geometry" />
         </mxCell>
         <mxCell id="3a17f1ce550125da-2" value="Raspberry Pi" style="whiteSpace=wrap;html=1;shadow=1;fontSize=18;fillColor=#f5f5f5;strokeColor=#666666;verticalAlign=top;" parent="1" vertex="1">
           <mxGeometry x="140" y="440" width="1120" height="586" as="geometry" />
@@ -103,7 +103,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="h09nz31fdlpBYT6gw-4B-10" value="&lt;div&gt;MQTT&lt;/div&gt;&lt;div&gt;Broker&lt;/div&gt;&lt;div&gt;(mosquitto)&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="180" y="680" width="90" height="210" as="geometry" />
+          <mxGeometry x="220" y="676" width="90" height="210" as="geometry" />
         </mxCell>
         <mxCell id="h09nz31fdlpBYT6gw-4B-11" value="" style="endArrow=none;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" parent="1" source="h09nz31fdlpBYT6gw-4B-4" target="h09nz31fdlpBYT6gw-4B-3" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
@@ -148,9 +148,6 @@
         </mxCell>
         <mxCell id="h09nz31fdlpBYT6gw-4B-45" value="MariaDB" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="320" y="280" width="100" height="70" as="geometry" />
-        </mxCell>
-        <mxCell id="h09nz31fdlpBYT6gw-4B-46" value="&lt;div&gt;txt , csv&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="165" y="280" width="95" height="70" as="geometry" />
         </mxCell>
         <mxCell id="h09nz31fdlpBYT6gw-4B-50" value="&lt;div&gt;BMS Slave 1&lt;br&gt;&lt;/div&gt;&lt;div&gt;(EasyBMS-slave)&lt;br&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;shadow=1;fontSize=18;fillColor=#f5f5f5;strokeColor=#666666;verticalAlign=top;" parent="1" vertex="1">
           <mxGeometry x="-290" y="506" width="220" height="105" as="geometry" />
