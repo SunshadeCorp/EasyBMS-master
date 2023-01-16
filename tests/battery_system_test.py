@@ -1,7 +1,7 @@
 import unittest
 
-from context import battery_system
 from battery_system import BatterySystem
+
 
 class BatterySystemTest(unittest.TestCase):
     def setUp(self) -> None:

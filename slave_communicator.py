@@ -44,10 +44,10 @@ class SlaveCommunicator:
         self._mqtt_client.publish(topic='master/relays/battery_plus/set', payload='off')
         self._mqtt_client.publish(topic='master/relays/battery_precharge/set', payload='off')
         self._mqtt_client.publish(topic='master/relays/battery_minus/set', payload='off')
-        self._mqtt_client.publish(topic=f'master/can/limits/max_voltage/set', payload='0')
-        self._mqtt_client.publish(topic=f'master/can/limits/min_voltage/set', payload='0')
-        self._mqtt_client.publish(topic=f'master/can/limits/max_discharge_current/set', payload='0')
-        self._mqtt_client.publish(topic=f'master/can/limits/max_charge_current/set', payload='0')
+        self._mqtt_client.publish(topic='master/can/limits/max_voltage/set', payload='0')
+        self._mqtt_client.publish(topic='master/can/limits/min_voltage/set', payload='0')
+        self._mqtt_client.publish(topic='master/can/limits/max_discharge_current/set', payload='0')
+        self._mqtt_client.publish(topic='master/can/limits/max_charge_current/set', payload='0')
 
     def close_battery_perform_precharge(self):
         self._mqtt_client.publish(topic='master/relays/perform_precharge', payload='on')
@@ -68,30 +68,30 @@ class SlaveCommunicator:
             except TypeError:
                 pass
         try:
-            self._mqtt_client.publish(topic=f'master/can/battery/soc/set',
+            self._mqtt_client.publish(topic='master/can/battery/soc/set',
                                       payload=f'{self._battery_system.sliding_window_soc() * 100.0:.2f}')
-            self._mqtt_client.publish(topic=f'master/core/load_adjusted_soc',
+            self._mqtt_client.publish(topic='master/core/load_adjusted_soc',
                                       payload=f'{self._battery_system.load_adjusted_soc() * 100.0:.2f}')
-            self._mqtt_client.publish(topic=f'master/core/soc', payload=f'{self._battery_system.soc() * 100.0:.2f}')
+            self._mqtt_client.publish(topic='master/core/soc', payload=f'{self._battery_system.soc() * 100.0:.2f}')
         except (AssertionError, TypeError):
             pass
         try:
             calculated_voltage: float = self._battery_system.calculated_voltage()
-            self._mqtt_client.publish(topic=f'master/core/calculated_system_voltage',
+            self._mqtt_client.publish(topic='master/core/calculated_system_voltage',
                                       payload=f'{calculated_voltage:.2f}')
             current_power = self._battery_system.current * calculated_voltage
-            self._mqtt_client.publish(topic=f'master/core/system_power',
+            self._mqtt_client.publish(topic='master/core/system_power',
                                       payload=f'{current_power:.2f}')
-            self._mqtt_client.publish(topic=f'master/core/load_adjusted_calculated_voltage',
+            self._mqtt_client.publish(topic='master/core/load_adjusted_calculated_voltage',
                                       payload=f'{self._battery_system.load_adjusted_calculated_voltage():.2f}')
         except TypeError:
             pass
         try:
-            self._mqtt_client.publish(topic=f'master/can/battery/temp/set',
+            self._mqtt_client.publish(topic='master/can/battery/temp/set',
                                       payload=f'{self._battery_system.temp():.2f}')
-            self._mqtt_client.publish(topic=f'master/can/battery/max_cell_temp/set',
+            self._mqtt_client.publish(topic='master/can/battery/max_cell_temp/set',
                                       payload=f'{self._battery_system.highest_module_temp():.2f}')
-            self._mqtt_client.publish(topic=f'master/can/battery/min_cell_temp/set',
+            self._mqtt_client.publish(topic='master/can/battery/min_cell_temp/set',
                                       payload=f'{self._battery_system.lowest_module_temp():.2f}')
         except TypeError:
             pass
