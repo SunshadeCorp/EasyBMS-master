@@ -2,7 +2,7 @@ import time
 
 from battery_cell import BatteryCell
 from battery_system import BatterySystem
-from heartbeat_event import HeartbeatEvent
+# from heartbeat_event import HeartbeatEvent
 from battery_module import BatteryModule
 from slave_communicator import SlaveCommunicator
 

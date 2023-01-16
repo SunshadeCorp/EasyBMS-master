@@ -6,8 +6,8 @@ from soc_curve import SocCurve
 
 
 class BatteryCell:
-    LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = -1000  # V
-    UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = 1000  # V
+    LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = 0  # V
+    UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = 10  # V
     LOWER_VOLTAGE_LIMIT_CRITICAL: float = 3.0  # V
     UPPER_VOLTAGE_LIMIT_CRITICAL: float = 4.2  # V
     LOWER_VOLTAGE_LIMIT_WARNING: float = 3.2  # V
@@ -21,12 +21,12 @@ class BatteryCell:
         self.voltage: float or None = None
         self.balance_pin_state: bool or None = False
 
-        # Initialized values
-        self.id = cell_id
-        self.module_id = module_id
-        self.voltage_event = MeasurementEvent()
-        self.communication_event = Events(events=('send_balance_request',))
-        self.soc_curve = SocCurve()
+        # Inpitialized values
+        self.id: int = cell_id
+        self.module_id: int = module_id
+        self.voltage_event: MeasurementEvent = MeasurementEvent()
+        self.communication_event: Events = Events(events=('send_balance_request',))
+        self.soc_curve: SocCurve = SocCurve()
         self.last_discharge_time: float = 0
 
     def __str__(self):

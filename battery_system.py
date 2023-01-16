@@ -7,8 +7,8 @@ from measurement_event import MeasurementEvent
 
 
 class BatterySystem:
-    LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = -10000  # V
-    UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = 10000  # V
+    LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = -2000  # V
+    UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = 2000  # V
 
     LOWER_CURRENT_LIMIT_IMPLAUSIBLE: float = -500  # A
     UPPER_CURRENT_LIMIT_IMPLAUSIBLE: float = 500  # A
