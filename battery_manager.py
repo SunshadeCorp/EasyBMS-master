@@ -11,7 +11,6 @@ class BatteryManager:
     MIN_CELL_DIFF_FOR_BALANCING: float = 0.010  # V
     MAX_CELL_DIFF_FOR_BALANCING: float = 0.5  # V
     BALANCE_DISCHARGE_TIME: float = 120.0  # Seconds
-    BALANCE_RELAX_TIME: float = 20.0  # Seconds
 
     def __init__(self, battery_system: BatterySystem, slave_communicator: SlaveCommunicator) -> None:
         self.battery_system: BatterySystem = battery_system

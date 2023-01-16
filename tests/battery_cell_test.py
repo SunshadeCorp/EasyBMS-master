@@ -110,11 +110,11 @@ class BatteryCellTest(unittest.TestCase):
         self.assertTrue(self.cell.is_relaxing())
         mock_time.assert_called()
 
-        self.cell.last_discharge_time = 120.0 - 50.0  # seconds
+        self.cell.last_discharge_time = 120.0 - 15.0  # seconds
         self.assertTrue(self.cell.is_relaxing())
         mock_time.assert_called()
 
-        self.cell.last_discharge_time = 120.0 - 100.0  # seconds
+        self.cell.last_discharge_time = 120.0 - 30.0  # seconds
         self.assertFalse(self.cell.is_relaxing())
         mock_time.assert_called()
 

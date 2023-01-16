@@ -12,7 +12,7 @@ class BatteryCell:
     UPPER_VOLTAGE_LIMIT_CRITICAL: float = 4.2  # V
     LOWER_VOLTAGE_LIMIT_WARNING: float = 3.2  # V
     UPPER_VOLTAGE_LIMIT_WARNING: float = 4.15  # V
-    RELAX_TIME: float = 60.0  # Seconds
+    RELAX_TIME: float = 20.0  # Seconds
 
     INTERNAL_IMPEDANCE: float = 0.000975  # Ohm, for 2P cells
 
