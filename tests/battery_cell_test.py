@@ -1,4 +1,7 @@
 import unittest
+import time
+import unittest.mock
+from unittest.mock import MagicMock
 
 from battery_cell import BatteryCell
 
@@ -22,7 +25,7 @@ class BatteryCellTest(unittest.TestCase):
         current = 5.0  # A
 
         load_adjusted = cell.load_adjusted_voltage(current)
-        self.assertEqual(load_adjusted, voltage + BatteryCell.INTERNAL_IMPEDANCE*current)
+        self.assertAlmostEqual(load_adjusted, voltage + BatteryCell.INTERNAL_IMPEDANCE*current)
 
     def test_load_adjusted_soc(self):
         cell = BatteryCell(1, 2)
@@ -113,12 +116,41 @@ class BatteryCellTest(unittest.TestCase):
             cell.update_voltage(voltage)
             self.assertEqual(cell.voltage, voltage)
 
-    def test_is_relaxing(self):
-        # todo: need mock
-        pass
+    @unittest.mock.patch('time.time', return_value=120.0)
+    def test_is_relaxing(self, mock_time: MagicMock):
+        cell = BatteryCell(1, 2)
+
+        cell.last_discharge_time = 120.0 - 10.0  # seconds
+        self.assertTrue(cell.is_relaxing())
+        mock_time.assert_called()
+
+        cell.last_discharge_time = 120.0 - 60.0  # seconds
+        self.assertTrue(cell.is_relaxing())
+        mock_time.assert_called()
+
+        cell.last_discharge_time = 120.0 - 100.0  # seconds
+        self.assertFalse(cell.is_relaxing())
+        mock_time.assert_called()
 
     def test_start_balance_discharge(self):
-        pass
+        cell_id = 1
+        module_id = 2
+        cell = BatteryCell(cell_id, module_id)
+        balance_time = 60
+
+        handler_called = False
+
+        def handler(a, b, c):
+            nonlocal handler_called
+            handler_called = True
+            print("called")
+
+        cell.communication_event.send_balance_request += handler
+
+        self.assertFalse(cell.balance_pin_state)
+        cell.start_balance_discharge(balance_time)  # seconds
+        self.assertTrue(cell.balance_pin_state)
+        self.assertTrue(handler_called)
 
     def test_on_balance_discharged_stopped(self):
         pass
