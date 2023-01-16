@@ -131,53 +131,60 @@ class SlaveCommunicator:
             self._mqtt_client.subscribe(f'esp-module/{module_id}/uptime')
         self._mqtt_client.publish('master/core/available', 'online', retain=True)
 
-    def _mqtt_on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
-        # if time.time() - self._last_log_time >= 60:  # log time diffs
-        #     self._write_logs()
+    def _handle_cell_message(self, topic, battery_module, payload):
+        cell_number, sub_topic = self._topic_extract_number(topic)
+        battery_cell = battery_module.cells[cell_number - 1]
+        if sub_topic == 'voltage':
+            battery_cell.update_voltage(float(payload))
+        elif sub_topic == 'is_balancing':
+            if payload == '1':
+                battery_cell.balance_pin_state = True
+            else:
+                battery_cell.on_balance_discharged_stopped()
 
+    def _handle_uptime_message(self, payload, battery_module, esp_number):
+        current_time = int(payload)
+        battery_module.update_esp_uptime(current_time)
+
+        if self._last_time[esp_number] != 0:  # log time diffs
+            diff = current_time - self._last_time[esp_number] - 1000
+            self._mqtt_client.publish(topic=f'esp-module/{esp_number}/timediff', payload=f'{diff}')
+        self._last_time[esp_number] = current_time
+
+    def _configure_esp_module(self, extracted_id):
+        slave: dict = self._slave_mapping['slaves'][extracted_id]
+        slave.get('total_current_measurer', False)
+        config = f"{slave['number']},"
+        config += f"{slave.get('total_voltage_measurer', False):d},"
+        config += f"{slave.get('total_current_measurer', False):d}"
+        self._mqtt_client.publish(f'esp-module/{extracted_id}/set_config', config)
+
+    def _handle_esp_module_message(self, extracted_id, topic, payload):  # noqa: C901
+        if extracted_id.isdigit():
+            esp_number = int(extracted_id)
+            battery_module = self._battery_system.battery_modules[esp_number - 1]
+            if topic == 'uptime':
+                self._handle_uptime_message(payload, battery_module, esp_number)
+            elif topic.startswith('cell/'):
+                self._handle_cell_message(extracted_id, topic, payload)
+            elif topic == 'module_voltage':
+                battery_module.update_module_voltage(float(payload))
+            elif topic == 'module_temps':
+                module_temps = payload.split(',')
+                battery_module.update_module_temps(float(module_temps[0]), float(module_temps[1]))
+            elif topic == 'chip_temp':
+                battery_module.update_chip_temp(float(payload))
+            elif topic == 'total_system_voltage':
+                self._battery_system.update_voltage(float(payload))
+            elif topic == 'total_system_current':
+                payload = payload.split(',')
+                self._battery_system.update_current(float(payload[1]))
+        elif extracted_id in self._slave_mapping['slaves']:
+            if topic == 'uptime':
+                self._configure_esp_module(extracted_id)
+
+    def _mqtt_on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
         if msg.topic.startswith('esp-module/') and len(msg.payload) > 0:
             payload = msg.payload.decode()
             extracted_id, topic = self._topic_extract_id(msg.topic)
-            if extracted_id.isdigit():
-                esp_number = int(extracted_id)
-                battery_module = self._battery_system.battery_modules[esp_number - 1]
-                if topic == 'uptime':
-                    current_time = int(payload)
-                    battery_module.update_esp_uptime(current_time)
-
-                    if self._last_time[esp_number] != 0:  # log time diffs
-                        diff = current_time - self._last_time[esp_number] - 1000
-                        self._mqtt_client.publish(topic=f'esp-module/{esp_number}/timediff', payload=f'{diff}')
-                    #     self._lines_to_write[esp_number].append(f'{current_time},{diff}')
-                    self._last_time[esp_number] = current_time
-
-                elif topic.startswith('cell/'):
-                    cell_number, sub_topic = self._topic_extract_number(topic)
-                    battery_cell = battery_module.cells[cell_number - 1]
-                    if sub_topic == 'voltage':
-                        battery_cell.update_voltage(float(payload))
-                    elif sub_topic == 'is_balancing':
-                        if payload == '1':
-                            battery_cell.balance_pin_state = True
-                        else:
-                            battery_cell.on_balance_discharged_stopped()
-                elif topic == 'module_voltage':
-                    battery_module.update_module_voltage(float(payload))
-                elif topic == 'module_temps':
-                    module_temps = payload.split(',')
-                    battery_module.update_module_temps(float(module_temps[0]), float(module_temps[1]))
-                elif topic == 'chip_temp':
-                    battery_module.update_chip_temp(float(payload))
-                elif topic == 'total_system_voltage':
-                    self._battery_system.update_voltage(float(payload))
-                elif topic == 'total_system_current':
-                    payload = payload.split(',')
-                    self._battery_system.update_current(float(payload[1]))
-            elif extracted_id in self._slave_mapping['slaves']:
-                if topic == 'uptime':
-                    slave: dict = self._slave_mapping['slaves'][extracted_id]
-                    slave.get('total_current_measurer', False)
-                    config = f"{slave['number']},"
-                    config += f"{slave.get('total_voltage_measurer', False):d},"
-                    config += f"{slave.get('total_current_measurer', False):d}"
-                    self._mqtt_client.publish(f'esp-module/{extracted_id}/set_config', config)
+            self._handle_esp_module_message(extracted_id, topic, payload)
