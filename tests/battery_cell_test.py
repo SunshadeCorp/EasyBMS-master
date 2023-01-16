@@ -1,8 +1,6 @@
 import unittest
 
-import sys
-sys.path.insert(0,'..')
-
+from context import battery_cell
 from battery_cell import BatteryCell
 
 class BatteryCellTest(unittest.TestCase):

@@ -1,7 +1,7 @@
 import unittest
 
+from context import soc_curve
 from soc_curve import SocCurve
-
 
 class SocCurveTest(unittest.TestCase):
 
