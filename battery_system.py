@@ -135,6 +135,12 @@ class BatterySystem:
     def cells(self) -> List[BatteryCell]:
         return [cell for module in self.battery_modules for cell in module.cells]
 
+    def cells_voltage_above(self, value: float) -> List[BatteryCell]:
+        return [cell for cell in self.cells() if cell.voltage > value]
+
+    def cells_min_soc_voltage_above(self, value: float) -> List[BatteryCell]:
+        return [cell for cell in self.cells() if cell.voltage > value and cell.soc() > 0.15]
+
     def lowest_module_temp(self) -> float:
         return min(battery_modules.min_temp() for battery_modules in self.battery_modules)
 
