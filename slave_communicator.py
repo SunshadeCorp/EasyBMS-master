@@ -84,6 +84,8 @@ class SlaveCommunicator:
                                       payload=f'{current_power:.2f}')
             self._mqtt_client.publish(topic='master/core/load_adjusted_calculated_voltage',
                                       payload=f'{self._battery_system.load_adjusted_calculated_voltage():.2f}')
+            self._mqtt_client.publish(topic='master/core/max_cell_diff',
+                                      payload=f'{self._battery_system.max_cell_diff():.3f}')
         except TypeError:
             pass
         try:
