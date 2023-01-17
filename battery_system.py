@@ -147,6 +147,9 @@ class BatterySystem:
     def lowest_cell_voltage(self) -> float:
         return min(cell.voltage for cell in self.cells())
 
+    def max_cell_diff(self) -> float:
+        return self.highest_cell_voltage() - self.lowest_cell_voltage()
+
     def highest_voltage_cells(self, number) -> List[BatteryCell]:
         cell_list = self.cells()
         cell_list.sort(key=lambda x: x.voltage, reverse=True)
