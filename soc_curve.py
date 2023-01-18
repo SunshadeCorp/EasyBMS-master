@@ -44,6 +44,23 @@ class SocCurve:
 
         return soc
 
+    @staticmethod
+    def soc_to_voltage(soc: float):
+        data_points = dict(sorted(SocCurve.data_points.items()))
+        lower_voltage = min(data_points)
+        upper_voltage = max(data_points)
+
+        for table_voltage in data_points:
+            if soc >= data_points[table_voltage]:
+                lower_voltage = table_voltage
+            else:
+                upper_voltage = table_voltage
+                break
+
+        m = (upper_voltage - lower_voltage) / (data_points[upper_voltage] - data_points[lower_voltage])
+        b = upper_voltage - (m * data_points[upper_voltage])
+        return m * soc + b
+
 
 if __name__ == '__main__':
     soc_curve = SocCurve()
