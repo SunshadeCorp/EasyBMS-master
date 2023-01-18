@@ -63,6 +63,6 @@ class SocCurveTest(unittest.TestCase):
         self.assertAlmostEqual(SocCurve.soc_to_voltage(0.35), 3.628, delta=0.01)
         self.assertAlmostEqual(SocCurve.soc_to_voltage(0.7), 3.825, delta=0.01)
 
-        
+
 if __name__ == '__main__':
     unittest.main()
