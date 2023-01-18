@@ -14,7 +14,7 @@ class BatteryManagerTest(unittest.TestCase):
 
     def test_init(self):
         battery_system = self.battery_manager.battery_system
-        
+
         self.assertEqual(len(battery_system.voltage_event.on_critical), 1)
         self.assertEqual(len(battery_system.voltage_event.on_warning), 1)
         self.assertEqual(len(battery_system.voltage_event.on_implausible), 1)
@@ -40,11 +40,21 @@ class BatteryManagerTest(unittest.TestCase):
                 self.assertEqual(len(cell.voltage_event.on_warning), 1)
                 self.assertEqual(len(cell.voltage_event.on_implausible), 1)
 
-    def test_is_in_emergency_state(self):
-        pass
-
     def test_balance(self):
-        pass
+        # Test 0: balancing constants
+        assert BatteryManager.BALANCE_DISCHARGE_TIME > 0.0
+        assert 0.0 < BatteryManager.MIN_CELL_DIFF_FOR_BALANCING \
+                    < BatteryManager.MAX_CELL_DIFF_FOR_BALANCING
+
+        # Test 1: no new balancing while already balancing
+
+        # Test 2: no balancing while relaxing
+
+        # Test 3: no balancing when diff not high enough
+
+        # Test 4: no balancing when system is balanced
+
+        # Test 4: low cells should be balanced
 
     def test_trigger_safety_disconnect(self):
         pass
