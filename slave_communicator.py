@@ -167,7 +167,7 @@ class SlaveCommunicator:
             if topic == 'uptime':
                 self._handle_uptime_message(payload, battery_module, esp_number)
             elif topic.startswith('cell/'):
-                self._handle_cell_message(extracted_id, topic, payload)
+                self._handle_cell_message(topic, battery_module, payload)
             elif topic == 'module_voltage':
                 battery_module.update_module_voltage(float(payload))
             elif topic == 'module_temps':
