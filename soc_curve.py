@@ -12,7 +12,7 @@ class SocCurve:
         3.579: 0.2,
         3.499: 0.1,
         3.420: 0.0,
-        0: -0.2
+        0.0: -0.2
     }
 
     def __init__(self) -> None:
@@ -57,6 +57,11 @@ class SocCurve:
                 upper_voltage = table_voltage
                 break
 
+        if upper_voltage == lower_voltage == 0:
+            upper_voltage = list(data_points.keys())[1]
+        elif upper_voltage == lower_voltage == max(data_points):
+            lower_voltage = list(data_points.keys())[-2]
+
         m = (upper_voltage - lower_voltage) / (data_points[upper_voltage] - data_points[lower_voltage])
         b = upper_voltage - (m * data_points[upper_voltage])
         return m * soc + b
@@ -69,3 +74,8 @@ if __name__ == '__main__':
     print(soc_curve.voltage_to_soc(3))
     print(soc_curve.voltage_to_soc(4))
     print(soc_curve.voltage_to_soc(4.9))
+
+    print(SocCurve.soc_to_voltage(-0.4))
+    print(SocCurve.soc_to_voltage(1.0))
+    print(SocCurve.soc_to_voltage(1.3))
+    print(SocCurve.soc_to_voltage(0.431))
