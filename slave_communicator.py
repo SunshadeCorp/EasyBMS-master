@@ -84,6 +84,8 @@ class SlaveCommunicator:
                                       payload=f'{current_power:.2f}')
             self._mqtt_client.publish(topic='master/core/load_adjusted_calculated_voltage',
                                       payload=f'{self._battery_system.load_adjusted_calculated_voltage():.2f}')
+            self._mqtt_client.publish(topic='master/core/max_cell_diff',
+                                      payload=f'{self._battery_system.max_cell_diff():.3f}')
         except TypeError:
             pass
         try:
@@ -153,7 +155,6 @@ class SlaveCommunicator:
 
     def _configure_esp_module(self, extracted_id):
         slave: dict = self._slave_mapping['slaves'][extracted_id]
-        slave.get('total_current_measurer', False)
         config = f"{slave['number']},"
         config += f"{slave.get('total_voltage_measurer', False):d},"
         config += f"{slave.get('total_current_measurer', False):d}"
@@ -166,7 +167,7 @@ class SlaveCommunicator:
             if topic == 'uptime':
                 self._handle_uptime_message(payload, battery_module, esp_number)
             elif topic.startswith('cell/'):
-                self._handle_cell_message(extracted_id, topic, payload)
+                self._handle_cell_message(topic, battery_module, payload)
             elif topic == 'module_voltage':
                 battery_module.update_module_voltage(float(payload))
             elif topic == 'module_temps':

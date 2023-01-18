@@ -12,7 +12,7 @@ class BatteryCell:
     UPPER_VOLTAGE_LIMIT_CRITICAL: float = 4.2  # V
     LOWER_VOLTAGE_LIMIT_WARNING: float = 3.2  # V
     UPPER_VOLTAGE_LIMIT_WARNING: float = 4.15  # V
-    RELAX_TIME: float = 20.0  # Seconds
+    RELAX_TIME: float = 1.0  # Seconds
 
     INTERNAL_IMPEDANCE: float = 0.000975  # Ohm, for 2P cells
 
@@ -21,7 +21,7 @@ class BatteryCell:
         self.voltage: float or None = None
         self.balance_pin_state: bool or None = False
 
-        # Inpitialized values
+        # Initialized values
         self.id: int = cell_id
         self.module_id: int = module_id
         self.voltage_event: MeasurementEvent = MeasurementEvent()
@@ -76,3 +76,7 @@ class BatteryCell:
 
     def is_balance_discharging(self) -> bool:
         return self.balance_pin_state
+
+    @staticmethod
+    def soc_to_voltage(soc: float):
+        return SocCurve.soc_to_voltage(soc)
