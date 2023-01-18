@@ -81,7 +81,7 @@ class BatteryManager:
                   'The system will not perform balancing')
             return
 
-        highest_cells = self.battery_system.highest_voltage_cells(4)
+        highest_cells = self.battery_system.highest_voltage_cells(24)
 
         print('start discharching cells: ', end='')
         for cell in highest_cells:
