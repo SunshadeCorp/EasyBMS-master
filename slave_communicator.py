@@ -155,7 +155,6 @@ class SlaveCommunicator:
 
     def _configure_esp_module(self, extracted_id):
         slave: dict = self._slave_mapping['slaves'][extracted_id]
-        slave.get('total_current_measurer', False)
         config = f"{slave['number']},"
         config += f"{slave.get('total_voltage_measurer', False):d},"
         config += f"{slave.get('total_current_measurer', False):d}"
