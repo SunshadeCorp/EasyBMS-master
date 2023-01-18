@@ -5,6 +5,7 @@ from battery_system import BatterySystem
 # from heartbeat_event import HeartbeatEvent
 from battery_module import BatteryModule
 from slave_communicator import SlaveCommunicator
+from soc_curve import SocCurve
 
 
 class BatteryManager:
@@ -81,8 +82,8 @@ class BatteryManager:
                   'The system will not perform balancing')
             return
 
-        cells_to_discharge = self.battery_system.cells_min_soc_voltage_above(
-            lowest_voltage + self.MIN_CELL_DIFF_FOR_BALANCING)
+        required_voltage: float = max(lowest_voltage + self.MIN_CELL_DIFF_FOR_BALANCING, SocCurve.soc_to_voltage(0.15))
+        cells_to_discharge = self.battery_system.cells_voltage_above(required_voltage)
 
         print('start discharching cells: ', end='')
         for cell in cells_to_discharge:
