@@ -70,7 +70,7 @@ class BatteryManager:
 
         cell_diff: float = highest_voltage - lowest_voltage
 
-        print(f'cell_diff: {cell_diff:.3f}V', flush=True)
+        print(f'cell_diff: {cell_diff:.3f} V', flush=True)
 
         if cell_diff < self.MIN_CELL_DIFF_FOR_BALANCING:
             print('Min cell diff was not reached')
@@ -81,10 +81,12 @@ class BatteryManager:
                   'The system will not perform balancing')
             return
 
-        highest_cells = self.battery_system.highest_voltage_cells(4)
+        required_voltage: float = max(lowest_voltage + self.MIN_CELL_DIFF_FOR_BALANCING,
+                                      BatteryCell.soc_to_voltage(0.15))
+        cells_to_discharge = self.battery_system.cells_voltage_above(required_voltage)
 
         print('start discharching cells: ', end='')
-        for cell in highest_cells:
+        for cell in cells_to_discharge:
             print(f'{cell.module_id}:{cell.id}({cell.voltage:.3f}V) ', end='')
             cell.start_balance_discharge(self.BALANCE_DISCHARGE_TIME)
         print('.\n')
