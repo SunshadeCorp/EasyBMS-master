@@ -76,3 +76,7 @@ class BatteryCell:
 
     def is_balance_discharging(self) -> bool:
         return self.balance_pin_state
+
+    @staticmethod
+    def soc_to_voltage(soc: float):
+        return SocCurve.soc_to_voltage(soc)
