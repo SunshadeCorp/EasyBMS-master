@@ -20,7 +20,7 @@ class SocCurve:
         pass
 
     def voltage_to_soc(self, cell_voltage: float) -> float:
-        assert 0 < cell_voltage < 5
+        assert 0.0 < cell_voltage < 5.0
 
         self.data_points = dict(sorted(self.data_points.items()))
         lower_voltage = min(self.data_points)
@@ -46,6 +46,8 @@ class SocCurve:
 
     @staticmethod
     def soc_to_voltage(soc: float):
+        assert 0.0 <= soc <= 1.0
+
         data_points = dict(sorted(SocCurve.data_points.items()))
         lower_voltage = min(data_points)
         upper_voltage = max(data_points)

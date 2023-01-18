@@ -48,6 +48,21 @@ class SocCurveTest(unittest.TestCase):
         with self.assertRaises(AssertionError):
             self.soc_curve.voltage_to_soc(voltage)
 
+    def test_soc_to_voltage_out_of_range(self):
+        with self.assertRaises(AssertionError):
+            SocCurve.soc_to_voltage(-1.0)
+        with self.assertRaises(AssertionError):
+            SocCurve.soc_to_voltage(-0.1)
+        with self.assertRaises(AssertionError):
+            SocCurve.soc_to_voltage(1.1)
+        with self.assertRaises(AssertionError):
+            SocCurve.soc_to_voltage(10.0)
+
+    def test_soc_to_voltage(self):
+        self.assertAlmostEqual(SocCurve.soc_to_voltage(0.75), 3.869, delta=0.01)
+        self.assertAlmostEqual(SocCurve.soc_to_voltage(0.35), 3.628, delta=0.01)
+        self.assertAlmostEqual(SocCurve.soc_to_voltage(0.7), 3.825, delta=0.01)
+
 
 if __name__ == '__main__':
     unittest.main()
