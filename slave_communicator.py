@@ -127,8 +127,8 @@ class SlaveCommunicator:
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/module_voltage')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/module_temps')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/chip_temp')
-        self._mqtt_client.subscribe('esp-module/1/total_system_voltage')
-        self._mqtt_client.subscribe(f'esp-module/{len(self._battery_system.battery_modules)}/total_system_current')
+        self._mqtt_client.subscribe('esp-module/1/total_system_current')
+        self._mqtt_client.subscribe(f'esp-module/{len(self._battery_system.battery_modules)}/total_system_voltage')
         for module_id in self._slave_mapping['slaves']:
             self._mqtt_client.subscribe(f'esp-module/{module_id}/uptime')
         self._mqtt_client.publish('master/core/available', 'online', retain=True)
