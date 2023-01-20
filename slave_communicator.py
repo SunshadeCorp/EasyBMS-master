@@ -105,7 +105,10 @@ class SlaveCommunicator:
         self._mqtt_client.publish('master/core/config/balancing_enabled', str(enabled).lower(), retain=True)
 
     def send_balancing_ignore_slaves_state(self, ignore_slaves: set[int]):
-        ignore_slaves_string = ','.join(str(i) for i in ignore_slaves)
+        if len(ignore_slaves) == 0:
+            ignore_slaves_string = 'none'
+        else:
+            ignore_slaves_string = ','.join(str(i) for i in ignore_slaves)
         self._mqtt_client.publish('master/core/config/balancing_ignore_slaves', ignore_slaves_string, retain=True)
 
     @staticmethod
@@ -205,6 +208,10 @@ class SlaveCommunicator:
         elif msg.topic == 'master/core/config/balancing_enabled/set':
             self.events.on_balancing_enabled_set(msg.payload.decode())
         elif msg.topic == 'master/core/config/balancing_ignore_slaves/set':
-            values: list[str] = msg.payload.decode().split(',')
-            slaves: set[int] = set(int(value) for value in values)
-            self.events.on_balancing_ignore_slaves_set(slaves)
+            payload = msg.payload.decode()
+            if payload == '' or payload.lower() == 'none':
+                self.events.on_balancing_ignore_slaves_set(set())
+            else:
+                values: list[str] = msg.payload.decode().split(',')
+                slaves: set[int] = set(int(value) for value in values)
+                self.events.on_balancing_ignore_slaves_set(slaves)
