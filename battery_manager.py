@@ -17,6 +17,11 @@ class BatteryManager:
         self.battery_system: BatterySystem = battery_system
         self.slave_communicator: SlaveCommunicator = slave_communicator
 
+        self.balancing_enabled: bool = True
+
+        self.slave_communicator.events.on_connect += self.publish_config
+        self.slave_communicator.events.on_balancing_enabled_set += self.set_balancing_enabled
+
         # Register battery system event handlers
         self.battery_system.voltage_event.on_critical += self.on_critical_battery_system_voltage
         self.battery_system.voltage_event.on_warning += self.on_battery_system_voltage_warning
@@ -52,7 +57,17 @@ class BatteryManager:
         print('[NOT IMPLEMENTED] BatteryManager:is_in_emergency_state()')
         return False
 
+    def publish_config(self):
+        self.slave_communicator.send_balancing_enabled_state(self.balancing_enabled)
+
+    def set_balancing_enabled(self, value: str):
+        self.balancing_enabled = value.lower() == 'true'
+        self.publish_config()
+
     def balance(self) -> None:
+        if not self.balancing_enabled:
+            return
+
         if self.battery_system.is_in_relax_time() or self.battery_system.is_currently_balancing():
             print(f'{time.time():.0f} Battery System is balancing. {self.battery_system}', flush=True)
             return
