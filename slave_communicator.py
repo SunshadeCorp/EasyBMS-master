@@ -88,7 +88,7 @@ class SlaveCommunicator:
             self._mqtt_client.publish(topic='master/core/load_adjusted_calculated_voltage',
                                       payload=f'{self._battery_system.load_adjusted_calculated_voltage():.2f}')
             self._mqtt_client.publish(topic='master/core/max_cell_diff',
-                                      payload=f'{self._battery_system.max_cell_diff():.3f}')
+                                      payload=f'{self._battery_system.cells().max_diff():.3f}')
         except TypeError:
             pass
         try:
@@ -101,8 +101,12 @@ class SlaveCommunicator:
         except TypeError:
             pass
 
-    def send_balancing_enabled_state(self, value: bool):
-        self._mqtt_client.publish('master/core/config/balancing_enabled', str(value).lower(), retain=True)
+    def send_balancing_enabled_state(self, enabled: bool):
+        self._mqtt_client.publish('master/core/config/balancing_enabled', str(enabled).lower(), retain=True)
+
+    def send_balancing_ignore_slaves_state(self, ignore_slaves: set[int]):
+        ignore_slaves_string = ','.join(str(i) for i in ignore_slaves)
+        self._mqtt_client.publish('master/core/config/balancing_ignore_slaves', ignore_slaves_string, retain=True)
 
     @staticmethod
     def _topic_extract_id(topic: str) -> (str, str,):
@@ -139,6 +143,7 @@ class SlaveCommunicator:
         for module_id in self._slave_mapping['slaves']:
             self._mqtt_client.subscribe(f'esp-module/{module_id}/uptime')
         self._mqtt_client.subscribe('master/core/config/balancing_enabled/set')
+        self._mqtt_client.subscribe('master/core/config/balancing_ignore_slaves/set')
         self._mqtt_client.publish('master/core/available', 'online', retain=True)
 
     def _handle_cell_message(self, topic, battery_module, payload):
@@ -199,3 +204,7 @@ class SlaveCommunicator:
             self._handle_esp_module_message(extracted_id, topic, payload)
         elif msg.topic == 'master/core/config/balancing_enabled/set':
             self.events.on_balancing_enabled_set(msg.payload.decode())
+        elif msg.topic == 'master/core/config/balancing_ignore_slaves/set':
+            values: list[str] = msg.payload.decode().split(',')
+            slaves: set[int] = set(int(value) for value in values)
+            self.events.on_balancing_ignore_slaves_set(slaves)

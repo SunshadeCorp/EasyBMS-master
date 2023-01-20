@@ -1,26 +1,17 @@
-import time
-
 from battery_cell import BatteryCell
 from battery_system import BatterySystem
 # from heartbeat_event import HeartbeatEvent
 from battery_module import BatteryModule
+from battery_system_balancer import BatterySystemBalancer
 from slave_communicator import SlaveCommunicator
 
 
 class BatteryManager:
-    MIN_CELL_DIFF_FOR_BALANCING: float = 0.010  # V
-    MAX_CELL_DIFF_FOR_BALANCING: float = 0.5  # V
-    BALANCE_DISCHARGE_TIME: float = 120.0  # Seconds
-    BALANCE_RELAX_TIME: float = 20.0  # Seconds
-
     def __init__(self, battery_system: BatterySystem, slave_communicator: SlaveCommunicator) -> None:
         self.battery_system: BatterySystem = battery_system
         self.slave_communicator: SlaveCommunicator = slave_communicator
 
-        self.balancing_enabled: bool = True
-
-        self.slave_communicator.events.on_connect += self.publish_config
-        self.slave_communicator.events.on_balancing_enabled_set += self.set_balancing_enabled
+        self.balancer = BatterySystemBalancer(battery_system, slave_communicator)
 
         # Register battery system event handlers
         self.battery_system.voltage_event.on_critical += self.on_critical_battery_system_voltage
@@ -57,56 +48,11 @@ class BatteryManager:
         print('[NOT IMPLEMENTED] BatteryManager:is_in_emergency_state()')
         return False
 
-    def publish_config(self):
-        self.slave_communicator.send_balancing_enabled_state(self.balancing_enabled)
-
-    def set_balancing_enabled(self, value: str):
-        self.balancing_enabled = value.lower() == 'true'
-        self.publish_config()
-
     def balance(self) -> None:
-        if not self.balancing_enabled:
-            return
-
-        if self.battery_system.is_in_relax_time() or self.battery_system.is_currently_balancing():
-            print(f'{time.time():.0f} Battery System is balancing. {self.battery_system}', flush=True)
-            return
-
         if self.is_in_emergency_state():
             print('[WARNING] System is in emergency state and will not perform balancing.', flush=True)
             return
-
-        try:
-            highest_voltage = self.battery_system.highest_cell_voltage()
-        except TypeError:
-            print(f'TypeError: some voltages not set! {self.battery_system}')
-            return
-        lowest_voltage = self.battery_system.lowest_cell_voltage()
-
-        cell_diff: float = highest_voltage - lowest_voltage
-
-        print(f'cell_diff: {cell_diff:.3f} V', flush=True)
-
-        if cell_diff < self.MIN_CELL_DIFF_FOR_BALANCING:
-            print('Min cell diff was not reached')
-            return
-
-        if cell_diff > self.MAX_CELL_DIFF_FOR_BALANCING:
-            print('[WARNING] Difference in cell voltages is too high for balancing.'
-                  'The system will not perform balancing')
-            return
-
-        required_voltage: float = max(lowest_voltage + self.MIN_CELL_DIFF_FOR_BALANCING,
-                                      BatteryCell.soc_to_voltage(0.15))
-        cells_to_discharge = self.battery_system.cells_voltage_above(required_voltage)
-
-        print('start discharching cells: ', end='')
-        for cell in cells_to_discharge:
-            print(f'{cell.module_id}:{cell.id}({cell.voltage:.3f}V) ', end='')
-            cell.start_balance_discharge(self.BALANCE_DISCHARGE_TIME)
-        print('.\n')
-
-        # Cells are now discharging until the BMS slave resets the balance pins
+        self.balancer.balance()
 
     def trigger_safety_disconnect(self) -> None:
         # todo: retry several times to ensure message delivery
