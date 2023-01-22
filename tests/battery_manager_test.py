@@ -1,11 +1,12 @@
 import unittest
 import unittest.mock
-from unittest.mock import MagicMock
 
 from battery_manager import BatteryManager
 from battery_system import BatterySystem
 
+
 class BatteryManagerTest(unittest.TestCase):
+
     def setUp(self):
         self.modules = 8
         self.cells = 12
@@ -44,13 +45,12 @@ class BatteryManagerTest(unittest.TestCase):
         for module in self.battery_manager.battery_system.battery_modules:
             for cell in module.cells:
                 cell.update_voltage(voltage)  # V
-                
 
     def test_balance(self):
         # Test 0: balancing constants
         assert BatteryManager.BALANCE_DISCHARGE_TIME > 0.0
         assert 0.0 < BatteryManager.MIN_CELL_DIFF_FOR_BALANCING \
-                    < BatteryManager.MAX_CELL_DIFF_FOR_BALANCING
+            < BatteryManager.MAX_CELL_DIFF_FOR_BALANCING
 
         # Test 4: no balancing when system is balanced
         self.initialize_cells(3.6)  # V
@@ -60,16 +60,18 @@ class BatteryManagerTest(unittest.TestCase):
                 self.assertFalse(cell.is_balance_discharging())
 
         # Test 4: One of the cells is too high
-        def mock_handler(module_number: int, cell_number: int, balance_time_s: float):
+        def balance_request(module_number: int, cell_number: int, balance_time_s: float):
             pass
 
-        self.battery_manager.battery_system.battery_modules[0].cells[0].communication_event.send_balance_request += mock_handler
-        self.battery_manager.battery_system.battery_modules[0].cells[0].update_voltage(3.65)  # V
+        cell_to_balance = self.battery_manager.battery_system.battery_modules[0].cells[0]
+        cell_to_balance.communication_event.send_balance_request += balance_request
+        cell_to_balance.update_voltage(3.65)  # V
         self.battery_manager.balance()
-        self.assertTrue(self.battery_manager.battery_system.battery_modules[0].cells[0].is_balance_discharging())
+        self.assertTrue(cell_to_balance.is_balance_discharging())
         for module in self.battery_manager.battery_system.battery_modules:
             for cell in module.cells:
-                self.assertTrue(((module.id == 0 and cell.id == 0) and cell.is_balance_discharging()) or not (module.id == 0 and cell.id == 0) )
+                self.assertTrue(((module.id == 0 and cell.id == 0) and cell.is_balance_discharging())
+                                or not (module.id == 0 and cell.id == 0))
 
         # Test 1: no new balancing while already balancing
         self.initialize_cells(3.4)  # V
@@ -145,6 +147,7 @@ class BatteryManagerTest(unittest.TestCase):
 
     def test_on_heartbeat(self):
         pass
+
 
 if __name__ == '__main__':
     unittest.main()
