@@ -4,6 +4,7 @@ from typing import Any, Dict
 
 from battery_cell import BatteryCell
 from battery_system import BatterySystem
+from slave_communicator_events import SlaveCommunicatorEvents
 from utils import get_config
 
 
@@ -11,6 +12,8 @@ class SlaveCommunicator:
     def __init__(self, master_config: dict, battery_system: BatterySystem):
         credentials = get_config('credentials.yaml')
         self._slave_mapping = get_config('slave_mapping.yaml')
+
+        self.events: SlaveCommunicatorEvents = SlaveCommunicatorEvents()
 
         self._mqtt_client = mqtt.Client()
         self._mqtt_client.on_connect = self._mqtt_on_connect
@@ -98,6 +101,9 @@ class SlaveCommunicator:
         except TypeError:
             pass
 
+    def send_balancing_enabled_state(self, value: bool):
+        self._mqtt_client.publish('master/core/config/balancing_enabled', str(value).lower(), retain=True)
+
     @staticmethod
     def _topic_extract_id(topic: str) -> (str, str,):
         extracted = topic[topic.find('/') + 1:]
@@ -119,6 +125,7 @@ class SlaveCommunicator:
     #             self._lines_to_write[i].clear()
 
     def _mqtt_on_connect(self, client: mqtt.Client, userdata: Any, flags: Dict, rc: int):
+        self.events.on_connect()
         for i in range(len(self._battery_system.battery_modules)):
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/uptime')
             for j in range(12):
@@ -131,6 +138,7 @@ class SlaveCommunicator:
         self._mqtt_client.subscribe(f'esp-module/{len(self._battery_system.battery_modules)}/total_system_voltage')
         for module_id in self._slave_mapping['slaves']:
             self._mqtt_client.subscribe(f'esp-module/{module_id}/uptime')
+        self._mqtt_client.subscribe('master/core/config/balancing_enabled/set')
         self._mqtt_client.publish('master/core/available', 'online', retain=True)
 
     def _handle_cell_message(self, topic, battery_module, payload):
@@ -189,3 +197,5 @@ class SlaveCommunicator:
             payload = msg.payload.decode()
             extracted_id, topic = self._topic_extract_id(msg.topic)
             self._handle_esp_module_message(extracted_id, topic, payload)
+        elif msg.topic == 'master/core/config/balancing_enabled/set':
+            self.events.on_balancing_enabled_set(msg.payload.decode())
