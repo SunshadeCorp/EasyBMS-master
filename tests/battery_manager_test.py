@@ -40,21 +40,48 @@ class BatteryManagerTest(unittest.TestCase):
                 self.assertEqual(len(cell.voltage_event.on_warning), 1)
                 self.assertEqual(len(cell.voltage_event.on_implausible), 1)
 
+    def initialize_cells(self, voltage):
+        for module in self.battery_manager.battery_system.battery_modules:
+            for cell in module.cells:
+                cell.update_voltage(voltage)  # V
+                
+
     def test_balance(self):
         # Test 0: balancing constants
         assert BatteryManager.BALANCE_DISCHARGE_TIME > 0.0
         assert 0.0 < BatteryManager.MIN_CELL_DIFF_FOR_BALANCING \
                     < BatteryManager.MAX_CELL_DIFF_FOR_BALANCING
 
+        # Test 4: no balancing when system is balanced
+        self.initialize_cells(3.6)  # V
+        self.battery_manager.balance()
+        for module in self.battery_manager.battery_system.battery_modules:
+            for cell in module.cells:
+                self.assertFalse(cell.is_balance_discharging())
+
+        # Test 4: One of the cells is too high
+        def mock_handler(module_number: int, cell_number: int, balance_time_s: float):
+            pass
+
+        self.battery_manager.battery_system.battery_modules[0].cells[0].communication_event.send_balance_request += mock_handler
+        self.battery_manager.battery_system.battery_modules[0].cells[0].update_voltage(3.65)  # V
+        self.battery_manager.balance()
+        self.assertTrue(self.battery_manager.battery_system.battery_modules[0].cells[0].is_balance_discharging())
+        for module in self.battery_manager.battery_system.battery_modules:
+            for cell in module.cells:
+                self.assertTrue(((module.id == 0 and cell.id == 0) and cell.is_balance_discharging()) or not (module.id == 0 and cell.id == 0) )
+
         # Test 1: no new balancing while already balancing
+        self.initialize_cells(3.4)  # V
+        self.battery_manager.battery_system.battery_modules[0].cells[0].balance_pin_state = True
+        self.battery_manager.battery_system.battery_modules[0].cells[1].update_voltage(3.5)  # V
+        for module in self.battery_manager.battery_system.battery_modules:
+            for cell in module.cells:
+                self.assertTrue((module.id == 0 and cell.id == 0) or not cell.is_balance_discharging())
 
         # Test 2: no balancing while relaxing
 
         # Test 3: no balancing when diff not high enough
-
-        # Test 4: no balancing when system is balanced
-
-        # Test 4: low cells should be balanced
 
     def test_trigger_safety_disconnect(self):
         pass
