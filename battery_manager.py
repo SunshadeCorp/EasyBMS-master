@@ -11,7 +11,6 @@ class BatteryManager:
     MIN_CELL_DIFF_FOR_BALANCING: float = 0.010  # V
     MAX_CELL_DIFF_FOR_BALANCING: float = 0.5  # V
     BALANCE_DISCHARGE_TIME: float = 120.0  # Seconds
-    BALANCE_RELAX_TIME: float = 20.0  # Seconds
 
     def __init__(self, battery_system: BatterySystem, slave_communicator: SlaveCommunicator) -> None:
         self.battery_system: BatterySystem = battery_system
@@ -53,10 +52,6 @@ class BatteryManager:
                 cell.voltage_event.on_warning += self.on_cell_voltage_warning
                 cell.voltage_event.on_implausible += self.on_implausible_cell_voltage
 
-    def is_in_emergency_state(self) -> bool:
-        print('[NOT IMPLEMENTED] BatteryManager:is_in_emergency_state()')
-        return False
-
     def publish_config(self):
         self.slave_communicator.send_balancing_enabled_state(self.balancing_enabled)
 
@@ -70,10 +65,6 @@ class BatteryManager:
 
         if self.battery_system.is_in_relax_time() or self.battery_system.is_currently_balancing():
             print(f'{time.time():.0f} Battery System is balancing. {self.battery_system}', flush=True)
-            return
-
-        if self.is_in_emergency_state():
-            print('[WARNING] System is in emergency state and will not perform balancing.', flush=True)
             return
 
         try:
