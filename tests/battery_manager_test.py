@@ -3,6 +3,12 @@ import unittest.mock
 
 from battery_manager import BatteryManager
 from battery_system import BatterySystem
+from slave_communicator_events import SlaveCommunicatorEvents
+
+
+class MockCommunicator:
+    def __init__(self):
+        self.events: SlaveCommunicatorEvents = SlaveCommunicatorEvents()
 
 
 class BatteryManagerTest(unittest.TestCase):
@@ -11,7 +17,7 @@ class BatteryManagerTest(unittest.TestCase):
         self.modules = 8
         self.cells = 12
         battery_system = BatterySystem(self.modules, self.cells)
-        self.battery_manager = BatteryManager(battery_system, None)
+        self.battery_manager = BatteryManager(battery_system, MockCommunicator())
 
     def test_init(self):
         battery_system = self.battery_manager.battery_system
