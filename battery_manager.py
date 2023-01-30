@@ -44,14 +44,7 @@ class BatteryManager:
                 cell.voltage_event.on_warning += self.on_cell_voltage_warning
                 cell.voltage_event.on_implausible += self.on_implausible_cell_voltage
 
-    def is_in_emergency_state(self) -> bool:
-        print('[NOT IMPLEMENTED] BatteryManager:is_in_emergency_state()')
-        return False
-
     def balance(self) -> None:
-        if self.is_in_emergency_state():
-            print('[WARNING] System is in emergency state and will not perform balancing.', flush=True)
-            return
         self.balancer.balance()
 
     def trigger_safety_disconnect(self) -> None:
