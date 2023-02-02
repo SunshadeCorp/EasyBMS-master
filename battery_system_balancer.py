@@ -7,7 +7,7 @@ from slave_communicator import SlaveCommunicator
 
 
 class BatterySystemBalancer:
-    DEFAULT_MIN_CELL_DIFF_FOR_BALANCING: float = 0.005  # V
+    DEFAULT_MIN_CELL_DIFF_FOR_BALANCING: float = 0.003  # V
     DEFAULT_MAX_CELL_DIFF_FOR_BALANCING: float = 0.5  # V
     DEFAULT_BALANCE_DISCHARGE_TIME: float = 120.0  # seconds
 
@@ -78,10 +78,14 @@ class BatterySystemBalancer:
             possible_cells.set_relax_time(seconds=1.0)
             self.balance_discharge_time = 120.0  # seconds
             min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.010)
-        else:
+        elif cell_diff > 0.005:
             possible_cells.set_relax_time(seconds=10.0)
             self.balance_discharge_time = 60.0  # seconds
-            min_cell_diff: float = self.min_cell_diff_for_balancing
+            min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.005)
+        else:
+            possible_cells.set_relax_time(seconds=20.0)
+            self.balance_discharge_time = 30.0  # seconds
+            min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.003)
 
         required_voltage: float = max(lowest_voltage + min_cell_diff, BatteryCell.soc_to_voltage(0.15))
         cells_to_discharge: list[BatteryCell] = possible_cells.voltage_above(required_voltage)
