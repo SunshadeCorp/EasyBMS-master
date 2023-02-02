@@ -7,10 +7,11 @@ from slave_communicator import SlaveCommunicator
 
 
 class BatterySystemBalancer:
-    MIN_CELL_DIFF_FOR_BALANCING: float = 0.010  # V
-    MAX_CELL_DIFF_FOR_BALANCING: float = 0.5  # V
-    BALANCE_DISCHARGE_TIME: float = 120.0  # Seconds
-    BALANCE_RELAX_TIME: float = 20.0  # Seconds
+    DEFAULT_MIN_CELL_DIFF_FOR_BALANCING: float = 0.005  # V
+    DEFAULT_MAX_CELL_DIFF_FOR_BALANCING: float = 0.5  # V
+    DEFAULT_BALANCE_DISCHARGE_TIME: float = 120.0  # seconds
+
+    # DEFAULT_BALANCE_RELAX_TIME: float = 20.0  # seconds # unused
 
     def __init__(self, battery_system: BatterySystem, slave_communicator: SlaveCommunicator):
         self.battery_system = battery_system
@@ -18,6 +19,10 @@ class BatterySystemBalancer:
 
         self.enabled: bool = True
         self.ignore_slaves: set[int] = set()
+
+        self.min_cell_diff_for_balancing: float = self.DEFAULT_MIN_CELL_DIFF_FOR_BALANCING
+        self.max_cell_diff_for_balancing: float = self.DEFAULT_MAX_CELL_DIFF_FOR_BALANCING
+        self.balance_discharge_time: float = self.DEFAULT_BALANCE_DISCHARGE_TIME
 
         self.slave_communicator.events.on_connect += self.publish_config
         self.slave_communicator.events.on_balancing_enabled_set += self.set_enabled
@@ -60,23 +65,31 @@ class BatterySystemBalancer:
 
         print(f'cell_diff: {cell_diff:.3f} V', flush=True)
 
-        if cell_diff < self.MIN_CELL_DIFF_FOR_BALANCING:
+        if cell_diff < self.min_cell_diff_for_balancing:
             print('Min cell diff was not reached')
             return
 
-        if cell_diff > self.MAX_CELL_DIFF_FOR_BALANCING:
+        if cell_diff > self.max_cell_diff_for_balancing:
             print('[WARNING] Difference in cell voltages is too high for balancing.'
                   'The system will not perform balancing')
             return
 
-        required_voltage: float = max(lowest_voltage + self.MIN_CELL_DIFF_FOR_BALANCING,
-                                      BatteryCell.soc_to_voltage(0.15))
+        if cell_diff > 0.010:
+            possible_cells.set_relax_time(seconds=1.0)
+            self.balance_discharge_time = 120.0  # seconds
+            min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.010)
+        else:
+            possible_cells.set_relax_time(seconds=10.0)
+            self.balance_discharge_time = 60.0  # seconds
+            min_cell_diff: float = self.min_cell_diff_for_balancing
+
+        required_voltage: float = max(lowest_voltage + min_cell_diff, BatteryCell.soc_to_voltage(0.15))
         cells_to_discharge: list[BatteryCell] = possible_cells.voltage_above(required_voltage)
 
         print('start discharching cells', end='')
         for cell in cells_to_discharge:
             # print(f'{cell.module_id}:{cell.id}({cell.voltage:.3f}V) ', end='')
-            cell.start_balance_discharge(self.BALANCE_DISCHARGE_TIME)
+            cell.start_balance_discharge(self.balance_discharge_time)
         print('.\n')
 
         # Cells are now discharging until the BMS slave resets the balance pins

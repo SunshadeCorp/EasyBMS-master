@@ -12,7 +12,7 @@ class BatteryCell:
     UPPER_VOLTAGE_LIMIT_CRITICAL: float = 4.2  # V
     LOWER_VOLTAGE_LIMIT_WARNING: float = 3.2  # V
     UPPER_VOLTAGE_LIMIT_WARNING: float = 4.15  # V
-    RELAX_TIME: float = 1.0  # Seconds
+    DEFAULT_RELAX_TIME: float = 1.0  # Seconds
 
     INTERNAL_IMPEDANCE: float = 0.000975  # Ohm, for 2P cells
 
@@ -28,6 +28,7 @@ class BatteryCell:
         self.communication_event: Events = Events(events=('send_balance_request',))
         self.soc_curve: SocCurve = SocCurve()
         self.last_discharge_time: float = 0
+        self.relax_time = self.DEFAULT_RELAX_TIME
 
     def __str__(self):
         return f'Module{self.module_id} Cell{self.id}: {self.voltage:.2f}V Balance:{self.balance_pin_state}'
@@ -61,7 +62,7 @@ class BatteryCell:
 
     def is_relaxing(self) -> bool:
         now: float = time.time()
-        return (now - self.last_discharge_time) < self.RELAX_TIME
+        return (now - self.last_discharge_time) < self.relax_time
 
     def start_balance_discharge(self, balance_time: float) -> None:
         # Assert that there is a listener reacting to this event
