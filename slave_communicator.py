@@ -141,8 +141,8 @@ class SlaveCommunicator:
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/module_voltage')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/module_temps')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/chip_temp')
-        self._mqtt_client.subscribe('esp-module/1/total_system_current')
-        self._mqtt_client.subscribe(f'esp-module/{len(self._battery_system.battery_modules)}/total_system_voltage')
+        self._mqtt_client.subscribe('esp-total/total_voltage')
+        self._mqtt_client.subscribe('esp-total/total_current')
         for module_id in self._slave_mapping['slaves']:
             self._mqtt_client.subscribe(f'esp-module/{module_id}/uptime')
         self._mqtt_client.subscribe('master/core/config/balancing_enabled/set')
@@ -191,11 +191,6 @@ class SlaveCommunicator:
                 battery_module.update_module_temps(float(module_temps[0]), float(module_temps[1]))
             elif topic == 'chip_temp':
                 battery_module.update_chip_temp(float(payload))
-            elif topic == 'total_system_voltage':
-                self._battery_system.update_voltage(float(payload))
-            elif topic == 'total_system_current':
-                payload = payload.split(',')
-                self._battery_system.update_current(float(payload[1]))
         elif extracted_id in self._slave_mapping['slaves']:
             if topic == 'uptime':
                 self._configure_esp_module(extracted_id)
@@ -215,3 +210,7 @@ class SlaveCommunicator:
                 values: list[str] = msg.payload.decode().split(',')
                 slaves: set[int] = set(int(value) for value in values)
                 self.events.on_balancing_ignore_slaves_set(slaves)
+        elif msg.topic == 'esp-total/total_voltage':
+            self._battery_system.update_voltage(float(msg.payload.decode()))
+        elif msg.topic == 'esp-total/total_current':
+            self._battery_system.update_current(float(msg.payload.decode()))
