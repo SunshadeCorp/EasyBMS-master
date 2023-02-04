@@ -211,6 +211,6 @@ class SlaveCommunicator:
                 slaves: set[int] = set(int(value) for value in values)
                 self.events.on_balancing_ignore_slaves_set(slaves)
         elif msg.topic == 'esp-total/total_voltage':
-            self._battery_system.update_voltage(float(msg.payload.decode()))
+            self._battery_system.update_voltage(float(msg.payload))
         elif msg.topic == 'esp-total/total_current':
-            self._battery_system.update_current(float(msg.payload.decode()))
+            self._battery_system.update_current(float(msg.payload))
