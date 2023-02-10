@@ -43,7 +43,7 @@ class SlaveCommunicator:
         self._mqtt_client.publish(topic='master/uptime', payload=f'{time.time() * 1000:.0f}')
 
     def open_battery_relays(self):
-        print(f'open_battery_relays called: {self._battery_system}')
+        print('open_battery_relays called.')
         self._mqtt_client.publish(topic='master/relays/battery_plus/set', payload='off')
         self._mqtt_client.publish(topic='master/relays/battery_precharge/set', payload='off')
         self._mqtt_client.publish(topic='master/relays/battery_minus/set', payload='off')
@@ -88,7 +88,7 @@ class SlaveCommunicator:
             self._mqtt_client.publish(topic='master/core/load_adjusted_calculated_voltage',
                                       payload=f'{self._battery_system.load_adjusted_calculated_voltage():.2f}')
             self._mqtt_client.publish(topic='master/core/max_cell_diff',
-                                      payload=f'{self._battery_system.max_cell_diff():.3f}')
+                                      payload=f'{self._battery_system.cells().max_diff():.3f}')
         except TypeError:
             pass
         try:
@@ -101,8 +101,15 @@ class SlaveCommunicator:
         except TypeError:
             pass
 
-    def send_balancing_enabled_state(self, value: bool):
-        self._mqtt_client.publish('master/core/config/balancing_enabled', str(value).lower(), retain=True)
+    def send_balancing_enabled_state(self, enabled: bool):
+        self._mqtt_client.publish('master/core/config/balancing_enabled', str(enabled).lower(), retain=True)
+
+    def send_balancing_ignore_slaves_state(self, ignore_slaves: set[int]):
+        if len(ignore_slaves) == 0:
+            ignore_slaves_string = 'none'
+        else:
+            ignore_slaves_string = ','.join(str(i) for i in ignore_slaves)
+        self._mqtt_client.publish('master/core/config/balancing_ignore_slaves', ignore_slaves_string, retain=True)
 
     @staticmethod
     def _topic_extract_id(topic: str) -> (str, str,):
@@ -134,11 +141,12 @@ class SlaveCommunicator:
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/module_voltage')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/module_temps')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/chip_temp')
-        self._mqtt_client.subscribe('esp-module/1/total_system_current')
-        self._mqtt_client.subscribe(f'esp-module/{len(self._battery_system.battery_modules)}/total_system_voltage')
+        self._mqtt_client.subscribe('esp-total/total_voltage')
+        self._mqtt_client.subscribe('esp-total/total_current')
         for module_id in self._slave_mapping['slaves']:
             self._mqtt_client.subscribe(f'esp-module/{module_id}/uptime')
         self._mqtt_client.subscribe('master/core/config/balancing_enabled/set')
+        self._mqtt_client.subscribe('master/core/config/balancing_ignore_slaves/set')
         self._mqtt_client.publish('master/core/available', 'online', retain=True)
 
     def _handle_cell_message(self, topic, battery_module, payload):
@@ -183,11 +191,6 @@ class SlaveCommunicator:
                 battery_module.update_module_temps(float(module_temps[0]), float(module_temps[1]))
             elif topic == 'chip_temp':
                 battery_module.update_chip_temp(float(payload))
-            elif topic == 'total_system_voltage':
-                self._battery_system.update_voltage(float(payload))
-            elif topic == 'total_system_current':
-                payload = payload.split(',')
-                self._battery_system.update_current(float(payload[1]))
         elif extracted_id in self._slave_mapping['slaves']:
             if topic == 'uptime':
                 self._configure_esp_module(extracted_id)
@@ -199,3 +202,15 @@ class SlaveCommunicator:
             self._handle_esp_module_message(extracted_id, topic, payload)
         elif msg.topic == 'master/core/config/balancing_enabled/set':
             self.events.on_balancing_enabled_set(msg.payload.decode())
+        elif msg.topic == 'master/core/config/balancing_ignore_slaves/set':
+            payload = msg.payload.decode()
+            if payload == '' or payload.lower() == 'none':
+                self.events.on_balancing_ignore_slaves_set(set())
+            else:
+                values: list[str] = msg.payload.decode().split(',')
+                slaves: set[int] = set(int(value) for value in values)
+                self.events.on_balancing_ignore_slaves_set(slaves)
+        elif msg.topic == 'esp-total/total_voltage':
+            self._battery_system.update_voltage(float(msg.payload))
+        elif msg.topic == 'esp-total/total_current':
+            self._battery_system.update_current(float(msg.payload))

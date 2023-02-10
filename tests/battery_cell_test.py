@@ -24,7 +24,7 @@ class BatteryCellTest(unittest.TestCase):
         current = 5.0  # A
 
         load_adjusted = self.cell.load_adjusted_voltage(current)
-        self.assertAlmostEqual(load_adjusted, voltage + BatteryCell.INTERNAL_IMPEDANCE*current)
+        self.assertAlmostEqual(load_adjusted, voltage + BatteryCell.INTERNAL_IMPEDANCE * current)
 
     def test_load_adjusted_soc(self):
         voltage = 3.5  # V
@@ -105,20 +105,20 @@ class BatteryCellTest(unittest.TestCase):
             self.assertEqual(self.cell.voltage, voltage)
 
     def test_relax_time(self):
-        self.assertGreaterEqual(BatteryCell.RELAX_TIME, 1.0)  # seconds
-        self.assertLessEqual(BatteryCell.RELAX_TIME, 120.0)  # seconds
+        self.assertGreaterEqual(self.cell.relax_time, 1.0)  # seconds
+        self.assertLessEqual(self.cell.relax_time, 120.0)  # seconds
 
     @unittest.mock.patch('time.time', return_value=120.0)
     def test_is_relaxing(self, mock_time: MagicMock):
-        self.cell.last_discharge_time = 120.0 - (BatteryCell.RELAX_TIME * (1.0 / 3.0))  # seconds
+        self.cell.last_discharge_time = 120.0 - (self.cell.relax_time * (1.0 / 3.0))  # seconds
         self.assertTrue(self.cell.is_relaxing())
         mock_time.assert_called()
 
-        self.cell.last_discharge_time = 120.0 - (BatteryCell.RELAX_TIME * (2.0 / 3.0))  # seconds
+        self.cell.last_discharge_time = 120.0 - (self.cell.relax_time * (2.0 / 3.0))  # seconds
         self.assertTrue(self.cell.is_relaxing())
         mock_time.assert_called()
 
-        self.cell.last_discharge_time = 120.0 - (BatteryCell.RELAX_TIME * (4.0 / 3.0))  # seconds
+        self.cell.last_discharge_time = 120.0 - (self.cell.relax_time * (4.0 / 3.0))  # seconds
         self.assertFalse(self.cell.is_relaxing())
         mock_time.assert_called()
 
