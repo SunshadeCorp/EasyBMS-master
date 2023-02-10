@@ -2,6 +2,7 @@ import time
 from typing import List
 
 from battery_cell import BatteryCell
+from battery_cell_list import BatteryCellList
 from battery_module import BatteryModule
 from measurement_event import MeasurementEvent
 
@@ -132,11 +133,8 @@ class BatterySystem:
     def soc(self) -> float:
         return sum(module.soc() for module in self.battery_modules) / len(self.battery_modules)
 
-    def cells(self) -> List[BatteryCell]:
-        return [cell for module in self.battery_modules for cell in module.cells]
-
-    def cells_voltage_above(self, value: float) -> List[BatteryCell]:
-        return [cell for cell in self.cells() if cell.voltage > value]
+    def cells(self) -> BatteryCellList:
+        return BatteryCellList([cell for module in self.battery_modules for cell in module.cells])
 
     def lowest_module_temp(self) -> float:
         return min(battery_modules.min_temp() for battery_modules in self.battery_modules)
@@ -144,28 +142,7 @@ class BatterySystem:
     def highest_module_temp(self) -> float:
         return max(battery_modules.max_temp() for battery_modules in self.battery_modules)
 
-    def highest_cell_voltage(self) -> float:
-        return max(cell.voltage for cell in self.cells())
-
-    def lowest_cell_voltage(self) -> float:
-        return min(cell.voltage for cell in self.cells())
-
-    def max_cell_diff(self) -> float:
-        return self.highest_cell_voltage() - self.lowest_cell_voltage()
-
     def highest_voltage_cells(self, number) -> List[BatteryCell]:
         cell_list = self.cells()
         cell_list.sort(key=lambda x: x.voltage, reverse=True)
         return cell_list[0:number]
-
-    def is_in_relax_time(self) -> bool:
-        for cell in self.cells():
-            if cell.is_relaxing():
-                return True
-        return False
-
-    def is_currently_balancing(self) -> bool:
-        for cell in self.cells():
-            if cell.is_balance_discharging():
-                return True
-        return False
