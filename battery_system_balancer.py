@@ -76,6 +76,7 @@ class BatterySystemBalancer:
         cell_diff: float = highest_voltage - lowest_voltage
 
         print(f'cell_diff: {cell_diff:.3f} V', flush=True)
+        self.slave_communicator.send_balancer_cell_diff(cell_diff)
 
         if cell_diff < self.min_cell_diff_for_balancing:
             print('Min cell diff was not reached')

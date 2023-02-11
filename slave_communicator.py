@@ -62,6 +62,9 @@ class SlaveCommunicator:
     def send_accurate_reading_request(self, module_number: int):
         self._mqtt_client.publish(topic=f'esp-module/{module_number + 1}/read_accurate', payload='1')
 
+    def send_balancer_cell_diff(self, cell_diff: float):
+        self._mqtt_client.publish(topic='master/core/balancer_cell_diff', payload=f'{cell_diff:.3f}', retain=True)
+
     def send_battery_system_state(self):
         for battery_module in self._battery_system.battery_modules:
             try:
