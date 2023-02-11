@@ -13,12 +13,17 @@ class BatterySystemBalancer:
 
     # DEFAULT_BALANCE_RELAX_TIME: float = 20.0  # seconds # unused
 
+    ACCURATE_READINGS_MAX_AGE: float = 20.0  # seconds
+    ACCURATE_READINGS_REQUEST_WAIT_TIME: float = 10.0  # seconds
+    ACCURATE_READINGS_REQUEST_WAIT_TIME_IDLE: float = 120.0  # seconds
+
     def __init__(self, battery_system: BatterySystem, slave_communicator: SlaveCommunicator):
         self.battery_system = battery_system
         self.slave_communicator = slave_communicator
 
         self.enabled: bool = True
         self.ignore_slaves: set[int] = set()
+        self.idle: bool = False
 
         self.min_cell_diff_for_balancing: float = self.DEFAULT_MIN_CELL_DIFF_FOR_BALANCING
         self.max_cell_diff_for_balancing: float = self.DEFAULT_MAX_CELL_DIFF_FOR_BALANCING
@@ -45,10 +50,14 @@ class BatterySystemBalancer:
                                 module.id not in self.ignore_slaves])
 
     def request_accurate_readings(self):
+        if self.idle:
+            request_wait_time: float = self.ACCURATE_READINGS_REQUEST_WAIT_TIME_IDLE
+        else:
+            request_wait_time: float = self.ACCURATE_READINGS_REQUEST_WAIT_TIME
         for module in self.battery_system.battery_modules:
             if module.id in self.ignore_slaves:
                 continue
-            if time.time() - module.last_accurate_reading_request_time > 10:
+            if time.time() - module.last_accurate_reading_request_time > request_wait_time:
                 module.last_accurate_reading_request_time = time.time()
                 self.slave_communicator.send_accurate_reading_request(module.id)
 
@@ -59,10 +68,9 @@ class BatterySystemBalancer:
         possible_cells: BatteryCellList = self.cells()
 
         if possible_cells.in_relax_time() or possible_cells.currently_balancing():
-            print(f'{time.time():.0f} Battery System is balancing.', flush=True)
             return
 
-        if possible_cells.accurate_reading_older_than(seconds=20):
+        if possible_cells.accurate_readings_older_than(seconds=self.ACCURATE_READINGS_MAX_AGE):
             self.request_accurate_readings()
             return
 
@@ -78,13 +86,17 @@ class BatterySystemBalancer:
         print(f'cell_diff: {cell_diff:.3f} V', flush=True)
         self.slave_communicator.send_balancer_cell_diff(cell_diff)
 
+        self.idle = False
+
         if cell_diff < self.min_cell_diff_for_balancing:
             print('Min cell diff was not reached')
+            self.idle = True
             return
 
         if cell_diff > self.max_cell_diff_for_balancing:
             print('[WARNING] Difference in cell voltages is too high for balancing.'
                   'The system will not perform balancing')
+            self.idle = True
             return
 
         if cell_diff > 0.010:
