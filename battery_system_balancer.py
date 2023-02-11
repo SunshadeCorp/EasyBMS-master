@@ -44,6 +44,14 @@ class BatterySystemBalancer:
         return BatteryCellList([cell for module in self.battery_system.battery_modules for cell in module.cells if
                                 module.id not in self.ignore_slaves])
 
+    def request_accurate_readings(self):
+        for module in self.battery_system.battery_modules:
+            if module.id in self.ignore_slaves:
+                continue
+            if time.time() - module.last_accurate_reading_request_time > 10:
+                module.last_accurate_reading_request_time = time.time()
+                self.slave_communicator.send_accurate_reading_request(module.id)
+
     def balance(self) -> None:
         if not self.enabled:
             return
@@ -51,15 +59,19 @@ class BatterySystemBalancer:
         possible_cells: BatteryCellList = self.cells()
 
         if possible_cells.in_relax_time() or possible_cells.currently_balancing():
-            print(f'{time.time():.0f} Battery System is balancing. {self.battery_system}', flush=True)
+            print(f'{time.time():.0f} Battery System is balancing.', flush=True)
+            return
+
+        if possible_cells.accurate_reading_older_than(seconds=20):
+            self.request_accurate_readings()
             return
 
         try:
-            highest_voltage = possible_cells.highest_voltage()
+            highest_voltage = possible_cells.highest_accurate_voltage()
         except TypeError:
             print(f'TypeError: some voltages not set! {self.battery_system}')
             return
-        lowest_voltage = possible_cells.lowest_voltage()
+        lowest_voltage = possible_cells.lowest_accurate_voltage()
 
         cell_diff: float = highest_voltage - lowest_voltage
 
@@ -88,7 +100,7 @@ class BatterySystemBalancer:
             min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.003)
 
         required_voltage: float = max(lowest_voltage + min_cell_diff, BatteryCell.soc_to_voltage(0.15))
-        cells_to_discharge: list[BatteryCell] = possible_cells.voltage_above(required_voltage)
+        cells_to_discharge: list[BatteryCell] = possible_cells.accurate_voltage_above(required_voltage)
 
         print('start discharching cells', end='')
         for cell in cells_to_discharge:

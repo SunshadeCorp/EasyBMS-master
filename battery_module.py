@@ -37,6 +37,7 @@ class BatteryModule:
 
         self.id = module_id
         self.keep_monitoring_heartbeats: bool = True
+        self.last_accurate_reading_request_time: float = 0
 
         # Events
         self.module_temp_event = MeasurementEvent()

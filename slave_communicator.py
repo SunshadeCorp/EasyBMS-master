@@ -59,6 +59,9 @@ class SlaveCommunicator:
         self._mqtt_client.publish(topic=f'esp-module/{module_number + 1}/cell/{cell_number + 1}/balance_request',
                                   payload=f'{int(balance_time_s * 1000)}')
 
+    def send_accurate_reading_request(self, module_number: int):
+        self._mqtt_client.publish(topic=f'esp-module/{module_number + 1}/read_accurate', payload='1')
+
     def send_battery_system_state(self):
         for battery_module in self._battery_system.battery_modules:
             try:
@@ -138,6 +141,7 @@ class SlaveCommunicator:
             for j in range(12):
                 self._mqtt_client.subscribe(f'esp-module/{i + 1}/cell/{j + 1}/voltage')
                 self._mqtt_client.subscribe(f'esp-module/{i + 1}/cell/{j + 1}/is_balancing')
+                self._mqtt_client.subscribe(f'esp-module/{i + 1}/accurate/cell/{j + 1}/voltage')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/module_voltage')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/module_temps')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/chip_temp')
@@ -150,10 +154,16 @@ class SlaveCommunicator:
         self._mqtt_client.publish('master/core/available', 'online', retain=True)
 
     def _handle_cell_message(self, topic, battery_module, payload):
+        accurate_reading = topic.startswith('accurate/')
+        if accurate_reading:
+            topic = topic[topic.find('/') + 1:]
         cell_number, sub_topic = self._topic_extract_number(topic)
         battery_cell = battery_module.cells[cell_number - 1]
         if sub_topic == 'voltage':
-            battery_cell.update_voltage(float(payload))
+            if accurate_reading:
+                battery_cell.update_accurate_voltage(float(payload))
+            else:
+                battery_cell.update_voltage(float(payload))
         elif sub_topic == 'is_balancing':
             if payload == '1':
                 battery_cell.balance_pin_state = True
@@ -182,7 +192,7 @@ class SlaveCommunicator:
             battery_module = self._battery_system.battery_modules[esp_number - 1]
             if topic == 'uptime':
                 self._handle_uptime_message(payload, battery_module, esp_number)
-            elif topic.startswith('cell/'):
+            elif topic.startswith('cell/') or topic.startswith('accurate/cell/'):
                 self._handle_cell_message(topic, battery_module, payload)
             elif topic == 'module_voltage':
                 battery_module.update_module_voltage(float(payload))
