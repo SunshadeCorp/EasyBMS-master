@@ -50,8 +50,16 @@ class BatteryManager:
 
     def set_limits(self):
         cells: BatteryCellList = self.battery_system.cells()
-        self.slave_communicator.send_discharge_limit(cells.lowest_voltage() > BatteryCell.soc_to_voltage(0.2))
-        self.slave_communicator.send_charge_limit(cells.highest_voltage() < BatteryCell.soc_to_voltage(0.88))
+        lowest_voltage: float = cells.lowest_voltage()
+        highest_voltage: float = cells.highest_voltage()
+        if lowest_voltage <= BatteryCell.soc_to_voltage(0.2):
+            self.slave_communicator.send_discharge_limit(False)
+        elif lowest_voltage >= BatteryCell.soc_to_voltage(0.22):
+            self.slave_communicator.send_discharge_limit(True)
+        if highest_voltage >= BatteryCell.soc_to_voltage(0.88):
+            self.slave_communicator.send_charge_limit(False)
+        elif highest_voltage <= BatteryCell.soc_to_voltage(0.86):
+            self.slave_communicator.send_charge_limit(True)
 
     def trigger_safety_disconnect(self) -> None:
         # todo: retry several times to ensure message delivery
