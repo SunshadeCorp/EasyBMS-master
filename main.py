@@ -26,6 +26,11 @@ def info_task():
     scheduler.enter(delay=2, priority=1, action=info_task)  # delay in seconds
 
 
+def set_limits_task():
+    battery_manager.set_limits()
+    scheduler.enter(delay=2, priority=1, action=set_limits_task)  # delay in seconds
+
+
 if __name__ == '__main__':
     config = get_config('config.yaml')
     scheduler = sched.scheduler()
@@ -37,6 +42,7 @@ if __name__ == '__main__':
     scheduler.enter(delay=20, priority=1, action=balance_task)
     scheduler.enter(delay=20, priority=1, action=check_heartbeats_task)
     scheduler.enter(delay=0, priority=1, action=info_task)
+    scheduler.enter(delay=20, priority=1, action=set_limits_task)
     try:
         scheduler.run()
     except KeyboardInterrupt:

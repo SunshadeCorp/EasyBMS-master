@@ -1,4 +1,5 @@
 from battery_cell import BatteryCell
+from battery_cell_list import BatteryCellList
 from battery_system import BatterySystem
 # from heartbeat_event import HeartbeatEvent
 from battery_module import BatteryModule
@@ -46,6 +47,11 @@ class BatteryManager:
 
     def balance(self) -> None:
         self.balancer.balance()
+
+    def set_limits(self):
+        cells: BatteryCellList = self.battery_system.cells()
+        self.slave_communicator.send_discharge_limit(cells.lowest_voltage() > BatteryCell.soc_to_voltage(0.2))
+        self.slave_communicator.send_charge_limit(cells.highest_voltage() < BatteryCell.soc_to_voltage(0.88))
 
     def trigger_safety_disconnect(self) -> None:
         # todo: retry several times to ensure message delivery

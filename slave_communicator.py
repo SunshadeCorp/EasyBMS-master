@@ -117,6 +117,14 @@ class SlaveCommunicator:
             ignore_slaves_string = ','.join(str(i) for i in ignore_slaves)
         self._mqtt_client.publish('master/core/config/balancing_ignore_slaves', ignore_slaves_string, retain=True)
 
+    def send_charge_limit(self, allow_charge: bool):
+        topic: str = 'reset' if allow_charge else 'set'
+        self._mqtt_client.publish(topic=f'master/can/limits/max_charge_current/{topic}', payload='0')
+
+    def send_discharge_limit(self, allow_discharge: bool):
+        topic: str = 'reset' if allow_discharge else 'set'
+        self._mqtt_client.publish(topic=f'master/can/limits/max_discharge_current/{topic}', payload='0')
+
     @staticmethod
     def _topic_extract_id(topic: str) -> (str, str,):
         extracted = topic[topic.find('/') + 1:]
