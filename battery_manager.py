@@ -52,13 +52,13 @@ class BatteryManager:
         cells: BatteryCellList = self.battery_system.cells()
         lowest_voltage: float = cells.lowest_voltage()
         highest_voltage: float = cells.highest_voltage()
-        if lowest_voltage <= BatteryCell.soc_to_voltage(0.2):
+        if lowest_voltage <= BatteryCell.soc_to_voltage(0.0):
             self.slave_communicator.send_discharge_limit(False)
-        elif lowest_voltage >= BatteryCell.soc_to_voltage(0.23):
+        elif lowest_voltage >= BatteryCell.soc_to_voltage(0.03):
             self.slave_communicator.send_discharge_limit(True)
-        if highest_voltage >= BatteryCell.soc_to_voltage(0.88):
+        if highest_voltage >= BatteryCell.soc_to_voltage(0.97):
             self.slave_communicator.send_charge_limit(False)
-        elif highest_voltage <= BatteryCell.soc_to_voltage(0.85):
+        elif highest_voltage <= BatteryCell.soc_to_voltage(0.94):
             self.slave_communicator.send_charge_limit(True)
 
     def trigger_safety_disconnect(self) -> None:
