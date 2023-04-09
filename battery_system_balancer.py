@@ -80,6 +80,7 @@ class BatterySystemBalancer:
             print(f'TypeError: some voltages not set! {self.battery_system}')
             return
         lowest_voltage = possible_cells.lowest_accurate_voltage()
+        self.slave_communicator.send_balancer_cell_min_max(lowest_voltage, highest_voltage)
 
         cell_diff: float = highest_voltage - lowest_voltage
 

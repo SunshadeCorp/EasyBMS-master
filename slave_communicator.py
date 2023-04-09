@@ -65,6 +65,10 @@ class SlaveCommunicator:
     def send_balancer_cell_diff(self, cell_diff: float):
         self._mqtt_client.publish(topic='master/core/balancer_cell_diff', payload=f'{cell_diff:.3f}', retain=True)
 
+    def send_balancer_cell_min_max(self, min_voltage: float, max_voltage: float):
+        self._mqtt_client.publish(topic='master/core/balancer_min_voltage', payload=f'{min_voltage:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/balancer_max_voltage', payload=f'{max_voltage:.3f}', retain=True)
+
     def send_battery_system_state(self):
         for battery_module in self._battery_system.battery_modules:
             try:
