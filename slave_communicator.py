@@ -1,6 +1,7 @@
-import paho.mqtt.client as mqtt
 import time
 from typing import Any, Dict
+
+import paho.mqtt.client as mqtt
 
 from battery_cell import BatteryCell
 from battery_system import BatterySystem
@@ -40,6 +41,9 @@ class SlaveCommunicator:
         self._mqtt_client.loop_start()
 
     def send_heartbeat(self):
+        if not self._mqtt_client.is_connected():
+            self._mqtt_client.reconnect()
+            print('mqtt client reconnected!', flush=True)
         self._mqtt_client.publish(topic='master/uptime', payload=f'{time.time() * 1000:.0f}')
 
     def open_battery_relays(self):
