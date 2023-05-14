@@ -1,4 +1,5 @@
 import time
+import traceback
 from typing import Any, Dict
 
 import paho.mqtt.client as mqtt
@@ -222,21 +223,26 @@ class SlaveCommunicator:
                 self._configure_esp_module(extracted_id)
 
     def _mqtt_on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
-        if msg.topic.startswith('esp-module/') and len(msg.payload) > 0:
-            payload = msg.payload.decode()
-            extracted_id, topic = self._topic_extract_id(msg.topic)
-            self._handle_esp_module_message(extracted_id, topic, payload)
-        elif msg.topic == 'master/core/config/balancing_enabled/set':
-            self.events.on_balancing_enabled_set(msg.payload.decode())
-        elif msg.topic == 'master/core/config/balancing_ignore_slaves/set':
-            payload = msg.payload.decode()
-            if payload == '' or payload.lower() == 'none':
-                self.events.on_balancing_ignore_slaves_set(set())
-            else:
-                values: list[str] = msg.payload.decode().split(',')
-                slaves: set[int] = set(int(value) for value in values)
-                self.events.on_balancing_ignore_slaves_set(slaves)
-        elif msg.topic == 'esp-total/total_voltage':
-            self._battery_system.update_voltage(float(msg.payload))
-        elif msg.topic == 'esp-total/total_current':
-            self._battery_system.update_current(float(msg.payload))
+        try:
+            if msg.topic.startswith('esp-module/') and len(msg.payload) > 0:
+                payload = msg.payload.decode()
+                extracted_id, topic = self._topic_extract_id(msg.topic)
+                self._handle_esp_module_message(extracted_id, topic, payload)
+            elif msg.topic == 'master/core/config/balancing_enabled/set':
+                self.events.on_balancing_enabled_set(msg.payload.decode())
+            elif msg.topic == 'master/core/config/balancing_ignore_slaves/set':
+                payload = msg.payload.decode()
+                if payload == '' or payload.lower() == 'none':
+                    self.events.on_balancing_ignore_slaves_set(set())
+                else:
+                    values: list[str] = msg.payload.decode().split(',')
+                    slaves: set[int] = set(int(value) for value in values)
+                    self.events.on_balancing_ignore_slaves_set(slaves)
+            elif msg.topic == 'esp-total/total_voltage':
+                self._battery_system.update_voltage(float(msg.payload))
+            elif msg.topic == 'esp-total/total_current':
+                self._battery_system.update_current(float(msg.payload))
+        except ValueError as e:
+            print('_mqtt_on_message ValueError', e, traceback.format_exc(), msg.topic, msg.payload, flush=True)
+        except Exception as e:
+            print('_mqtt_on_message Exception', e, traceback.format_exc(), msg.topic, msg.payload, flush=True)
