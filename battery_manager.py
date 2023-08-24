@@ -144,7 +144,8 @@ class BatteryManager:
     # Other event handlers
 
     def on_heartbeat_missed(self, module: BatteryModule) -> None:
-        print(f'Heartbeat missed on module: {module.id})')
+        # print(f'Heartbeat missed on module: {module.id})')
+        pass
 
     def on_heartbeat(self, module: BatteryModule) -> None:
         # print(f'Got heartbeat on module: {module.id}')

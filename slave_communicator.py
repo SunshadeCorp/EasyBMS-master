@@ -1,3 +1,4 @@
+import re
 import time
 import traceback
 from typing import Any, Dict
@@ -11,6 +12,10 @@ from utils import get_config
 
 
 class SlaveCommunicator:
+    UINT_RE: re.Pattern = re.compile(r'^\d+$')
+    DEC_RE: re.Pattern = re.compile(r'^-?\d+(\.\d+)?$')
+    TWO_DEC_RE: re.Pattern = re.compile(r'^-?\d+(\.\d+)?,-?\d+(\.\d+)?$')
+
     def __init__(self, master_config: dict, battery_system: BatterySystem):
         credentials = get_config('credentials.yaml')
         self._slave_mapping = get_config('slave_mapping.yaml')
@@ -177,10 +182,13 @@ class SlaveCommunicator:
         cell_number, sub_topic = self._topic_extract_number(topic)
         battery_cell = battery_module.cells[cell_number - 1]
         if sub_topic == 'voltage':
-            if accurate_reading:
-                battery_cell.update_accurate_voltage(float(payload))
+            if self.DEC_RE.match(payload):
+                if accurate_reading:
+                    battery_cell.update_accurate_voltage(float(payload))
+                else:
+                    battery_cell.update_voltage(float(payload))
             else:
-                battery_cell.update_voltage(float(payload))
+                print(f'esp {battery_module.id + 1} voltage >{payload}< bad data', flush=True)
         elif sub_topic == 'is_balancing':
             if payload == '1':
                 battery_cell.balance_pin_state = True
@@ -208,30 +216,41 @@ class SlaveCommunicator:
             esp_number = int(extracted_id)
             battery_module = self._battery_system.battery_modules[esp_number - 1]
             if topic == 'uptime':
-                self._handle_uptime_message(payload, battery_module, esp_number)
+                if self.UINT_RE.match(payload):
+                    self._handle_uptime_message(payload, battery_module, esp_number)
+                else:
+                    print(f'esp {esp_number} {topic} >{payload}< bad data', flush=True)
             elif topic.startswith('cell/') or topic.startswith('accurate/cell/'):
                 self._handle_cell_message(topic, battery_module, payload)
             elif topic == 'module_voltage':
-                battery_module.update_module_voltage(float(payload))
+                if self.DEC_RE.match(payload):
+                    battery_module.update_module_voltage(float(payload))
+                else:
+                    print(f'esp {esp_number} {topic} >{payload}< bad data', flush=True)
             elif topic == 'module_temps':
-                module_temps = payload.split(',')
-                battery_module.update_module_temps(float(module_temps[0]), float(module_temps[1]))
+                if self.TWO_DEC_RE.match(payload):
+                    module_temps = payload.split(',')
+                    battery_module.update_module_temps(float(module_temps[0]), float(module_temps[1]))
+                else:
+                    print(f'esp {esp_number} {topic} >{payload}< bad data', flush=True)
             elif topic == 'chip_temp':
-                battery_module.update_chip_temp(float(payload))
+                if self.DEC_RE.match(payload):
+                    battery_module.update_chip_temp(float(payload))
+                else:
+                    print(f'esp {esp_number} {topic} >{payload}< bad data', flush=True)
         elif extracted_id in self._slave_mapping['slaves']:
             if topic == 'uptime':
                 self._configure_esp_module(extracted_id)
 
     def _mqtt_on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
         try:
+            payload = msg.payload.decode()
             if msg.topic.startswith('esp-module/') and len(msg.payload) > 0:
-                payload = msg.payload.decode()
                 extracted_id, topic = self._topic_extract_id(msg.topic)
                 self._handle_esp_module_message(extracted_id, topic, payload)
             elif msg.topic == 'master/core/config/balancing_enabled/set':
-                self.events.on_balancing_enabled_set(msg.payload.decode())
+                self.events.on_balancing_enabled_set(payload)
             elif msg.topic == 'master/core/config/balancing_ignore_slaves/set':
-                payload = msg.payload.decode()
                 if payload == '' or payload.lower() == 'none':
                     self.events.on_balancing_ignore_slaves_set(set())
                 else:
@@ -239,9 +258,15 @@ class SlaveCommunicator:
                     slaves: set[int] = set(int(value) for value in values)
                     self.events.on_balancing_ignore_slaves_set(slaves)
             elif msg.topic == 'esp-total/total_voltage':
-                self._battery_system.update_voltage(float(msg.payload))
+                if self.DEC_RE.match(payload):
+                    self._battery_system.update_voltage(float(payload))
+                else:
+                    print(f'{msg.topic} >{payload}< bad data', flush=True)
             elif msg.topic == 'esp-total/total_current':
-                self._battery_system.update_current(float(msg.payload))
+                if self.DEC_RE.match(payload):
+                    self._battery_system.update_current(float(payload))
+                else:
+                    print(f'{msg.topic} >{payload}< bad data', flush=True)
         except ValueError as e:
             print('_mqtt_on_message ValueError', e, traceback.format_exc(), msg.topic, msg.payload, flush=True)
         except Exception as e:

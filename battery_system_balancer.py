@@ -89,7 +89,7 @@ class BatterySystemBalancer:
         self.idle = False
 
         if cell_diff < self.min_cell_diff_for_balancing:
-            print(f'cell_diff: {cell_diff:.3f} V', 'Min cell diff was not reached', flush=True)
+            # print(f'cell_diff: {cell_diff:.3f} V', 'Min cell diff was not reached', flush=True)
             self.idle = True
             return
 
