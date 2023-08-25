@@ -26,10 +26,10 @@ class BatteryCellList(list[BatteryCell]):
     def lowest_accurate_voltage(self) -> float:
         return min(cell.accurate_voltage for cell in self.__iter__())
 
-    def voltage_above(self, value: float) -> list[BatteryCell]:
+    def with_voltage_above(self, value: float) -> list[BatteryCell]:
         return [cell for cell in self.__iter__() if cell.voltage > value]
 
-    def accurate_voltage_above(self, value: float) -> list[BatteryCell]:
+    def with_accurate_voltage_above(self, value: float) -> list[BatteryCell]:
         return [cell for cell in self.__iter__() if cell.accurate_voltage > value]
 
     def highest_soc(self) -> float:
@@ -41,5 +41,11 @@ class BatteryCellList(list[BatteryCell]):
     def max_diff(self) -> float:
         return self.highest_voltage() - self.lowest_voltage()
 
-    def accurate_readings_older_than(self, seconds: float) -> bool:
+    def has_voltage_older_than(self, seconds: float) -> bool:
+        return any(time.time() - cell.last_voltage_time > seconds for cell in self.__iter__())
+
+    def with_voltage_older_than(self, seconds: float) -> list[BatteryCell]:
+        return [cell for cell in self.__iter__() if time.time() - cell.last_voltage_time > seconds]
+
+    def has_accurate_readings_older_than(self, seconds: float) -> bool:
         return any(time.time() - cell.last_accurate_voltage_time > seconds for cell in self.__iter__())

@@ -1,3 +1,5 @@
+import time
+
 from battery_cell import BatteryCell
 from battery_cell_list import BatteryCellList
 from battery_system import BatterySystem
@@ -8,6 +10,8 @@ from slave_communicator import SlaveCommunicator
 
 
 class BatteryManager:
+    ESP_TIMEOUT_SECONDS: int = 3 * 60
+
     def __init__(self, battery_system: BatterySystem, slave_communicator: SlaveCommunicator) -> None:
         self.battery_system: BatterySystem = battery_system
         self.slave_communicator: SlaveCommunicator = slave_communicator
@@ -56,10 +60,18 @@ class BatteryManager:
             self.slave_communicator.send_discharge_limit(False)
         elif lowest_voltage >= BatteryCell.soc_to_voltage(0.18):
             self.slave_communicator.send_discharge_limit(True)
-        if highest_voltage >= BatteryCell.soc_to_voltage(0.97):
+        if highest_voltage >= BatteryCell.soc_to_voltage(0.93):
             self.slave_communicator.send_charge_limit(False)
-        elif highest_voltage <= BatteryCell.soc_to_voltage(0.94):
+        elif highest_voltage <= BatteryCell.soc_to_voltage(0.90):
             self.slave_communicator.send_charge_limit(True)
+
+    def check_cell_voltage_times(self):
+        old_cells = self.battery_system.cells().with_voltage_older_than(self.ESP_TIMEOUT_SECONDS)
+        if len(old_cells) > 0:
+            self.trigger_safety_disconnect()
+            print(f'[CRITICAL] following cells got no update: {time.time()}\n',
+                  '\n'.join([f'Module{cell.module_id} Cell{cell.id}: {cell.last_voltage_time}' for cell in old_cells]),
+                  flush=True)
 
     def trigger_safety_disconnect(self) -> None:
         # todo: retry several times to ensure message delivery

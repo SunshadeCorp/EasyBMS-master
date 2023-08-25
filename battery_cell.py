@@ -29,6 +29,7 @@ class BatteryCell:
         self.communication_event: Events = Events(events=('send_balance_request',))
         self.soc_curve: SocCurve = SocCurve()
         self.last_discharge_time: float = 0
+        self.last_voltage_time: float = 0
         self.last_accurate_voltage_time: float = 0
         self.relax_time = self.DEFAULT_RELAX_TIME
 
@@ -55,6 +56,7 @@ class BatteryCell:
 
     def update_voltage(self, voltage: float):
         self.voltage = voltage
+        self.last_voltage_time = time.time()
         if self.has_implausible_voltage():
             self.voltage_event.on_implausible(self)
         elif self.has_critical_voltage():

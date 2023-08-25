@@ -70,7 +70,7 @@ class BatterySystemBalancer:
         if possible_cells.in_relax_time() or possible_cells.currently_balancing():
             return
 
-        if possible_cells.accurate_readings_older_than(seconds=self.ACCURATE_READINGS_MAX_AGE):
+        if possible_cells.has_accurate_readings_older_than(seconds=self.ACCURATE_READINGS_MAX_AGE):
             self.request_accurate_readings()
             return
 
@@ -113,7 +113,7 @@ class BatterySystemBalancer:
             min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.003)
 
         required_voltage: float = max(lowest_voltage + min_cell_diff, BatteryCell.soc_to_voltage(0.15))
-        cells_to_discharge: list[BatteryCell] = possible_cells.accurate_voltage_above(required_voltage)
+        cells_to_discharge: list[BatteryCell] = possible_cells.with_accurate_voltage_above(required_voltage)
 
         # print('start discharching cells', end='')
         for cell in cells_to_discharge:

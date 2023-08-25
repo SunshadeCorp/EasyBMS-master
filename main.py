@@ -21,6 +21,11 @@ def check_heartbeats_task():
     scheduler.enter(delay=5, priority=1, action=check_heartbeats_task)  # delay in seconds
 
 
+def check_cell_voltage_times_task():
+    battery_manager.check_cell_voltage_times()
+    scheduler.enter(delay=20, priority=1, action=check_cell_voltage_times_task)  # delay in seconds
+
+
 def info_task():
     slave_communicator.send_battery_system_state()
     scheduler.enter(delay=2, priority=1, action=info_task)  # delay in seconds
@@ -41,6 +46,7 @@ if __name__ == '__main__':
     scheduler.enter(delay=0, priority=1, action=heartbeat_task)
     scheduler.enter(delay=20, priority=1, action=balance_task)
     scheduler.enter(delay=20, priority=1, action=check_heartbeats_task)
+    scheduler.enter(delay=20, priority=1, action=check_cell_voltage_times_task)
     scheduler.enter(delay=0, priority=1, action=info_task)
     scheduler.enter(delay=20, priority=1, action=set_limits_task)
     try:
