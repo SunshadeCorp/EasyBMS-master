@@ -12,10 +12,6 @@ from utils import get_config
 
 
 class SlaveCommunicator:
-    UINT_RE: re.Pattern = re.compile(r'^\d+$')
-    DEC_RE: re.Pattern = re.compile(r'^-?\d+(\.\d+)?$')
-    TWO_DEC_RE: re.Pattern = re.compile(r'^-?\d+(\.\d+)?,-?\d+(\.\d+)?$')
-
     def __init__(self, master_config: dict, battery_system: BatterySystem):
         credentials = get_config('credentials.yaml')
         self._slave_mapping = get_config('slave_mapping.yaml')
@@ -182,12 +178,12 @@ class SlaveCommunicator:
         cell_number, sub_topic = self._topic_extract_number(topic)
         battery_cell = battery_module.cells[cell_number - 1]
         if sub_topic == 'voltage':
-            if self.DEC_RE.match(payload):
+            try:
                 if accurate_reading:
                     battery_cell.update_accurate_voltage(float(payload))
                 else:
                     battery_cell.update_voltage(float(payload))
-            else:
+            except ValueError:
                 print(f'esp {battery_module.id + 1} voltage >{payload}< bad data', flush=True)
         elif sub_topic == 'is_balancing':
             if payload == '1':
@@ -216,27 +212,27 @@ class SlaveCommunicator:
             esp_number = int(extracted_id)
             battery_module = self._battery_system.battery_modules[esp_number - 1]
             if topic == 'uptime':
-                if self.UINT_RE.match(payload):
+                try:
                     self._handle_uptime_message(payload, battery_module, esp_number)
-                else:
+                except ValueError:
                     print(f'esp {esp_number} {topic} >{payload}< bad data', flush=True)
             elif topic.startswith('cell/') or topic.startswith('accurate/cell/'):
                 self._handle_cell_message(topic, battery_module, payload)
             elif topic == 'module_voltage':
-                if self.DEC_RE.match(payload):
+                try:
                     battery_module.update_module_voltage(float(payload))
-                else:
+                except ValueError:
                     print(f'esp {esp_number} {topic} >{payload}< bad data', flush=True)
             elif topic == 'module_temps':
-                if self.TWO_DEC_RE.match(payload):
+                try:
                     module_temps = payload.split(',')
                     battery_module.update_module_temps(float(module_temps[0]), float(module_temps[1]))
-                else:
+                except ValueError:
                     print(f'esp {esp_number} {topic} >{payload}< bad data', flush=True)
             elif topic == 'chip_temp':
-                if self.DEC_RE.match(payload):
+                try:
                     battery_module.update_chip_temp(float(payload))
-                else:
+                except ValueError:
                     print(f'esp {esp_number} {topic} >{payload}< bad data', flush=True)
         elif extracted_id in self._slave_mapping['slaves']:
             if topic == 'uptime':
@@ -258,14 +254,14 @@ class SlaveCommunicator:
                     slaves: set[int] = set(int(value) for value in values)
                     self.events.on_balancing_ignore_slaves_set(slaves)
             elif msg.topic == 'esp-total/total_voltage':
-                if self.DEC_RE.match(payload):
+                try:
                     self._battery_system.update_voltage(float(payload))
-                else:
+                except ValueError:
                     print(f'{msg.topic} >{payload}< bad data', flush=True)
             elif msg.topic == 'esp-total/total_current':
-                if self.DEC_RE.match(payload):
+                try:
                     self._battery_system.update_current(float(payload))
-                else:
+                except ValueError:
                     print(f'{msg.topic} >{payload}< bad data', flush=True)
         except ValueError as e:
             print('_mqtt_on_message ValueError', e, traceback.format_exc(), msg.topic, msg.payload, flush=True)
