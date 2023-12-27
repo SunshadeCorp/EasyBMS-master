@@ -24,7 +24,7 @@ class BatteryModule:
     LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = -1000  # V
     UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = 1000  # V
 
-    ESP_TIMEOUT: float = 5.000  # Seconds
+    ESP_TIMEOUT: float = 20.000  # Seconds
 
     def __init__(self, module_id: int, number_of_serial_cells: int) -> None:
         # Uninitialized
@@ -37,6 +37,7 @@ class BatteryModule:
 
         self.id = module_id
         self.keep_monitoring_heartbeats: bool = True
+        self.last_accurate_reading_request_time: float = 0
 
         # Events
         self.module_temp_event = MeasurementEvent()

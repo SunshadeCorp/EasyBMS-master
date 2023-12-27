@@ -1,6 +1,9 @@
-import paho.mqtt.client as mqtt
+import re
 import time
+import traceback
 from typing import Any, Dict
+
+import paho.mqtt.client as mqtt
 
 from battery_cell import BatteryCell
 from battery_system import BatterySystem
@@ -59,6 +62,16 @@ class SlaveCommunicator:
         self._mqtt_client.publish(topic=f'esp-module/{module_number + 1}/cell/{cell_number + 1}/balance_request',
                                   payload=f'{int(balance_time_s * 1000)}')
 
+    def send_accurate_reading_request(self, module_number: int):
+        self._mqtt_client.publish(topic=f'esp-module/{module_number + 1}/read_accurate', payload='1')
+
+    def send_balancer_cell_diff(self, cell_diff: float):
+        self._mqtt_client.publish(topic='master/core/balancer_cell_diff', payload=f'{cell_diff:.3f}', retain=True)
+
+    def send_balancer_cell_min_max(self, min_voltage: float, max_voltage: float):
+        self._mqtt_client.publish(topic='master/core/balancer_min_voltage', payload=f'{min_voltage:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/balancer_max_voltage', payload=f'{max_voltage:.3f}', retain=True)
+
     def send_battery_system_state(self):
         for battery_module in self._battery_system.battery_modules:
             try:
@@ -111,6 +124,14 @@ class SlaveCommunicator:
             ignore_slaves_string = ','.join(str(i) for i in ignore_slaves)
         self._mqtt_client.publish('master/core/config/balancing_ignore_slaves', ignore_slaves_string, retain=True)
 
+    def send_charge_limit(self, allow_charge: bool):
+        topic: str = 'reset' if allow_charge else 'set'
+        self._mqtt_client.publish(topic=f'master/can/limits/max_charge_current/{topic}', payload='0')
+
+    def send_discharge_limit(self, allow_discharge: bool):
+        topic: str = 'reset' if allow_discharge else 'set'
+        self._mqtt_client.publish(topic=f'master/can/limits/max_discharge_current/{topic}', payload='0')
+
     @staticmethod
     def _topic_extract_id(topic: str) -> (str, str,):
         extracted = topic[topic.find('/') + 1:]
@@ -138,6 +159,7 @@ class SlaveCommunicator:
             for j in range(12):
                 self._mqtt_client.subscribe(f'esp-module/{i + 1}/cell/{j + 1}/voltage')
                 self._mqtt_client.subscribe(f'esp-module/{i + 1}/cell/{j + 1}/is_balancing')
+                self._mqtt_client.subscribe(f'esp-module/{i + 1}/accurate/cell/{j + 1}/voltage')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/module_voltage')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/module_temps')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/chip_temp')
@@ -150,10 +172,19 @@ class SlaveCommunicator:
         self._mqtt_client.publish('master/core/available', 'online', retain=True)
 
     def _handle_cell_message(self, topic, battery_module, payload):
+        accurate_reading = topic.startswith('accurate/')
+        if accurate_reading:
+            topic = topic[topic.find('/') + 1:]
         cell_number, sub_topic = self._topic_extract_number(topic)
         battery_cell = battery_module.cells[cell_number - 1]
         if sub_topic == 'voltage':
-            battery_cell.update_voltage(float(payload))
+            try:
+                if accurate_reading:
+                    battery_cell.update_accurate_voltage(float(payload))
+                else:
+                    battery_cell.update_voltage(float(payload))
+            except ValueError:
+                print(f'esp {battery_module.id + 1} voltage >{payload}< bad data', flush=True)
         elif sub_topic == 'is_balancing':
             if payload == '1':
                 battery_cell.balance_pin_state = True
@@ -181,36 +212,58 @@ class SlaveCommunicator:
             esp_number = int(extracted_id)
             battery_module = self._battery_system.battery_modules[esp_number - 1]
             if topic == 'uptime':
-                self._handle_uptime_message(payload, battery_module, esp_number)
-            elif topic.startswith('cell/'):
+                try:
+                    self._handle_uptime_message(payload, battery_module, esp_number)
+                except ValueError:
+                    print(f'esp {esp_number} {topic} >{payload}< bad data', flush=True)
+            elif topic.startswith('cell/') or topic.startswith('accurate/cell/'):
                 self._handle_cell_message(topic, battery_module, payload)
             elif topic == 'module_voltage':
-                battery_module.update_module_voltage(float(payload))
+                try:
+                    battery_module.update_module_voltage(float(payload))
+                except ValueError:
+                    print(f'esp {esp_number} {topic} >{payload}< bad data', flush=True)
             elif topic == 'module_temps':
-                module_temps = payload.split(',')
-                battery_module.update_module_temps(float(module_temps[0]), float(module_temps[1]))
+                try:
+                    module_temps = payload.split(',')
+                    battery_module.update_module_temps(float(module_temps[0]), float(module_temps[1]))
+                except ValueError:
+                    print(f'esp {esp_number} {topic} >{payload}< bad data', flush=True)
             elif topic == 'chip_temp':
-                battery_module.update_chip_temp(float(payload))
+                try:
+                    battery_module.update_chip_temp(float(payload))
+                except ValueError:
+                    print(f'esp {esp_number} {topic} >{payload}< bad data', flush=True)
         elif extracted_id in self._slave_mapping['slaves']:
             if topic == 'uptime':
                 self._configure_esp_module(extracted_id)
 
     def _mqtt_on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
-        if msg.topic.startswith('esp-module/') and len(msg.payload) > 0:
+        try:
             payload = msg.payload.decode()
-            extracted_id, topic = self._topic_extract_id(msg.topic)
-            self._handle_esp_module_message(extracted_id, topic, payload)
-        elif msg.topic == 'master/core/config/balancing_enabled/set':
-            self.events.on_balancing_enabled_set(msg.payload.decode())
-        elif msg.topic == 'master/core/config/balancing_ignore_slaves/set':
-            payload = msg.payload.decode()
-            if payload == '' or payload.lower() == 'none':
-                self.events.on_balancing_ignore_slaves_set(set())
-            else:
-                values: list[str] = msg.payload.decode().split(',')
-                slaves: set[int] = set(int(value) for value in values)
-                self.events.on_balancing_ignore_slaves_set(slaves)
-        elif msg.topic == 'esp-total/total_voltage':
-            self._battery_system.update_voltage(float(msg.payload))
-        elif msg.topic == 'esp-total/total_current':
-            self._battery_system.update_current(float(msg.payload))
+            if msg.topic.startswith('esp-module/') and len(msg.payload) > 0:
+                extracted_id, topic = self._topic_extract_id(msg.topic)
+                self._handle_esp_module_message(extracted_id, topic, payload)
+            elif msg.topic == 'master/core/config/balancing_enabled/set':
+                self.events.on_balancing_enabled_set(payload)
+            elif msg.topic == 'master/core/config/balancing_ignore_slaves/set':
+                if payload == '' or payload.lower() == 'none':
+                    self.events.on_balancing_ignore_slaves_set(set())
+                else:
+                    values: list[str] = msg.payload.decode().split(',')
+                    slaves: set[int] = set(int(value) for value in values)
+                    self.events.on_balancing_ignore_slaves_set(slaves)
+            elif msg.topic == 'esp-total/total_voltage':
+                try:
+                    self._battery_system.update_voltage(float(payload))
+                except ValueError:
+                    print(f'{msg.topic} >{payload}< bad data', flush=True)
+            elif msg.topic == 'esp-total/total_current':
+                try:
+                    self._battery_system.update_current(float(payload))
+                except ValueError:
+                    print(f'{msg.topic} >{payload}< bad data', flush=True)
+        except ValueError as e:
+            print('_mqtt_on_message ValueError', e, traceback.format_exc(), msg.topic, msg.payload, flush=True)
+        except Exception as e:
+            print('_mqtt_on_message Exception', e, traceback.format_exc(), msg.topic, msg.payload, flush=True)

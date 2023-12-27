@@ -19,6 +19,7 @@ class BatteryCell:
     def __init__(self, cell_id: int, module_id: int) -> None:
         # Uninitialized values
         self.voltage: float or None = None
+        self.accurate_voltage: float or None = None
         self.balance_pin_state: bool or None = False
 
         # Initialized values
@@ -28,6 +29,8 @@ class BatteryCell:
         self.communication_event: Events = Events(events=('send_balance_request',))
         self.soc_curve: SocCurve = SocCurve()
         self.last_discharge_time: float = 0
+        self.last_voltage_time: float = 0
+        self.last_accurate_voltage_time: float = 0
         self.relax_time = self.DEFAULT_RELAX_TIME
 
     def __str__(self):
@@ -53,12 +56,17 @@ class BatteryCell:
 
     def update_voltage(self, voltage: float):
         self.voltage = voltage
+        self.last_voltage_time = time.time()
         if self.has_implausible_voltage():
             self.voltage_event.on_implausible(self)
         elif self.has_critical_voltage():
             self.voltage_event.on_critical(self)
         elif self.has_warning_voltage():
             self.voltage_event.on_warning(self)
+
+    def update_accurate_voltage(self, voltage: float):
+        self.accurate_voltage = voltage
+        self.last_accurate_voltage_time = time.time()
 
     def is_relaxing(self) -> bool:
         now: float = time.time()
