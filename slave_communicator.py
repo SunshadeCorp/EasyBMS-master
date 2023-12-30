@@ -55,7 +55,7 @@ class SlaveCommunicator:
         self._mqtt_client.publish(topic='master/can/limits/max_discharge_current/set', payload='0')
         self._mqtt_client.publish(topic='master/can/limits/max_charge_current/set', payload='0')
 
-        self._mqtt_client.publish(topic='master/relays/disconnect_reason', payload=reason, retain=True)
+        self._mqtt_client.publish(topic='master/core/safety_disconnect_reason', payload=reason, retain=True)
 
     def close_battery_perform_precharge(self):
         self._mqtt_client.publish(topic='master/relays/perform_precharge', payload='on')
