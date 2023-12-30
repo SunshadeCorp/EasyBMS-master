@@ -45,7 +45,7 @@ class SlaveCommunicator:
     def send_heartbeat(self):
         self._mqtt_client.publish(topic='master/uptime', payload=f'{time.time() * 1000:.0f}')
 
-    def open_battery_relays(self, reason : str = None):
+    def open_battery_relays(self, reason: str = None):
         print('open_battery_relays called.')
         self._mqtt_client.publish(topic='master/relays/battery_plus/set', payload='off')
         self._mqtt_client.publish(topic='master/relays/battery_precharge/set', payload='off')

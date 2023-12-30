@@ -89,7 +89,6 @@ class BatterySystemBalancer:
         self.idle = False
 
         if cell_diff < self.min_cell_diff_for_balancing:
-            # print(f'cell_diff: {cell_diff:.3f} V', 'Min cell diff was not reached', flush=True)
             self.idle = True
             return
 
@@ -115,10 +114,7 @@ class BatterySystemBalancer:
         required_voltage: float = max(lowest_voltage + min_cell_diff, BatteryCell.soc_to_voltage(0.15))
         cells_to_discharge: list[BatteryCell] = possible_cells.with_accurate_voltage_above(required_voltage)
 
-        # print('start discharching cells', end='')
         for cell in cells_to_discharge:
-            # print(f'{cell.module_id}:{cell.id}({cell.voltage:.3f}V) ', end='')
             cell.start_balance_discharge(self.balance_discharge_time)
-        # print('.\n')
 
         # Cells are now discharging until the BMS slave resets the balance pins

@@ -10,7 +10,8 @@ from slave_communicator import SlaveCommunicator
 
 
 class BatteryManager:
-    ESP_TIMEOUT_SECONDS: int = 3 * 60
+    ESP_TIMEOUT_WARNING_SECONDS: int = 60
+    ESP_TIMEOUT_CRITICAL_SECONDS: int = 120 * 60
 
     def __init__(self, battery_system: BatterySystem, slave_communicator: SlaveCommunicator) -> None:
         self.battery_system: BatterySystem = battery_system
@@ -66,15 +67,22 @@ class BatteryManager:
             self.slave_communicator.send_charge_limit(True)
 
     def check_cell_voltage_times(self):
-        old_cells = self.battery_system.cells().with_voltage_older_than(self.ESP_TIMEOUT_SECONDS)
-        if len(old_cells) > 0:
+        timeout_cells = self.battery_system.cells().with_voltage_older_than(self.ESP_TIMEOUT_CRITICAL_SECONDS)
+        if len(timeout_cells) > 0:
             message = f'[CRITICAL] following cells got no update: {time.time()}\n'
-            message += '\n'.join([f'Module{cell.module_id} Cell{cell.id}: {cell.last_voltage_time}' for cell in old_cells])
-                  
+            message += '\n'.join([f'Module{cell.module_id} Cell{cell.id}: {cell.last_voltage_time}' for cell in timeout_cells])
+            print(message, flush=True) 
             self.trigger_safety_disconnect(message)
-            print(message, flush=True)
+            return
+        
+        timeout_cells = self.battery_system.cells().with_voltage_older_than(self.ESP_TIMEOUT_WARNING_SECONDS)
+        if len(timeout_cells) > 0:
+            message = f'[WARNING] following cells got no update: {time.time()}\n'
+            message += '\n'.join([f'Module{cell.module_id} Cell{cell.id}: {cell.last_voltage_time}' for cell in timeout_cells])
+            print(message, flush=True) 
+            
 
-    def trigger_safety_disconnect(self, reason : str) -> None:
+    def trigger_safety_disconnect(self, reason: str) -> None:
         self.slave_communicator.open_battery_relays(reason)
 
     # Event handling for critical events
