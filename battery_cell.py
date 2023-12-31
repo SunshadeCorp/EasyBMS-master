@@ -9,16 +9,22 @@ from measurement import MeasurementLimits
 
 
 class BatteryCell:
-    limits: MeasurementLimits = MeasurementLimits()
-    # TODO
     LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = 0  # V
     UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE: float = 10  # V
     LOWER_VOLTAGE_LIMIT_CRITICAL: float = 3.0  # V
     UPPER_VOLTAGE_LIMIT_CRITICAL: float = 4.2  # V
     LOWER_VOLTAGE_LIMIT_WARNING: float = 3.2  # V
     UPPER_VOLTAGE_LIMIT_WARNING: float = 4.15  # V
-    DEFAULT_RELAX_TIME: float = 1.0  # Seconds
 
+    limits: MeasurementLimits = MeasurementLimits()
+    limits.critical_lower = LOWER_VOLTAGE_LIMIT_CRITICAL
+    limits.critical_upper = UPPER_VOLTAGE_LIMIT_CRITICAL
+    limits.implausible_lower = LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE
+    limits.implausible_upper = UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE
+    limits.warning_lower = LOWER_VOLTAGE_LIMIT_WARNING
+    limits.warning_upper = UPPER_VOLTAGE_LIMIT_WARNING
+
+    DEFAULT_RELAX_TIME: float = 1.0  # Seconds
     INTERNAL_IMPEDANCE: float = 0.000975  # Ohm, for 2P cells
 
     def __init__(self, cell_id: int, module_id: int) -> None:
