@@ -7,6 +7,7 @@ import paho.mqtt.client as mqtt
 
 from battery_cell import BatteryCell
 from battery_system import BatterySystem
+from battery_module import BatteryModule
 from slave_communicator_events import SlaveCommunicatorEvents
 from utils import get_config
 
@@ -80,9 +81,9 @@ class SlaveCommunicator:
                 min_cell: BatteryCell = battery_module.min_voltage_cell()
                 max_cell: BatteryCell = battery_module.max_voltage_cell()
                 self._mqtt_client.publish(topic=f'esp-module/{min_cell.module_id + 1}/min_cell_voltage',
-                                          payload=f'{min_cell.voltage}')
+                                          payload=f'{min_cell.voltage.value}')
                 self._mqtt_client.publish(topic=f'esp-module/{max_cell.module_id + 1}/max_cell_voltage',
-                                          payload=f'{max_cell.voltage}')
+                                          payload=f'{max_cell.voltage.value}')
             except TypeError:
                 pass
         try:
@@ -173,18 +174,18 @@ class SlaveCommunicator:
         self._mqtt_client.subscribe('master/core/config/balancing_ignore_slaves/set')
         self._mqtt_client.publish('master/core/available', 'online', retain=True)
 
-    def _handle_cell_message(self, topic, battery_module, payload):
+    def _handle_cell_message(self, topic, battery_module: BatteryModule, payload):
         accurate_reading = topic.startswith('accurate/')
         if accurate_reading:
             topic = topic[topic.find('/') + 1:]
         cell_number, sub_topic = self._topic_extract_number(topic)
-        battery_cell = battery_module.cells[cell_number - 1]
+        battery_cell: BatteryCell = battery_module.cells[cell_number - 1]
         if sub_topic == 'voltage':
             try:
                 if accurate_reading:
-                    battery_cell.update_accurate_voltage(float(payload))
+                    battery_cell.accurate_voltage.update(float(payload))
                 else:
-                    battery_cell.update_voltage(float(payload))
+                    battery_cell.voltage.update(float(payload))
             except ValueError:
                 print(f'esp {battery_module.id + 1} voltage >{payload}< bad data', flush=True)
         elif sub_topic == 'is_balancing':
@@ -212,7 +213,7 @@ class SlaveCommunicator:
     def _handle_esp_module_message(self, extracted_id, topic, payload):  # noqa: C901
         if extracted_id.isdigit():
             esp_number = int(extracted_id)
-            battery_module = self._battery_system.battery_modules[esp_number - 1]
+            battery_module: BatteryModule = self._battery_system.battery_modules[esp_number - 1]
             if topic == 'uptime':
                 try:
                     self._handle_uptime_message(payload, battery_module, esp_number)
@@ -222,18 +223,19 @@ class SlaveCommunicator:
                 self._handle_cell_message(topic, battery_module, payload)
             elif topic == 'module_voltage':
                 try:
-                    battery_module.update_module_voltage(float(payload))
+                    battery_module.voltage.update(float(payload))
                 except ValueError:
                     print(f'esp {esp_number} {topic} >{payload}< bad data', flush=True)
             elif topic == 'module_temps':
                 try:
                     module_temps = payload.split(',')
-                    battery_module.update_module_temps(float(module_temps[0]), float(module_temps[1]))
+                    battery_module.module_temp1.update(float(module_temps[0]))
+                    battery_module.module_temp2.update(float(module_temps[1]))
                 except ValueError:
                     print(f'esp {esp_number} {topic} >{payload}< bad data', flush=True)
             elif topic == 'chip_temp':
                 try:
-                    battery_module.update_chip_temp(float(payload))
+                    battery_module.chip_temp.update(float(payload))
                 except ValueError:
                     print(f'esp {esp_number} {topic} >{payload}< bad data', flush=True)
         elif extracted_id in self._slave_mapping['slaves']:
@@ -257,12 +259,12 @@ class SlaveCommunicator:
                     self.events.on_balancing_ignore_slaves_set(slaves)
             elif msg.topic == 'esp-total/total_voltage':
                 try:
-                    self._battery_system.update_voltage(float(payload))
+                    self._battery_system.voltage.update(float(payload))
                 except ValueError:
                     print(f'{msg.topic} >{payload}< bad data', flush=True)
             elif msg.topic == 'esp-total/total_current':
                 try:
-                    self._battery_system.update_current(float(payload))
+                    self._battery_system.current.update(float(payload))
                 except ValueError:
                     print(f'{msg.topic} >{payload}< bad data', flush=True)
         except ValueError as e:
