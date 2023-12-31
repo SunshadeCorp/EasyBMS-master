@@ -9,12 +9,12 @@ class MeasurementEvent(Events):
 
 class MeasurementLimits:
     def __init__(self):
-        self.warning_upper: float = None
-        self.warning_lower: float = None
-        self.critical_upper: float = None
-        self.critical_lower: float = None
-        self.implausible_upper: float = None
-        self.implausible_lower: float = None
+        self.warning_upper: float or None = None
+        self.warning_lower: float or None = None
+        self.critical_upper: float or None = None
+        self.critical_lower: float or None = None
+        self.implausible_upper: float or None = None
+        self.implausible_lower: float or None = None
 
 
 class Measurement:
