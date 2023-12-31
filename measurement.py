@@ -6,6 +6,7 @@ from events import Events
 class MeasurementEvent(Events):
     __events__ = ('on_critical', 'on_warning', 'on_implausible')
 
+
 class MeasurementLimits:
     def __init__(self):
         self.warning_upper: float = None
@@ -13,7 +14,8 @@ class MeasurementLimits:
         self.critical_upper: float = None
         self.critical_lower: float = None
         self.implausible_upper: float = None
-        self.implausible_lower: float  = None
+        self.implausible_lower: float = None
+
 
 class Measurement:
     def __init__(self, limits: MeasurementLimits):
@@ -36,7 +38,7 @@ class Measurement:
 
     def has_warning_value(self) -> bool:
         return not (self.warning_lower <= self.value <= self.warning_upper)
-    
+
     def update(self, value: float):
         self.value = value
         time.time()
@@ -57,4 +59,3 @@ class Measurement:
             self.warning_counter = 0
             self.implausible_counter = 0
             self.critical_counter = 0
-        

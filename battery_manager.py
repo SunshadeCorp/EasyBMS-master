@@ -75,16 +75,15 @@ class BatteryManager:
         if len(timeout_cells) > 0:
             message = f'[CRITICAL] following cells got no update: {time.time()}\n'
             message += '\n'.join([f'Module{cell.module_id} Cell{cell.id}: {cell.last_voltage_time}' for cell in timeout_cells])
-            print(message, flush=True) 
+            print(message, flush=True)
             self.trigger_safety_disconnect(message)
             return
-        
+
         timeout_cells = self.battery_system.cells().with_voltage_older_than(self.ESP_TIMEOUT_WARNING_SECONDS)
         if len(timeout_cells) > 0:
             message = f'[WARNING] following cells got no update: {time.time()}\n'
             message += '\n'.join([f'Module{cell.module_id} Cell{cell.id}: {cell.last_voltage_time}' for cell in timeout_cells])
-            print(message, flush=True) 
-            
+            print(message, flush=True)
 
     def trigger_safety_disconnect(self, reason: str) -> None:
         self.slave_communicator.open_battery_relays(reason)

@@ -3,7 +3,6 @@ from typing import List
 
 from battery_cell import BatteryCell
 from heartbeat_event import HeartbeatEvent
-from measurement import MeasurementEvent
 from measurement import MeasurementLimits
 from measurement import Measurement
 

@@ -4,7 +4,6 @@ from typing import List
 from battery_cell import BatteryCell
 from battery_cell_list import BatteryCellList
 from battery_module import BatteryModule
-from measurement import MeasurementEvent
 from measurement import MeasurementLimits
 from measurement import Measurement
 
