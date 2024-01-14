@@ -28,6 +28,7 @@ def check_cell_voltage_times_task():
 
 def info_task():
     slave_communicator.send_battery_system_state()
+    slave_communicator.send_limits()
     scheduler.enter(delay=2, priority=1, action=info_task)  # delay in seconds
 
 

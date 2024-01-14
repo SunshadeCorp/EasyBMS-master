@@ -78,6 +78,23 @@ class SlaveCommunicator:
         self._mqtt_client.publish(topic='master/core/balancer_min_voltage', payload=f'{min_voltage:.3f}', retain=True)
         self._mqtt_client.publish(topic='master/core/balancer_max_voltage', payload=f'{max_voltage:.3f}', retain=True)
 
+    def send_limits(self):
+        # master/core/limits/system/voltage
+        self._mqtt_client.publish(topic='master/core/limits/system/voltage/upper_implausible', payload=f'{self._battery_system.voltage_limits.implausible_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/system/voltage/lower_implausible', payload=f'{self._battery_system.voltage_limits.implausible_lower:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/system/voltage/upper_critical', payload=f'{self._battery_system.voltage_limits.critical_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/system/voltage/lower_critical', payload=f'{self._battery_system.voltage_limits.critical_lower:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/system/voltage/upper_warning', payload=f'{self._battery_system.voltage_limits.warning_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/system/voltage/lower_warning', payload=f'{self._battery_system.voltage_limits.warning_lower:.3f}', retain=True)
+
+        # master/core/limits/system/current
+        self._mqtt_client.publish(topic='master/core/limits/system/current/upper_implausible', payload=f'{self._battery_system.current_limits.implausible_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/system/current/lower_implausible', payload=f'{self._battery_system.current_limits.implausible_lower:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/system/current/upper_critical', payload=f'{self._battery_system.current_limits.critical_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/system/current/lower_critical', payload=f'{self._battery_system.current_limits.critical_lower:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/system/current/upper_warning', payload=f'{self._battery_system.current_limits.warning_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/system/current/lower_warning', payload=f'{self._battery_system.current_limits.warning_lower:.3f}', retain=True)
+
     def send_battery_system_state(self):
         for battery_module in self._battery_system.battery_modules:
             try:
