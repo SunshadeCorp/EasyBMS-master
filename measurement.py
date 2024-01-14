@@ -16,12 +16,11 @@ class MeasurementLimits:
         self.implausible_upper: float or None = None
         self.implausible_lower: float or None = None
 
-
 class Measurement:
-    def __init__(self, limits: MeasurementLimits):
+    def __init__(self, limits: MeasurementLimits, owner):
         self.value: float or None = None
         self.timestamp: float or None = None
-
+        self.owner = owner
         self.limits = limits
 
         self.implausible_counter: int = 0
@@ -45,16 +44,16 @@ class Measurement:
 
         if self.has_implausible_value():
             self.implausible_counter += 1
-            self.event.on_implausible(self)
+            self.event.on_implausible(self.owner)
         elif self.has_critical_value():
             self.critical_counter += 1
             self.implausible_counter = 0
-            self.event.on_critical(self)
+            self.event.on_critical(self.owner)
         elif self.has_warning_value():
             self.warning_counter += 1
             self.implausible_counter = 0
             self.critical_counter = 0
-            self.event.on_warning(self)
+            self.event.on_warning(self.owner)
         else:
             self.warning_counter = 0
             self.implausible_counter = 0

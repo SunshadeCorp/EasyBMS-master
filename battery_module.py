@@ -51,10 +51,10 @@ class BatteryModule:
         self.voltage_limits.critical_upper = number_of_serial_cells * BatteryCell.UPPER_VOLTAGE_LIMIT_CRITICAL
         self.voltage_limits.warning_lower = number_of_serial_cells * BatteryCell.LOWER_VOLTAGE_LIMIT_WARNING
         self.voltage_limits.warning_upper = number_of_serial_cells * BatteryCell.UPPER_VOLTAGE_LIMIT_WARNING
-        self.voltage: Measurement = Measurement(self.voltage_limits)
-        self.module_temp1: Measurement = Measurement(self.module_temp_limits)
-        self.module_temp2: Measurement = Measurement(self.module_temp_limits)
-        self.chip_temp: Measurement = Measurement(self.chip_temp_limits)
+        self.voltage: Measurement = Measurement(self, self.voltage_limits)
+        self.module_temp1: Measurement = Measurement(self, self.module_temp_limits)
+        self.module_temp2: Measurement = Measurement(self, self.module_temp_limits)
+        self.chip_temp: Measurement = Measurement(self, self.chip_temp_limits)
 
         # Uninitialized
 

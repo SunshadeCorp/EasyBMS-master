@@ -41,8 +41,8 @@ class BatterySystem:
         self.voltage_limits.warning_lower = cells_total * BatteryCell.LOWER_VOLTAGE_LIMIT_WARNING
         self.voltage_limits.warning_lower = cells_total * BatteryCell.UPPER_VOLTAGE_LIMIT_WARNING
 
-        self.voltage: Measurement = Measurement(self.voltage_limits)
-        self.current: Measurement = Measurement(self.current_limits)
+        self.voltage: Measurement = Measurement(self, self.voltage_limits)
+        self.current: Measurement = Measurement(self, self.current_limits)
 
         self.battery_modules: List[BatteryModule] = []
         for module_id in range(0, number_of_modules):

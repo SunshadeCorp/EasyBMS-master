@@ -28,12 +28,11 @@ class BatteryCell:
     INTERNAL_IMPEDANCE: float = 0.000975  # Ohm, for 2P cells
 
     def __init__(self, cell_id: int, module_id: int) -> None:
-        self.voltage: Measurement = Measurement(self.limits)
-        self.accurate_voltage: Measurement = Measurement(self.limits)
+        self.voltage: Measurement = Measurement(self, self.limits)
+        self.accurate_voltage: Measurement = Measurement(self, self.limits)
         self.balance_pin_state: bool or None = False
         self.id: int = cell_id
         self.module_id: int = module_id
-        self.voltage_event: MeasurementEvent = MeasurementEvent()
         self.communication_event: Events = Events(events=('send_balance_request',))
         self.soc_curve: SocCurve = SocCurve()
         self.last_discharge_time: float = 0
