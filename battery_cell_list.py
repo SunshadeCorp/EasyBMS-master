@@ -15,22 +15,22 @@ class BatteryCellList(list[BatteryCell]):
         return any(cell.is_balance_discharging() for cell in self.__iter__())
 
     def highest_voltage(self) -> float:
-        return max(cell.voltage for cell in self.__iter__())
+        return max(cell.voltage.value for cell in self.__iter__())
 
     def highest_accurate_voltage(self) -> float:
-        return max(cell.accurate_voltage for cell in self.__iter__())
+        return max(cell.accurate_voltage.value for cell in self.__iter__())
 
     def lowest_voltage(self) -> float:
-        return min(cell.voltage for cell in self.__iter__())
+        return min(cell.voltage.value for cell in self.__iter__())
 
     def lowest_accurate_voltage(self) -> float:
-        return min(cell.accurate_voltage for cell in self.__iter__())
+        return min(cell.accurate_voltage.value for cell in self.__iter__())
 
     def with_voltage_above(self, value: float) -> list[BatteryCell]:
-        return [cell for cell in self.__iter__() if cell.voltage > value]
+        return [cell for cell in self.__iter__() if cell.voltage.value > value]
 
     def with_accurate_voltage_above(self, value: float) -> list[BatteryCell]:
-        return [cell for cell in self.__iter__() if cell.accurate_voltage > value]
+        return [cell for cell in self.__iter__() if cell.accurate_voltage.value > value]
 
     def highest_soc(self) -> float:
         return max(cell.soc() for cell in self.__iter__())
