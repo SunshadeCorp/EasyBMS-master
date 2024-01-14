@@ -42,10 +42,10 @@ class BatteryCellList(list[BatteryCell]):
         return self.highest_voltage() - self.lowest_voltage()
 
     def has_voltage_older_than(self, seconds: float) -> bool:
-        return any(time.time() - cell.voltage.timestamp > seconds for cell in self.__iter__())
+        return any(not cell.voltage.initialized() or cell.voltage.age_seconds() > seconds for cell in self.__iter__())
 
     def with_voltage_older_than(self, seconds: float) -> list[BatteryCell]:
-        return [cell for cell in self.__iter__() if time.time() - cell.voltage.timestamp > seconds]
+        return [cell for cell in self.__iter__() if not cell.voltage.initialized() or cell.voltage.age_seconds() > seconds]
 
     def has_accurate_readings_older_than(self, seconds: float) -> bool:
-        return any(time.time() - cell.accurate_voltage.timestamp > seconds for cell in self.__iter__())
+        return any(not cell.voltage.initialized() or cell.accurate_voltage.age_seconds() > seconds for cell in self.__iter__())

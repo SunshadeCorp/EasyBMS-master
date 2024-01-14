@@ -20,6 +20,7 @@ class Measurement:
     def __init__(self, owner, limits: MeasurementLimits):
         self.value: float or None = None
         self.timestamp: float or None = None
+        self.init = False
         self.owner = owner
         self.limits = limits
 
@@ -40,7 +41,8 @@ class Measurement:
 
     def update(self, value: float):
         self.value = value
-        time.time()
+        self.timestamp = time.time()
+        self.init = True
 
         if self.has_implausible_value():
             self.implausible_counter += 1
@@ -58,3 +60,10 @@ class Measurement:
             self.warning_counter = 0
             self.implausible_counter = 0
             self.critical_counter = 0
+
+    def initialized(self) -> bool:
+        return self.init
+
+    def age_seconds(self) -> float:
+        return time.time() - self.timestamp
+
