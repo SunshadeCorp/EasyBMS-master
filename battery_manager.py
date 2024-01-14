@@ -98,7 +98,7 @@ class BatteryManager:
     def on_critical_battery_system_current(self, system: BatterySystem) -> None:
         message = f'[CRITICAL] battery system current: {system.current.value}A'
         print(message, flush=True)
-        if system.voltage.critical_counter > 4:
+        if system.current.critical_counter > 4:
             self.trigger_safety_disconnect(message)
 
     def on_critical_module_temperature(self, module: BatteryModule) -> None:
@@ -126,12 +126,12 @@ class BatteryManager:
             self.trigger_safety_disconnect(message)
 
     # Event handling for warning events
+            
+    def on_battery_system_voltage_warning(self, system: BatterySystem) -> None:
+        print(f'[WARNING] battery system voltage: {system.voltage.value}V')
 
     def on_battery_system_current_warning(self, system: BatterySystem) -> None:
-        print(f'[WARNING] battery system current: {system.current.value}V')
-
-    def on_battery_system_voltage_warning(self, system: BatterySystem) -> None:
-        print(f'[WARNING] battery system voltage: {system.voltage.value}A')
+        print(f'[WARNING] battery system current: {system.current.value}A')
 
     def on_module_temperature_warning(self, module: BatteryModule) -> None:
         print(f'[WARNING] module temperature on module {module.id}: {module.module_temp1.value}°C, {module.module_temp2.value}°C')
