@@ -123,7 +123,7 @@ class SlaveCommunicator:
         self._mqtt_client.publish(topic='master/core/limits/module/module_temp/lower_warning', payload=f'{module_temp_limits.warning_lower:.3f}', retain=True)
 
         # master/core/limits/cell/voltage
-        cell_voltage_limits = self._battery_system.battery_modules[0].module_temp_limits
+        cell_voltage_limits = self._battery_system.battery_modules[0].cells[0].limits
         self._mqtt_client.publish(topic='master/core/limits/cell/voltage/upper_implausible', payload=f'{cell_voltage_limits.implausible_upper:.3f}', retain=True)
         self._mqtt_client.publish(topic='master/core/limits/cell/voltage/lower_implausible', payload=f'{cell_voltage_limits.implausible_lower:.3f}', retain=True)
         self._mqtt_client.publish(topic='master/core/limits/cell/voltage/upper_critical', payload=f'{cell_voltage_limits.critical_upper:.3f}', retain=True)
