@@ -31,13 +31,13 @@ class Measurement:
         self.event = MeasurementEvent()
 
     def has_implausible_value(self) -> bool:
-        return not (self.implausible_lower <= self.value <= self.implausible_upper)
+        return not (self.limits.implausible_lower <= self.value <= self.limits.implausible_upper)
 
     def has_critical_value(self) -> bool:
-        return not (self.critical_lower <= self.value <= self.critical_upper)
+        return not (self.limits.critical_lower <= self.value <= self.limits.critical_upper)
 
     def has_warning_value(self) -> bool:
-        return not (self.warning_lower <= self.value <= self.warning_upper)
+        return not (self.limits.warning_lower <= self.value <= self.limits.warning_upper)
 
     def update(self, value: float):
         self.value = value
