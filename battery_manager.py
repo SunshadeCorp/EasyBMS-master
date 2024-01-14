@@ -128,10 +128,10 @@ class BatteryManager:
     # Event handling for warning events
 
     def on_battery_system_current_warning(self, system: BatterySystem) -> None:
-        print(f'[WARNING] battery system voltage: {system.voltage.value}V')
+        print(f'[WARNING] battery system current: {system.current.value}V')
 
     def on_battery_system_voltage_warning(self, system: BatterySystem) -> None:
-        print(f'[WARNING] battery system current: {system.current.value}A')
+        print(f'[WARNING] battery system voltage: {system.voltage.value}A')
 
     def on_module_temperature_warning(self, module: BatteryModule) -> None:
         print(f'[WARNING] module temperature on module {module.id}: {module.module_temp1.value}°C, {module.module_temp2.value}°C')
