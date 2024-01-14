@@ -17,7 +17,7 @@ class MeasurementLimits:
         self.implausible_lower: float or None = None
 
 class Measurement:
-    def __init__(self, limits: MeasurementLimits, owner):
+    def __init__(self, owner, limits: MeasurementLimits):
         self.value: float or None = None
         self.timestamp: float or None = None
         self.owner = owner
