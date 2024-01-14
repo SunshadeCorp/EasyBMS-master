@@ -39,7 +39,7 @@ class BatterySystem:
         self.voltage_limits.critical_lower = cells_total * BatteryCell.LOWER_VOLTAGE_LIMIT_CRITICAL
         self.voltage_limits.critical_upper = cells_total * BatteryCell.UPPER_VOLTAGE_LIMIT_CRITICAL
         self.voltage_limits.warning_lower = cells_total * BatteryCell.LOWER_VOLTAGE_LIMIT_WARNING
-        self.voltage_limits.warning_lower = cells_total * BatteryCell.UPPER_VOLTAGE_LIMIT_WARNING
+        self.voltage_limits.warning_upper = cells_total * BatteryCell.UPPER_VOLTAGE_LIMIT_WARNING
 
         self.voltage: Measurement = Measurement(self, self.voltage_limits)
         self.current: Measurement = Measurement(self, self.current_limits)
