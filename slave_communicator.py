@@ -41,9 +41,13 @@ class SlaveCommunicator:
         #     self._lines_to_write[i + 1] = []
 
         self._mqtt_client.loop_start()
+        self.start_time = time.time()
+
+    def uptime_seconds(self) -> float:
+        return time.time() - self.start_time 
 
     def send_heartbeat(self):
-        self._mqtt_client.publish(topic='master/uptime', payload=f'{time.time() * 1000:.0f}')
+        self._mqtt_client.publish(topic='master/uptime', payload=f'{self.uptime_seconds() * 1000:.0f}')
 
     def open_battery_relays(self, reason: str = None):
         print('open_battery_relays called.')

@@ -16,7 +16,6 @@ class BatteryManager:
     def __init__(self, battery_system: BatterySystem, slave_communicator: SlaveCommunicator) -> None:
         self.battery_system: BatterySystem = battery_system
         self.slave_communicator: SlaveCommunicator = slave_communicator
-
         self.balancer = BatterySystemBalancer(battery_system, slave_communicator)
 
         # Register battery system event handlers
@@ -192,3 +191,4 @@ class BatteryManager:
     def on_heartbeat(self, module: BatteryModule) -> None:
         # print(f'Got heartbeat on module: {module.id}')
         pass
+
