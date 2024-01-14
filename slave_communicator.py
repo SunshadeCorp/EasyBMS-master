@@ -95,6 +95,42 @@ class SlaveCommunicator:
         self._mqtt_client.publish(topic='master/core/limits/system/current/upper_warning', payload=f'{self._battery_system.current_limits.warning_upper:.3f}', retain=True)
         self._mqtt_client.publish(topic='master/core/limits/system/current/lower_warning', payload=f'{self._battery_system.current_limits.warning_lower:.3f}', retain=True)
 
+        # master/core/limits/module/voltage
+        module_voltage_limits = self._battery_system.battery_modules[0].voltage_limits
+        self._mqtt_client.publish(topic='master/core/limits/module/voltage/upper_implausible', payload=f'{module_voltage_limits.implausible_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/module/voltage/lower_implausible', payload=f'{module_voltage_limits.implausible_lower:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/module/voltage/upper_critical', payload=f'{module_voltage_limits.critical_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/module/voltage/lower_critical', payload=f'{module_voltage_limits.critical_lower:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/module/voltage/upper_warning', payload=f'{module_voltage_limits.warning_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/module/voltage/lower_warning', payload=f'{module_voltage_limits.warning_lower:.3f}', retain=True)
+
+        # master/core/limits/module/chip_temp
+        chip_temp_limits = self._battery_system.battery_modules[0].chip_temp_limits
+        self._mqtt_client.publish(topic='master/core/limits/module/chip_temp/upper_implausible', payload=f'{chip_temp_limits.implausible_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/module/chip_temp/lower_implausible', payload=f'{chip_temp_limits.implausible_lower:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/module/chip_temp/upper_critical', payload=f'{chip_temp_limits.critical_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/module/chip_temp/lower_critical', payload=f'{chip_temp_limits.critical_lower:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/module/chip_temp/upper_warning', payload=f'{chip_temp_limits.warning_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/module/chip_temp/lower_warning', payload=f'{chip_temp_limits.warning_lower:.3f}', retain=True)
+
+        # master/core/limits/module/module_temp
+        module_temp_limits = self._battery_system.battery_modules[0].module_temp_limits
+        self._mqtt_client.publish(topic='master/core/limits/module/module_temp/upper_implausible', payload=f'{module_temp_limits.implausible_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/module/module_temp/lower_implausible', payload=f'{module_temp_limits.implausible_lower:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/module/module_temp/upper_critical', payload=f'{module_temp_limits.critical_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/module/module_temp/lower_critical', payload=f'{module_temp_limits.critical_lower:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/module/module_temp/upper_warning', payload=f'{module_temp_limits.warning_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/module/module_temp/lower_warning', payload=f'{module_temp_limits.warning_lower:.3f}', retain=True)
+
+        # master/core/limits/cell/voltage
+        cell_voltage_limits = self._battery_system.battery_modules[0].module_temp_limits
+        self._mqtt_client.publish(topic='master/core/limits/cell/voltage/upper_implausible', payload=f'{cell_voltage_limits.implausible_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/cell/voltage/lower_implausible', payload=f'{cell_voltage_limits.implausible_lower:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/cell/voltage/upper_critical', payload=f'{cell_voltage_limits.critical_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/cell/voltage/lower_critical', payload=f'{cell_voltage_limits.critical_lower:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/cell/voltage/upper_warning', payload=f'{cell_voltage_limits.warning_upper:.3f}', retain=True)
+        self._mqtt_client.publish(topic='master/core/limits/cell/voltage/lower_warning', payload=f'{cell_voltage_limits.warning_lower:.3f}', retain=True)
+
     def send_battery_system_state(self):
         for battery_module in self._battery_system.battery_modules:
             try:
