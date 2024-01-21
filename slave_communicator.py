@@ -229,6 +229,7 @@ class SlaveCommunicator:
         self._mqtt_client.subscribe('master/core/config/balancing_enabled/set')
         self._mqtt_client.subscribe('master/core/config/balancing_ignore_slaves/set')
         self._mqtt_client.publish('master/core/available', 'online', retain=True)
+        self.send_limits()
 
     def _handle_cell_message(self, topic, battery_module: BatteryModule, payload):
         accurate_reading = topic.startswith('accurate/')
