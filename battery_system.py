@@ -4,7 +4,8 @@ from typing import List
 from battery_cell import BatteryCell
 from battery_cell_list import BatteryCellList
 from battery_module import BatteryModule
-from measurement_event import MeasurementEvent
+from measurement import MeasurementLimits
+from measurement import Measurement
 
 
 class BatterySystem:
@@ -18,24 +19,30 @@ class BatterySystem:
     LOWER_CURRENT_LIMIT_WARNING: float = -30  # A
     UPPER_CURRENT_LIMIT_WARNING: float = 30  # A
 
+    current_limits = MeasurementLimits()
+    current_limits.critical_lower = LOWER_CURRENT_LIMIT_CRITICAL
+    current_limits.critical_upper = UPPER_CURRENT_LIMIT_CRITICAL
+    current_limits.implausible_lower = LOWER_CURRENT_LIMIT_IMPLAUSIBLE
+    current_limits.implausible_upper = UPPER_CURRENT_LIMIT_IMPLAUSIBLE
+    current_limits.warning_lower = LOWER_CURRENT_LIMIT_WARNING
+    current_limits.warning_upper = UPPER_CURRENT_LIMIT_WARNING
+
     SLIDING_WINDOW_TIME: float = 180.0  # seconds
 
     def __init__(self, number_of_modules: int, number_of_serial_cells: int) -> None:
         assert 1 <= number_of_modules <= 16
 
-        # Uninitialized values
-        self.voltage: float or None = None
-        self.current: float or None = None
-
         cells_total = number_of_modules * number_of_serial_cells
-        self.lower_voltage_limit_critical: float = cells_total * BatteryCell.LOWER_VOLTAGE_LIMIT_CRITICAL
-        self.upper_voltage_limit_critical: float = cells_total * BatteryCell.UPPER_VOLTAGE_LIMIT_CRITICAL
-        self.lower_voltage_limit_warning: float = cells_total * BatteryCell.LOWER_VOLTAGE_LIMIT_WARNING
-        self.upper_voltage_limit_warning: float = cells_total * BatteryCell.UPPER_VOLTAGE_LIMIT_WARNING
+        self.voltage_limits = MeasurementLimits()
+        self.voltage_limits.implausible_lower = self.LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE
+        self.voltage_limits.implausible_upper = self.UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE
+        self.voltage_limits.critical_lower = cells_total * BatteryCell.LOWER_VOLTAGE_LIMIT_CRITICAL
+        self.voltage_limits.critical_upper = cells_total * BatteryCell.UPPER_VOLTAGE_LIMIT_CRITICAL
+        self.voltage_limits.warning_lower = cells_total * BatteryCell.LOWER_VOLTAGE_LIMIT_WARNING
+        self.voltage_limits.warning_upper = cells_total * BatteryCell.UPPER_VOLTAGE_LIMIT_WARNING
 
-        # Events
-        self.current_event = MeasurementEvent()
-        self.voltage_event = MeasurementEvent()
+        self.voltage: Measurement = Measurement(self, self.voltage_limits)
+        self.current: Measurement = Measurement(self, self.current_limits)
 
         self.battery_modules: List[BatteryModule] = []
         for module_id in range(0, number_of_modules):
@@ -50,72 +57,34 @@ class BatterySystem:
             cells_string = ''
             for cell in battery_module.cells:
                 try:
-                    cells_string += (f'{cell.voltage:.3f}' + ('+' if cell.balance_pin_state else '')).ljust(7)
+                    cells_string += (f'{cell.voltage.value:.3f}' + ('+' if cell.balance_pin_state else '')).ljust(7)
                 except TypeError:
-                    cells_string += (f'{cell.voltage}' + ('' if cell.balance_pin_state is None else 'N')).ljust(7)
+                    cells_string += (f'{cell.voltage.value}' + ('' if cell.balance_pin_state is None else 'N')).ljust(7)
             try:
-                modules_string += f'{battery_module.voltage:.2f}V'.ljust(7) \
-                                  + f'{battery_module.module_temp1:.1f}°C'.ljust(7) \
-                                  + f'{battery_module.module_temp2:.1f}°C'.ljust(7) \
+                modules_string += f'{battery_module.voltage.value:.2f}V'.ljust(7) \
+                                  + f'{battery_module.module_temp1.value:.1f}°C'.ljust(7) \
+                                  + f'{battery_module.module_temp2.value:.1f}°C'.ljust(7) \
                                   + f'{cells_string}\n'
             except TypeError:
-                modules_string += f'{battery_module.voltage}V'.ljust(7) \
-                                  + f'{battery_module.module_temp1}°C'.ljust(7) \
-                                  + f'{battery_module.module_temp2}°C'.ljust(7) \
+                modules_string += f'{battery_module.voltage.value}V'.ljust(7) \
+                                  + f'{battery_module.module_temp1.value}°C'.ljust(7) \
+                                  + f'{battery_module.module_temp2.value}°C'.ljust(7) \
                                   + f'{cells_string}\n'
         try:
-            return f'System: {self.voltage:.2f}V {self.current:.2f}A ' \
+            return f'System: {self.voltage.value:.2f}V {self.current.value:.2f}A ' \
                    f'calculated: {self.calculated_voltage():.2f}V Modules:\n{modules_string}'
         except TypeError:
-            return f'System: {self.voltage}V {self.current}A Modules:\n{modules_string}'
+            return f'System: {self.voltage.value}V {self.current.value}A Modules:\n{modules_string}'
 
     def check_heartbeats(self):
         for battery_module in self.battery_modules:
             battery_module.check_heartbeat()
 
-    def update_voltage(self, voltage: float) -> None:
-        self.voltage = voltage
-
-        if self.has_implausible_voltage():
-            self.voltage_event.on_implausible(self)
-        elif self.has_critical_voltage():
-            self.voltage_event.on_critical(self)
-        elif self.has_warning_voltage():
-            self.voltage_event.on_warning(self)
-
-    def update_current(self, current: float) -> None:
-        self.current = current
-
-        if self.has_implausible_current():
-            self.current_event.on_implausible(self)
-        elif self.has_critical_current():
-            self.current_event.on_critical(self)
-        elif self.has_warning_current():
-            self.current_event.on_warning(self)
-
-    def has_implausible_voltage(self) -> bool:
-        return not (self.LOWER_VOLTAGE_LIMIT_IMPLAUSIBLE <= self.voltage <= self.UPPER_VOLTAGE_LIMIT_IMPLAUSIBLE)
-
-    def has_critical_voltage(self) -> bool:
-        return not (self.lower_voltage_limit_critical <= self.voltage <= self.upper_voltage_limit_critical)
-
-    def has_warning_voltage(self) -> bool:
-        return not (self.lower_voltage_limit_warning <= self.voltage <= self.upper_voltage_limit_warning)
-
-    def has_implausible_current(self) -> bool:
-        return not (self.LOWER_CURRENT_LIMIT_IMPLAUSIBLE <= self.current <= self.UPPER_CURRENT_LIMIT_IMPLAUSIBLE)
-
-    def has_critical_current(self) -> bool:
-        return not (self.LOWER_CURRENT_LIMIT_CRITICAL <= self.current <= self.UPPER_CURRENT_LIMIT_CRITICAL)
-
-    def has_warning_current(self) -> bool:
-        return not (self.LOWER_CURRENT_LIMIT_WARNING <= self.current <= self.UPPER_CURRENT_LIMIT_WARNING)
-
     def load_adjusted_calculated_voltage(self) -> float:
-        return sum(cell.load_adjusted_voltage(self.current) for cell in self.cells())
+        return sum(cell.load_adjusted_voltage(self.current.value) for cell in self.cells())
 
     def calculated_voltage(self) -> float:
-        return sum(cell.voltage for cell in self.cells())
+        return sum(cell.voltage.value for cell in self.cells())
 
     def temp(self) -> float:
         return sum(battery_modules.temp() for battery_modules in self.battery_modules) / len(self.battery_modules)
@@ -127,7 +96,7 @@ class BatterySystem:
         return sum(soc_value[1] for soc_value in self.sliding_window_soc_values) / len(self.sliding_window_soc_values)
 
     def load_adjusted_soc(self) -> float:
-        return sum(module.load_adjusted_soc(self.current) for module in self.battery_modules) \
+        return sum(module.load_adjusted_soc(self.current.value) for module in self.battery_modules) \
             / len(self.battery_modules)
 
     def soc(self) -> float:
@@ -144,5 +113,5 @@ class BatterySystem:
 
     def highest_voltage_cells(self, number) -> List[BatteryCell]:
         cell_list = self.cells()
-        cell_list.sort(key=lambda x: x.voltage, reverse=True)
+        cell_list.sort(key=lambda x: x.voltage.value, reverse=True)
         return cell_list[0:number]
