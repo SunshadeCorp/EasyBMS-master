@@ -1,0 +1,11 @@
+qodana:
+  image:
+    name: jetbrains/qodana-python
+    entrypoint: [ "" ]
+  variables:
+    QODANA_TOKEN: $qodana_token
+  script:
+    - qodana
+  artifacts:
+    paths:
+      - qodana
