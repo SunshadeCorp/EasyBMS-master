@@ -154,7 +154,7 @@ class SlaveCommunicator:
             calculated_voltage: float = self._battery_system.calculated_voltage()
             self._mqtt_client.publish(topic='master/core/calculated_system_voltage',
                                       payload=f'{calculated_voltage:.2f}')
-            current_power = self._battery_system.current * calculated_voltage
+            current_power = self._battery_system.current.value * calculated_voltage
             self._mqtt_client.publish(topic='master/core/system_power',
                                       payload=f'{current_power:.2f}')
             self._mqtt_client.publish(topic='master/core/load_adjusted_calculated_voltage',
