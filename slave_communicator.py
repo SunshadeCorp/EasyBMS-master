@@ -18,7 +18,7 @@ class SlaveCommunicator:
 
         self.events: SlaveCommunicatorEvents = SlaveCommunicatorEvents()
 
-        self._mqtt_client = mqtt.Client()
+        self._mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
         self._mqtt_client.on_connect = self._mqtt_on_connect
         self._mqtt_client.on_message = self._mqtt_on_message
 
@@ -26,7 +26,7 @@ class SlaveCommunicator:
         self._mqtt_client.will_set('master/core/available', 'offline', retain=True)
         if master_config.get('mqtt_ssl', False):
             self._mqtt_client.tls_set(credentials['mqtt_cert_path'])
-        self._mqtt_client.connect(host=master_config['mqtt_server'], port=master_config['mqtt_port'], keepalive=60)
+        self._mqtt_client.connect(host=master_config['mqtt_server'], port=master_config['mqtt_port'])
 
         self._battery_system = battery_system
         for battery_module in self._battery_system.battery_modules:
@@ -211,7 +211,7 @@ class SlaveCommunicator:
     #                 print(line, file=file)
     #             self._lines_to_write[i].clear()
 
-    def _mqtt_on_connect(self, client: mqtt.Client, userdata: Any, flags: Dict, rc: int):
+    def _mqtt_on_connect(self, client, userdata, flags, reason_code, properties):
         self.events.on_connect()
         for i in range(len(self._battery_system.battery_modules)):
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/uptime')

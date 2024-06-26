@@ -1,8 +1,10 @@
-FROM python:3-buster
+FROM python:3.12-bookworm
 
 WORKDIR /usr/src/app
 
-RUN pip install Events~=0.4 paho-mqtt~=1.5.1 PyYAML~=6.0.1
+COPY requirements.txt requirements.txt
+
+RUN pip install --no-cache-dir --prefer-binary -r requirements.txt
 
 COPY . .
 
