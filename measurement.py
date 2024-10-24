@@ -9,17 +9,18 @@ class MeasurementEvent(Events):
 
 class MeasurementLimits:
     def __init__(self):
-        self.warning_upper: float or None = None
-        self.warning_lower: float or None = None
-        self.critical_upper: float or None = None
-        self.critical_lower: float or None = None
-        self.implausible_upper: float or None = None
-        self.implausible_lower: float or None = None
+        self.warning_upper: float | None = None
+        self.warning_lower: float | None = None
+        self.critical_upper: float | None = None
+        self.critical_lower: float | None = None
+        self.implausible_upper: float | None = None
+        self.implausible_lower: float | None = None
+
 
 class Measurement:
-    def __init__(self, owner, limits: MeasurementLimits):
-        self.value: float or None = None
-        self.timestamp: float or None = None
+    def __init__(self, owner, limits: MeasurementLimits, start_value: float | None = None):
+        self.value: float | None = start_value
+        self.timestamp: float | None = None
         self.init = False
         self.owner = owner
         self.limits = limits
@@ -66,4 +67,3 @@ class Measurement:
 
     def age_seconds(self) -> float:
         return time.time() - self.timestamp
-
