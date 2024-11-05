@@ -53,6 +53,9 @@ class BatteryManager:
                 cell.voltage.event.on_warning += self.on_cell_voltage_warning
                 cell.voltage.event.on_implausible += self.on_implausible_cell_voltage
 
+        self.allow_charge: bool = True
+        self.allow_discharge: bool = True
+
     def balance(self) -> None:
         self.balancer.balance()
 
@@ -60,14 +63,18 @@ class BatteryManager:
         cells: BatteryCellList = self.battery_system.cells()
         lowest_voltage: float = cells.lowest_voltage()
         highest_voltage: float = cells.highest_voltage()
-        if lowest_voltage <= BatteryCell.soc_to_voltage(0.15):
-            self.slave_communicator.send_discharge_limit(False)
-        elif lowest_voltage >= BatteryCell.soc_to_voltage(0.18):
-            self.slave_communicator.send_discharge_limit(True)
+        if lowest_voltage <= BatteryCell.soc_to_voltage(0.37):
+            self.allow_discharge = False
+            self.slave_communicator.send_discharge_limit(self.allow_discharge)
+        elif lowest_voltage >= BatteryCell.soc_to_voltage(0.41) and not self.allow_discharge:
+            self.allow_discharge = True
+            self.slave_communicator.send_discharge_limit(self.allow_discharge)
         if highest_voltage >= BatteryCell.soc_to_voltage(0.93):
-            self.slave_communicator.send_charge_limit(False)
-        elif highest_voltage <= BatteryCell.soc_to_voltage(0.90):
-            self.slave_communicator.send_charge_limit(True)
+            self.allow_charge = False
+            self.slave_communicator.send_charge_limit(self.allow_charge)
+        elif highest_voltage <= BatteryCell.soc_to_voltage(0.90) and not self.allow_charge:
+            self.allow_charge = True
+            self.slave_communicator.send_charge_limit(self.allow_charge)
 
     def check_cell_voltage_times(self):
         timeout_cells = self.battery_system.cells().with_voltage_older_than(self.ESP_TIMEOUT_CRITICAL_SECONDS)
@@ -125,7 +132,7 @@ class BatteryManager:
             self.trigger_safety_disconnect(message)
 
     # Event handling for warning events
-            
+
     def on_battery_system_voltage_warning(self, system: BatterySystem) -> None:
         print(f'[WARNING] battery system voltage: {system.voltage.value}V')
 
@@ -191,4 +198,3 @@ class BatteryManager:
     def on_heartbeat(self, module: BatteryModule) -> None:
         # print(f'Got heartbeat on module: {module.id}')
         pass
-
