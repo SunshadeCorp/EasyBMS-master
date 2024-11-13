@@ -63,10 +63,10 @@ class BatteryManager:
         cells: BatteryCellList = self.battery_system.cells()
         lowest_voltage: float = cells.lowest_voltage()
         highest_voltage: float = cells.highest_voltage()
-        if lowest_voltage <= BatteryCell.soc_to_voltage(0.37):
+        if lowest_voltage <= BatteryCell.soc_to_voltage(0.30):
             self.allow_discharge = False
             self.slave_communicator.send_discharge_limit(self.allow_discharge)
-        elif lowest_voltage >= BatteryCell.soc_to_voltage(0.41) and not self.allow_discharge:
+        elif lowest_voltage >= BatteryCell.soc_to_voltage(0.35) and not self.allow_discharge:
             self.allow_discharge = True
             self.slave_communicator.send_discharge_limit(self.allow_discharge)
         if highest_voltage >= BatteryCell.soc_to_voltage(0.93):
