@@ -7,7 +7,7 @@ from slave_communicator import SlaveCommunicator
 
 
 class BatterySystemBalancer:
-    DEFAULT_MIN_CELL_DIFF_FOR_BALANCING: float = 0.003  # V
+    DEFAULT_MIN_CELL_DIFF_FOR_BALANCING: float = 0.001  # V
     DEFAULT_MAX_CELL_DIFF_FOR_BALANCING: float = 0.5  # V
     DEFAULT_BALANCE_DISCHARGE_TIME: float = 120.0  # seconds
 
