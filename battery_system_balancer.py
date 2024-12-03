@@ -109,7 +109,7 @@ class BatterySystemBalancer:
         else:
             possible_cells.set_relax_time(seconds=20.0)
             self.balance_discharge_time = 30.0  # seconds
-            min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.003)
+            min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.001)
 
         required_voltage: float = max(lowest_voltage + min_cell_diff, BatteryCell.soc_to_voltage(0.15))
         cells_to_discharge: list[BatteryCell] = possible_cells.with_accurate_voltage_above(required_voltage)
