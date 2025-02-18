@@ -2,9 +2,9 @@ import time
 
 from battery_cell import BatteryCell
 from battery_cell_list import BatteryCellList
-from battery_system import BatterySystem
 # from heartbeat_event import HeartbeatEvent
 from battery_module import BatteryModule
+from battery_system import BatterySystem
 from battery_system_balancer import BatterySystemBalancer
 from slave_communicator import SlaveCommunicator
 
@@ -60,6 +60,7 @@ class BatteryManager:
         self.balancer.balance()
 
     def set_limits(self):
+        min_temp: float = self.battery_system.lowest_module_temp()
         cells: BatteryCellList = self.battery_system.cells()
         lowest_voltage: float = cells.lowest_voltage()
         highest_voltage: float = cells.highest_voltage()
@@ -69,10 +70,10 @@ class BatteryManager:
         elif lowest_voltage >= BatteryCell.soc_to_voltage(0.10) and not self.allow_discharge:
             self.allow_discharge = True
             self.slave_communicator.send_discharge_limit(self.allow_discharge)
-        if highest_voltage >= BatteryCell.soc_to_voltage(0.98):
+        if min_temp < 0.5 or highest_voltage >= BatteryCell.soc_to_voltage(0.98):
             self.allow_charge = False
             self.slave_communicator.send_charge_limit(self.allow_charge)
-        elif highest_voltage <= BatteryCell.soc_to_voltage(0.95) and not self.allow_charge:
+        elif min_temp >= 0.5 and highest_voltage <= BatteryCell.soc_to_voltage(0.95) and not self.allow_charge:
             self.allow_charge = True
             self.slave_communicator.send_charge_limit(self.allow_charge)
 
