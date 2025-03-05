@@ -1,12 +1,12 @@
 import time
 import traceback
-from typing import Any, Dict
+from typing import Any
 
 import paho.mqtt.client as mqtt
 
 from battery_cell import BatteryCell
-from battery_system import BatterySystem
 from battery_module import BatteryModule
+from battery_system import BatterySystem
 from slave_communicator_events import SlaveCommunicatorEvents
 from utils import get_config
 
@@ -160,8 +160,12 @@ class SlaveCommunicator:
                                       payload=f'{current_power:.2f}')
             self._mqtt_client.publish(topic='master/core/load_adjusted_calculated_voltage',
                                       payload=f'{self._battery_system.load_adjusted_calculated_voltage():.2f}')
+            self._mqtt_client.publish(topic='master/can/battery/voltage/set',
+                                      payload=f'{self._battery_system.load_adjusted_calculated_voltage():.2f}')
             self._mqtt_client.publish(topic='master/core/max_cell_diff',
                                       payload=f'{self._battery_system.cells().max_diff():.3f}')
+            self._mqtt_client.publish(topic='master/can/battery/current/set',
+                                      payload=f'{self._battery_system.current.value * -1:.2f}')
         except TypeError:
             pass
         try:
