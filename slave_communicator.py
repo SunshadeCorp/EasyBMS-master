@@ -152,7 +152,6 @@ class SlaveCommunicator:
             pass
         try:
             calculated_voltage: float = self._battery_system.calculated_voltage()
-            self._battery_system.voltage.update(calculated_voltage)
             self._mqtt_client.publish(topic='master/core/calculated_system_voltage',
                                       payload=f'{calculated_voltage:.2f}')
             current_power = self._battery_system.current.value * calculated_voltage
@@ -227,7 +226,7 @@ class SlaveCommunicator:
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/module_voltage')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/module_temps')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/chip_temp')
-        # self._mqtt_client.subscribe('esp-total/total_voltage')
+        self._mqtt_client.subscribe('esp-total/total_voltage')
         self._mqtt_client.subscribe('esp-total/total_current')
         for module_id in self._slave_mapping['slaves']:
             self._mqtt_client.subscribe(f'esp-module/{module_id}/uptime')
