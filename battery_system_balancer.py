@@ -70,8 +70,7 @@ class BatterySystemBalancer:
 
         modules = self.modules()
         max_chip_temp = max(module.chip_temp.value for module in modules)
-
-        if max_chip_temp >= BatteryModule.UPPER_CHIP_TEMP_LIMIT_CRITICAL - 10:
+        if max_chip_temp >= BatteryModule.UPPER_CHIP_TEMP_LIMIT_WARNING:
             return
 
         possible_cells: BatteryCellList = self.cells()
