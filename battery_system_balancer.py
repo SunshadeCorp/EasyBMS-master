@@ -2,6 +2,7 @@ import time
 
 from battery_cell import BatteryCell
 from battery_cell_list import BatteryCellList
+from battery_module import BatteryModule
 from battery_system import BatterySystem
 from slave_communicator import SlaveCommunicator
 
@@ -45,9 +46,11 @@ class BatterySystemBalancer:
         self.ignore_slaves = ignore_slaves
         self.slave_communicator.send_balancing_ignore_slaves_state(self.ignore_slaves)
 
+    def modules(self) -> list[BatteryModule]:
+        return [module for module in self.battery_system.battery_modules if module.id not in self.ignore_slaves]
+
     def cells(self) -> BatteryCellList:
-        return BatteryCellList([cell for module in self.battery_system.battery_modules for cell in module.cells if
-                                module.id not in self.ignore_slaves])
+        return BatteryCellList([cell for module in self.modules() for cell in module.cells])
 
     def request_accurate_readings(self):
         if self.idle:
@@ -63,6 +66,12 @@ class BatterySystemBalancer:
 
     def balance(self) -> None:
         if not self.enabled:
+            return
+
+        modules = self.modules()
+        max_chip_temp = max(module.chip_temp.value for module in modules)
+
+        if max_chip_temp >= BatteryModule.UPPER_CHIP_TEMP_LIMIT_CRITICAL - 10:
             return
 
         possible_cells: BatteryCellList = self.cells()
