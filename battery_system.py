@@ -14,10 +14,10 @@ class BatterySystem:
 
     LOWER_CURRENT_LIMIT_IMPLAUSIBLE: float = -500  # A
     UPPER_CURRENT_LIMIT_IMPLAUSIBLE: float = 500  # A
-    LOWER_CURRENT_LIMIT_CRITICAL: float = -32  # A
-    UPPER_CURRENT_LIMIT_CRITICAL: float = 32  # A
-    LOWER_CURRENT_LIMIT_WARNING: float = -30  # A
-    UPPER_CURRENT_LIMIT_WARNING: float = 30  # A
+    LOWER_CURRENT_LIMIT_CRITICAL: float = -52  # A
+    UPPER_CURRENT_LIMIT_CRITICAL: float = 52  # A
+    LOWER_CURRENT_LIMIT_WARNING: float = -50  # A
+    UPPER_CURRENT_LIMIT_WARNING: float = 50  # A
 
     current_limits = MeasurementLimits()
     current_limits.critical_lower = LOWER_CURRENT_LIMIT_CRITICAL
