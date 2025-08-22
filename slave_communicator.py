@@ -1,3 +1,4 @@
+import json
 import time
 import traceback
 from typing import Any
@@ -42,6 +43,59 @@ class SlaveCommunicator:
 
         self._mqtt_client.loop_start()
         self.start_time = time.time()
+        self.first_connect = True
+
+    def set_ha_discovery(self):
+        sensors = [
+            ('safety_disconnect_reason', 'master/core/safety_disconnect_reason', None, None, None),
+            ('balancer_cell_diff', 'master/core/balancer_cell_diff', 'voltage', 'V', 'measurement'),
+            ('balancer_min_voltage', 'master/core/balancer_min_voltage', 'voltage', 'V', 'measurement'),
+            ('balancer_max_voltage', 'master/core/balancer_max_voltage', 'voltage', 'V', 'measurement'),
+            ('load_adjusted_soc', 'master/core/load_adjusted_soc', 'battery', '%', 'measurement'),
+            ('soc', 'master/core/soc', 'battery', '%', 'measurement'),
+            ('calculated_system_voltage', 'master/core/calculated_system_voltage', 'voltage', 'V', 'measurement'),
+            ('system_power', 'master/core/system_power', 'power', 'W', 'measurement'),
+            ('load_adjusted_calculated_voltage', 'master/core/load_adjusted_calculated_voltage', 'voltage', 'V',
+             'measurement'),
+            ('balancing_ignore_slaves', 'master/core/config/balancing_ignore_slaves', None, None, None),
+        ]
+        payload = {
+            'dev': {  # device
+                'ids': 'easybms_master',  # identifiers
+                'name': 'EasyBMS Master',
+            },
+            'o': {  # origin
+                'name': 'EasyBMS-master',
+                'sw': '1.0',  # sw_version
+                'url': 'https://github.com/SunshadeCorp/EasyBMS-master'  # support_url
+            },
+            'avty_t': 'master/core/available',  # availability_topic
+            'cmps': {  # components
+                'balancing_enabled': {
+                    'p': 'binary_sensor',  # platform
+                    'name': 'balancing_enabled',
+                    'uniq_id': 'easybms_master_balancing_enabled',  # unique_id
+                    'stat_t': 'master/core/config/balancing_enabled',  # state_topic
+                    'payload_on': 'true',
+                    'payload_off': 'false',
+                }
+            }
+        }
+        for sensor in sensors:
+            payload['cmps'][sensor[0]] = {
+                'p': 'sensor',  # platform
+                'name': sensor[0],
+                'uniq_id': f"{payload['dev']['ids']}_{sensor[0]}",  # unique_id
+                'stat_t': sensor[1],  # state_topic
+            }
+            if sensor[2]:
+                payload['cmps'][sensor[0]]['dev_cla'] = sensor[2]  # device_class
+            if sensor[3]:
+                payload['cmps'][sensor[0]]['unit_of_meas'] = sensor[3]  # unit_of_measurement
+            if sensor[4]:
+                payload['cmps'][sensor[0]]['stat_cla'] = sensor[4]  # state_class
+        self._mqtt_client.publish('homeassistant/device/easybms_master/config', payload=json.dumps(payload),
+                                  retain=True)
 
     def uptime_seconds(self) -> float:
         return time.time() - self.start_time
@@ -234,6 +288,9 @@ class SlaveCommunicator:
         self._mqtt_client.subscribe('master/core/config/balancing_ignore_slaves/set')
         self._mqtt_client.publish('master/core/available', 'online', retain=True)
         self.send_limits()
+        if self.first_connect:
+            self.first_connect = False
+            self.set_ha_discovery()
 
     def _handle_cell_message(self, topic, battery_module: BatteryModule, payload):
         accurate_reading = topic.startswith('accurate/')
