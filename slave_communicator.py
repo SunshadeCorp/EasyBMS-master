@@ -1,6 +1,7 @@
 import json
 import time
 import traceback
+from dataclasses import dataclass
 from typing import Any
 
 import paho.mqtt.client as mqtt
@@ -46,20 +47,37 @@ class SlaveCommunicator:
         self.first_connect = True
 
     def set_ha_discovery(self):
+        @dataclass(frozen=True, slots=True)
+        class SensorDef:
+            name: str
+            state_topic: str | None = None
+            platform: str = 'sensor'
+            device_class: str | None = None
+            unit: str | None = None
+            state_class: str | None = None
+            payload_on: str | None = None
+            payload_off: str | None = None
+            entity_category: str | None = None
+            precision: int | None = None
+
         sensors = [
-            ('safety_disconnect_reason', 'master/core/safety_disconnect_reason', None, None, None),
-            ('balancer_cell_diff', 'master/core/balancer_cell_diff', 'voltage', 'V', 'measurement'),
-            ('balancer_min_voltage', 'master/core/balancer_min_voltage', 'voltage', 'V', 'measurement'),
-            ('balancer_max_voltage', 'master/core/balancer_max_voltage', 'voltage', 'V', 'measurement'),
-            ('load_adjusted_soc', 'master/core/load_adjusted_soc', 'battery', '%', 'measurement'),
-            ('soc', 'master/core/soc', 'battery', '%', 'measurement'),
-            ('calculated_system_voltage', 'master/core/calculated_system_voltage', 'voltage', 'V', 'measurement'),
-            ('system_power', 'master/core/system_power', 'power', 'W', 'measurement'),
-            ('load_adjusted_calculated_voltage', 'master/core/load_adjusted_calculated_voltage', 'voltage', 'V',
-             'measurement'),
-            ('balancing_ignore_slaves', 'master/core/config/balancing_ignore_slaves', None, None, None),
+            SensorDef('safety_disconnect_reason'),
+            SensorDef('balancer_cell_diff', device_class='voltage', unit='V', state_class='measurement', precision=3),
+            SensorDef('balancer_min_voltage', device_class='voltage', unit='V', state_class='measurement', precision=3),
+            SensorDef('balancer_max_voltage', device_class='voltage', unit='V', state_class='measurement', precision=3),
+            SensorDef('load_adjusted_soc', device_class='battery', unit='%', state_class='measurement'),
+            SensorDef('soc', device_class='battery', unit='%', state_class='measurement'),
+            SensorDef('calculated_system_voltage', device_class='voltage', unit='V', state_class='measurement',
+                      precision=1),
+            SensorDef('system_power', device_class='power', unit='W', state_class='measurement'),
+            SensorDef('load_adjusted_calculated_voltage', device_class='voltage', unit='V', state_class='measurement',
+                      precision=1),
+            SensorDef('balancing_enabled', platform='binary_sensor', state_topic='config/balancing_enabled',
+                      payload_on='true', payload_off='false', entity_category='diagnostic'),
+            SensorDef('balancing_ignore_slaves', state_topic='config/balancing_ignore_slaves',
+                      entity_category='diagnostic'),
         ]
-        payload = {
+        payload: dict[str, dict[str, str | dict[str, str]]] = {
             'dev': {  # device
                 'ids': 'easybms_master',  # identifiers
                 'name': 'EasyBMS Master',
@@ -70,30 +88,22 @@ class SlaveCommunicator:
                 'url': 'https://github.com/SunshadeCorp/EasyBMS-master'  # support_url
             },
             'avty_t': 'master/core/available',  # availability_topic
-            'cmps': {  # components
-                'balancing_enabled': {
-                    'p': 'binary_sensor',  # platform
-                    'name': 'balancing_enabled',
-                    'uniq_id': 'easybms_master_balancing_enabled',  # unique_id
-                    'stat_t': 'master/core/config/balancing_enabled',  # state_topic
-                    'payload_on': 'true',
-                    'payload_off': 'false',
-                }
-            }
+            'cmps': {}  # components
         }
         for sensor in sensors:
-            payload['cmps'][sensor[0]] = {
-                'p': 'sensor',  # platform
-                'name': sensor[0],
-                'uniq_id': f"{payload['dev']['ids']}_{sensor[0]}",  # unique_id
-                'stat_t': sensor[1],  # state_topic
+            component = {
+                'p': sensor.platform,  # platform
+                'name': sensor.name,
+                'uniq_id': f"{payload['dev']['ids']}_{sensor.name}",  # unique_id
+                'stat_t': f'master/core/{sensor.state_topic or sensor.name}',  # state_topic
             }
-            if sensor[2]:
-                payload['cmps'][sensor[0]]['dev_cla'] = sensor[2]  # device_class
-            if sensor[3]:
-                payload['cmps'][sensor[0]]['unit_of_meas'] = sensor[3]  # unit_of_measurement
-            if sensor[4]:
-                payload['cmps'][sensor[0]]['stat_cla'] = sensor[4]  # state_class
+            if sensor.device_class: component['dev_cla'] = sensor.device_class  # device_class
+            if sensor.unit: component['unit_of_meas'] = sensor.unit  # unit_of_measurement
+            if sensor.state_class: component['stat_cla'] = sensor.state_class  # state_class
+            if sensor.payload_on: component['pl_on'] = sensor.payload_on  # payload_on
+            if sensor.payload_off: component['pl_off'] = sensor.payload_off  # payload_off
+            if sensor.entity_category: component['ent_cat'] = sensor.payload_off  # entity_category
+            payload['cmps'][sensor.name] = component
         self._mqtt_client.publish('homeassistant/device/easybms_master/config', payload=json.dumps(payload),
                                   retain=True)
 
