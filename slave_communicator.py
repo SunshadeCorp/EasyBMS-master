@@ -77,7 +77,7 @@ class SlaveCommunicator:
             SensorDef('balancing_ignore_slaves', state_topic='config/balancing_ignore_slaves',
                       entity_category='diagnostic'),
         ]
-        payload: dict[str, dict[str, str | dict[str, str]]] = {
+        payload: dict[str, dict[str, str | dict[str, str | int]]] = {
             'dev': {  # device
                 'ids': 'easybms_master',  # identifiers
                 'name': 'EasyBMS Master',
@@ -91,7 +91,7 @@ class SlaveCommunicator:
             'cmps': {}  # components
         }
         for sensor in sensors:
-            component = {
+            component: dict[str, str | int] = {
                 'p': sensor.platform,  # platform
                 'name': sensor.name,
                 'uniq_id': f"{payload['dev']['ids']}_{sensor.name}",  # unique_id
@@ -102,7 +102,8 @@ class SlaveCommunicator:
             if sensor.state_class: component['stat_cla'] = sensor.state_class  # state_class
             if sensor.payload_on: component['pl_on'] = sensor.payload_on  # payload_on
             if sensor.payload_off: component['pl_off'] = sensor.payload_off  # payload_off
-            if sensor.entity_category: component['ent_cat'] = sensor.payload_off  # entity_category
+            if sensor.entity_category: component['ent_cat'] = sensor.entity_category  # entity_category
+            if sensor.precision: component['sug_dsp_prc'] = sensor.precision  # suggested_display_precision
             payload['cmps'][sensor.name] = component
         self._mqtt_client.publish('homeassistant/device/easybms_master/config', payload=json.dumps(payload),
                                   retain=True)
