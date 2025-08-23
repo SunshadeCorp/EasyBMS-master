@@ -297,6 +297,7 @@ class SlaveCommunicator:
             self._mqtt_client.subscribe(f'esp-module/{module_id}/uptime')
         self._mqtt_client.subscribe('master/core/config/balancing_enabled/set')
         self._mqtt_client.subscribe('master/core/config/balancing_ignore_slaves/set')
+        self._mqtt_client.subscribe('master/can/limits/+')
         self._mqtt_client.publish('master/core/available', 'online', retain=True)
         self.send_limits()
         if self.first_connect:
@@ -377,15 +378,6 @@ class SlaveCommunicator:
             if msg.topic.startswith('esp-module/') and len(msg.payload) > 0:
                 extracted_id, topic = self._topic_extract_id(msg.topic)
                 self._handle_esp_module_message(extracted_id, topic, payload)
-            elif msg.topic == 'master/core/config/balancing_enabled/set':
-                self.events.on_balancing_enabled_set(payload)
-            elif msg.topic == 'master/core/config/balancing_ignore_slaves/set':
-                if payload == '' or payload.lower() == 'none':
-                    self.events.on_balancing_ignore_slaves_set(set())
-                else:
-                    values: list[str] = msg.payload.decode().split(',')
-                    slaves: set[int] = set(int(value) for value in values)
-                    self.events.on_balancing_ignore_slaves_set(slaves)
             elif msg.topic == 'esp-total/total_voltage':
                 try:
                     self._battery_system.voltage.update(float(payload))
@@ -396,6 +388,19 @@ class SlaveCommunicator:
                     self._battery_system.current.update(float(payload))
                 except ValueError:
                     print(f'{msg.topic} >{payload}< bad data', flush=True)
+            elif msg.topic.startswith('master/can/limits/'):
+                topic = msg.topic.removeprefix('master/can/limits/')
+                value = float(msg.payload.decode())
+                self.events.on_can_limit_recv(topic, value)
+            elif msg.topic == 'master/core/config/balancing_enabled/set':
+                self.events.on_balancing_enabled_set(payload)
+            elif msg.topic == 'master/core/config/balancing_ignore_slaves/set':
+                if payload == '' or payload.lower() == 'none':
+                    self.events.on_balancing_ignore_slaves_set(set())
+                else:
+                    values: list[str] = msg.payload.decode().split(',')
+                    slaves: set[int] = set(int(value) for value in values)
+                    self.events.on_balancing_ignore_slaves_set(slaves)
         except ValueError as e:
             print('_mqtt_on_message ValueError', e, traceback.format_exc(), msg.topic, msg.payload, flush=True)
         except Exception as e:
