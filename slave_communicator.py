@@ -65,6 +65,7 @@ class SlaveCommunicator:
             SensorDef('balancer_cell_diff', device_class='voltage', unit='V', state_class='measurement', precision=3),
             SensorDef('balancer_min_voltage', device_class='voltage', unit='V', state_class='measurement', precision=3),
             SensorDef('balancer_max_voltage', device_class='voltage', unit='V', state_class='measurement', precision=3),
+            SensorDef('max_cell_soc_diff', unit='%', state_class='measurement', precision=2),
             SensorDef('load_adjusted_soc', device_class='battery', unit='%', state_class='measurement'),
             SensorDef('soc', device_class='battery', unit='%', state_class='measurement'),
             SensorDef('calculated_system_voltage', device_class='voltage', unit='V', state_class='measurement',
@@ -230,6 +231,8 @@ class SlaveCommunicator:
                                       payload=f'{self._battery_system.load_adjusted_calculated_voltage():.2f}')
             self._mqtt_client.publish(topic='master/core/max_cell_diff',
                                       payload=f'{self._battery_system.cells().max_diff():.3f}')
+            self._mqtt_client.publish(topic='master/core/max_cell_soc_diff',
+                                      payload=f'{self._battery_system.cells().max_soc_diff():.2f}')
             self._mqtt_client.publish(topic='master/can/battery/current/set',
                                       payload=f'{self._battery_system.current.value * -1:.2f}')
         except TypeError:

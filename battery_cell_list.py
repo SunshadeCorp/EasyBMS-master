@@ -41,6 +41,9 @@ class BatteryCellList(list[BatteryCell]):
     def max_diff(self) -> float:
         return self.highest_voltage() - self.lowest_voltage()
 
+    def max_soc_diff(self) -> float:
+        return self.highest_soc() - self.lowest_soc()
+
     def has_voltage_older_than(self, seconds: float) -> bool:
         return any(not cell.voltage.initialized() or cell.voltage.age_seconds() > seconds for cell in self.__iter__())
 
