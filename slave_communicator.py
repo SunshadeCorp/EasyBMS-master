@@ -232,7 +232,7 @@ class SlaveCommunicator:
             self._mqtt_client.publish(topic='master/core/max_cell_diff',
                                       payload=f'{self._battery_system.cells().max_diff():.3f}')
             self._mqtt_client.publish(topic='master/core/max_cell_soc_diff',
-                                      payload=f'{self._battery_system.cells().max_soc_diff():.2f}')
+                                      payload=f'{self._battery_system.cells().max_soc_diff() * 100.0:.2f}')
             self._mqtt_client.publish(topic='master/can/battery/current/set',
                                       payload=f'{self._battery_system.current.value * -1:.2f}')
         except TypeError:
