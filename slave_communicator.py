@@ -116,6 +116,8 @@ class SlaveCommunicator:
 
     def open_battery_relays(self, reason: str = None):
         print('open_battery_relays called.')
+        self._mqtt_client.publish(topic='master/relays/1/set', payload='off')
+        self._mqtt_client.publish(topic='master/relays/2/set', payload='off')
         self._mqtt_client.publish(topic='master/relays/battery_plus/set', payload='off')
         self._mqtt_client.publish(topic='master/relays/battery_precharge/set', payload='off')
         self._mqtt_client.publish(topic='master/relays/battery_minus/set', payload='off')
