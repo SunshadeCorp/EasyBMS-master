@@ -1,5 +1,7 @@
+import json
 import time
 import traceback
+from dataclasses import dataclass
 from typing import Any
 
 import paho.mqtt.client as mqtt
@@ -42,6 +44,69 @@ class SlaveCommunicator:
 
         self._mqtt_client.loop_start()
         self.start_time = time.time()
+        self.first_connect = True
+
+    def set_ha_discovery(self):
+        @dataclass(frozen=True, slots=True)
+        class SensorDef:
+            name: str
+            state_topic: str | None = None
+            platform: str = 'sensor'
+            device_class: str | None = None
+            unit: str | None = None
+            state_class: str | None = None
+            payload_on: str | None = None
+            payload_off: str | None = None
+            entity_category: str | None = None
+            precision: int | None = None
+
+        sensors = [
+            SensorDef('safety_disconnect_reason'),
+            SensorDef('balancer_cell_diff', device_class='voltage', unit='V', state_class='measurement', precision=3),
+            SensorDef('balancer_min_voltage', device_class='voltage', unit='V', state_class='measurement', precision=3),
+            SensorDef('balancer_max_voltage', device_class='voltage', unit='V', state_class='measurement', precision=3),
+            SensorDef('load_adjusted_soc', device_class='battery', unit='%', state_class='measurement'),
+            SensorDef('soc', device_class='battery', unit='%', state_class='measurement'),
+            SensorDef('calculated_system_voltage', device_class='voltage', unit='V', state_class='measurement',
+                      precision=1),
+            SensorDef('system_power', device_class='power', unit='W', state_class='measurement'),
+            SensorDef('load_adjusted_calculated_voltage', device_class='voltage', unit='V', state_class='measurement',
+                      precision=1),
+            SensorDef('balancing_enabled', platform='binary_sensor', state_topic='config/balancing_enabled',
+                      payload_on='true', payload_off='false', entity_category='diagnostic'),
+            SensorDef('balancing_ignore_slaves', state_topic='config/balancing_ignore_slaves',
+                      entity_category='diagnostic'),
+        ]
+        payload: dict[str, dict[str, str | dict[str, str | int]]] = {
+            'dev': {  # device
+                'ids': 'easybms_master',  # identifiers
+                'name': 'EasyBMS Master',
+            },
+            'o': {  # origin
+                'name': 'EasyBMS-master',
+                'sw': '1.0',  # sw_version
+                'url': 'https://github.com/SunshadeCorp/EasyBMS-master'  # support_url
+            },
+            'avty_t': 'master/core/available',  # availability_topic
+            'cmps': {}  # components
+        }
+        for sensor in sensors:
+            component: dict[str, str | int] = {
+                'p': sensor.platform,  # platform
+                'name': sensor.name,
+                'uniq_id': f"{payload['dev']['ids']}_{sensor.name}",  # unique_id
+                'stat_t': f'master/core/{sensor.state_topic or sensor.name}',  # state_topic
+            }
+            if sensor.device_class: component['dev_cla'] = sensor.device_class  # device_class
+            if sensor.unit: component['unit_of_meas'] = sensor.unit  # unit_of_measurement
+            if sensor.state_class: component['stat_cla'] = sensor.state_class  # state_class
+            if sensor.payload_on: component['pl_on'] = sensor.payload_on  # payload_on
+            if sensor.payload_off: component['pl_off'] = sensor.payload_off  # payload_off
+            if sensor.entity_category: component['ent_cat'] = sensor.entity_category  # entity_category
+            if sensor.precision: component['sug_dsp_prc'] = sensor.precision  # suggested_display_precision
+            payload['cmps'][sensor.name] = component
+        self._mqtt_client.publish('homeassistant/device/easybms_master/config', payload=json.dumps(payload),
+                                  retain=True)
 
     def uptime_seconds(self) -> float:
         return time.time() - self.start_time
@@ -51,6 +116,8 @@ class SlaveCommunicator:
 
     def open_battery_relays(self, reason: str = None):
         print('open_battery_relays called.')
+        self._mqtt_client.publish(topic='master/relays/1/set', payload='off')
+        self._mqtt_client.publish(topic='master/relays/2/set', payload='off')
         self._mqtt_client.publish(topic='master/relays/battery_plus/set', payload='off')
         self._mqtt_client.publish(topic='master/relays/battery_precharge/set', payload='off')
         self._mqtt_client.publish(topic='master/relays/battery_minus/set', payload='off')
@@ -232,8 +299,12 @@ class SlaveCommunicator:
             self._mqtt_client.subscribe(f'esp-module/{module_id}/uptime')
         self._mqtt_client.subscribe('master/core/config/balancing_enabled/set')
         self._mqtt_client.subscribe('master/core/config/balancing_ignore_slaves/set')
+        self._mqtt_client.subscribe('master/can/limits/+')
         self._mqtt_client.publish('master/core/available', 'online', retain=True)
         self.send_limits()
+        if self.first_connect:
+            self.first_connect = False
+            self.set_ha_discovery()
 
     def _handle_cell_message(self, topic, battery_module: BatteryModule, payload):
         accurate_reading = topic.startswith('accurate/')
@@ -309,15 +380,6 @@ class SlaveCommunicator:
             if msg.topic.startswith('esp-module/') and len(msg.payload) > 0:
                 extracted_id, topic = self._topic_extract_id(msg.topic)
                 self._handle_esp_module_message(extracted_id, topic, payload)
-            elif msg.topic == 'master/core/config/balancing_enabled/set':
-                self.events.on_balancing_enabled_set(payload)
-            elif msg.topic == 'master/core/config/balancing_ignore_slaves/set':
-                if payload == '' or payload.lower() == 'none':
-                    self.events.on_balancing_ignore_slaves_set(set())
-                else:
-                    values: list[str] = msg.payload.decode().split(',')
-                    slaves: set[int] = set(int(value) for value in values)
-                    self.events.on_balancing_ignore_slaves_set(slaves)
             elif msg.topic == 'esp-total/total_voltage':
                 try:
                     self._battery_system.voltage.update(float(payload))
@@ -328,6 +390,19 @@ class SlaveCommunicator:
                     self._battery_system.current.update(float(payload))
                 except ValueError:
                     print(f'{msg.topic} >{payload}< bad data', flush=True)
+            elif msg.topic.startswith('master/can/limits/'):
+                topic = msg.topic.removeprefix('master/can/limits/')
+                value = float(msg.payload.decode())
+                self.events.on_can_limit_recv(topic, value)
+            elif msg.topic == 'master/core/config/balancing_enabled/set':
+                self.events.on_balancing_enabled_set(payload)
+            elif msg.topic == 'master/core/config/balancing_ignore_slaves/set':
+                if payload == '' or payload.lower() == 'none':
+                    self.events.on_balancing_ignore_slaves_set(set())
+                else:
+                    values: list[str] = msg.payload.decode().split(',')
+                    slaves: set[int] = set(int(value) for value in values)
+                    self.events.on_balancing_ignore_slaves_set(slaves)
         except ValueError as e:
             print('_mqtt_on_message ValueError', e, traceback.format_exc(), msg.topic, msg.payload, flush=True)
         except Exception as e:

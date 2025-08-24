@@ -53,29 +53,37 @@ class BatteryManager:
                 cell.voltage.event.on_warning += self.on_cell_voltage_warning
                 cell.voltage.event.on_implausible += self.on_implausible_cell_voltage
 
-        self.allow_charge: bool = True
-        self.allow_discharge: bool = True
+        self.slave_communicator.events.on_can_limit_recv += self.set_current_can_limit
+
+        self.current_can_limits = {}
 
     def balance(self) -> None:
         self.balancer.balance()
 
+    def set_current_can_limit(self, topic: str, value: float):
+        self.current_can_limits[topic] = value
+
+    def charge_allowed(self) -> bool:
+        return self.current_can_limits.get('max_charge_current', -1) != 0
+
+    def discharge_allowed(self) -> bool:
+        return self.current_can_limits.get('max_discharge_current', -1) != 0
+
     def set_limits(self):
+        if self.current_can_limits.get('max_voltage', 0) == 0 or self.current_can_limits.get('min_voltage', 0) == 0:
+            return
         min_temp: float = self.battery_system.lowest_module_temp()
         cells: BatteryCellList = self.battery_system.cells()
         lowest_voltage: float = cells.lowest_voltage()
         highest_voltage: float = cells.highest_voltage()
-        if lowest_voltage <= BatteryCell.soc_to_voltage(0.05):
-            self.allow_discharge = False
-            self.slave_communicator.send_discharge_limit(self.allow_discharge)
-        elif lowest_voltage >= BatteryCell.soc_to_voltage(0.10) and not self.allow_discharge:
-            self.allow_discharge = True
-            self.slave_communicator.send_discharge_limit(self.allow_discharge)
-        if min_temp < 0.5 or highest_voltage >= BatteryCell.soc_to_voltage(0.98):
-            self.allow_charge = False
-            self.slave_communicator.send_charge_limit(self.allow_charge)
-        elif min_temp >= 0.5 and highest_voltage <= BatteryCell.soc_to_voltage(0.95) and not self.allow_charge:
-            self.allow_charge = True
-            self.slave_communicator.send_charge_limit(self.allow_charge)
+        if lowest_voltage <= BatteryCell.soc_to_voltage(0.15) and self.discharge_allowed():
+            self.slave_communicator.send_discharge_limit(allow_discharge=False)
+        elif lowest_voltage >= BatteryCell.soc_to_voltage(0.18) and not self.discharge_allowed():
+            self.slave_communicator.send_discharge_limit(allow_discharge=True)
+        if (min_temp < 0.5 or highest_voltage >= BatteryCell.soc_to_voltage(0.93)) and self.charge_allowed():
+            self.slave_communicator.send_charge_limit(allow_charge=False)
+        # elif min_temp >= 0.5 and highest_voltage <= BatteryCell.soc_to_voltage(0.90) and not self.charge_allowed():
+        #     self.slave_communicator.send_charge_limit(allow_charge=True)
 
     def check_cell_voltage_times(self):
         timeout_cells = self.battery_system.cells().with_voltage_older_than(self.ESP_TIMEOUT_CRITICAL_SECONDS)
@@ -94,6 +102,7 @@ class BatteryManager:
 
     def trigger_safety_disconnect(self, reason: str) -> None:
         self.slave_communicator.open_battery_relays(reason)
+        self.current_can_limits = {}
 
     # Event handling for critical events
     def on_critical_battery_system_voltage(self, system: BatterySystem) -> None:
