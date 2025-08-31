@@ -107,16 +107,16 @@ class BatterySystemBalancer:
             return
 
         if cell_diff > 0.010:
-            possible_cells.set_relax_time(seconds=5.0)
-            self.balance_discharge_time = 120.0  # seconds
-            min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.010)
-        elif cell_diff > 0.005:
             possible_cells.set_relax_time(seconds=10.0)
             self.balance_discharge_time = 60.0  # seconds
-            min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.005)
-        else:
+            min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.010)
+        elif cell_diff > 0.005:
             possible_cells.set_relax_time(seconds=20.0)
             self.balance_discharge_time = 30.0  # seconds
+            min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.005)
+        else:
+            possible_cells.set_relax_time(seconds=40.0)
+            self.balance_discharge_time = 15.0  # seconds
             min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.001)
 
         required_voltage: float = max(lowest_voltage + min_cell_diff, BatteryCell.soc_to_voltage(0.15))
