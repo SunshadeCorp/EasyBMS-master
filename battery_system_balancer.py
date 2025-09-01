@@ -103,10 +103,6 @@ class BatterySystemBalancer:
             self.idle = True
             return
 
-        min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.001)
-        required_voltage: float = max(lowest_voltage + min_cell_diff, BatteryCell.soc_to_voltage(0.15))
-        cells_to_discharge: list[BatteryCell] = possible_cells.with_accurate_voltage_above(required_voltage)
-
         def balance_seconds(voltage_diff: float) -> float:
             balance_time: float = 6875.0 * voltage_diff - 8.75  # 2mv 5s -> 10mV 60s
             return min(60.0, max(5.0, balance_time))
@@ -115,7 +111,9 @@ class BatterySystemBalancer:
             balance_time: float = -3750.0 * voltage_diff + 47.5  # 2mv 40s -> 10mV 10s
             return min(40.0, max(10.0, balance_time))
 
-        for cell in cells_to_discharge:
+        min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.001)
+        required_voltage: float = max(lowest_voltage + min_cell_diff, BatteryCell.soc_to_voltage(0.15))
+        for cell in possible_cells.with_accurate_voltage_above(required_voltage):
             if cell.is_relaxing() or cell.is_balance_discharging():
                 continue
             cell_to_balance_diff: float = cell.accurate_voltage.value - lowest_voltage
