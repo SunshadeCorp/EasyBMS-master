@@ -86,7 +86,7 @@ class BatteryManager:
             self.slave_communicator.send_charge_limit(allow_charge=True)
 
     def check_cell_voltage_times(self):
-        timeout_cells = self.battery_system.cells().with_voltage_older_than(self.ESP_TIMEOUT_CRITICAL_SECONDS)
+        timeout_cells = list(self.battery_system.cells().with_voltage_older_than(self.ESP_TIMEOUT_CRITICAL_SECONDS))
         if len(timeout_cells) > 0:
             message = f'[CRITICAL] following cells got no update: {time.time()}\n'
             message += '\n'.join([f'Module{cell.module_id} Cell{cell.id}: {cell.voltage.timestamp}' for cell in timeout_cells])
@@ -94,7 +94,7 @@ class BatteryManager:
             self.trigger_safety_disconnect(message)
             return
 
-        timeout_cells = self.battery_system.cells().with_voltage_older_than(self.ESP_TIMEOUT_WARNING_SECONDS)
+        timeout_cells = list(self.battery_system.cells().with_voltage_older_than(self.ESP_TIMEOUT_WARNING_SECONDS))
         if len(timeout_cells) > 0:
             message = f'[WARNING] following cells got no update: {time.time()}\n'
             message += '\n'.join([f'Module{cell.module_id} Cell{cell.id}: {cell.voltage.timestamp}' for cell in timeout_cells])

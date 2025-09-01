@@ -1,4 +1,4 @@
-import time
+from typing import Iterator
 
 from battery_cell import BatteryCell
 
@@ -26,11 +26,11 @@ class BatteryCellList(list[BatteryCell]):
     def lowest_accurate_voltage(self) -> float:
         return min(cell.accurate_voltage.value for cell in self.__iter__())
 
-    def with_voltage_above(self, value: float) -> list[BatteryCell]:
-        return [cell for cell in self.__iter__() if cell.voltage.value > value]
+    def with_voltage_above(self, value: float) -> Iterator[BatteryCell]:
+        return (cell for cell in self.__iter__() if cell.voltage.value > value)
 
-    def with_accurate_voltage_above(self, value: float) -> list[BatteryCell]:
-        return [cell for cell in self.__iter__() if cell.accurate_voltage.value > value]
+    def with_accurate_voltage_above(self, value: float) -> Iterator[BatteryCell]:
+        return (cell for cell in self.__iter__() if cell.accurate_voltage.value > value)
 
     def highest_soc(self) -> float:
         return max(cell.soc() for cell in self.__iter__())
@@ -41,11 +41,14 @@ class BatteryCellList(list[BatteryCell]):
     def max_diff(self) -> float:
         return self.highest_voltage() - self.lowest_voltage()
 
+    def max_soc_diff(self) -> float:
+        return self.highest_soc() - self.lowest_soc()
+
     def has_voltage_older_than(self, seconds: float) -> bool:
         return any(not cell.voltage.initialized() or cell.voltage.age_seconds() > seconds for cell in self.__iter__())
 
-    def with_voltage_older_than(self, seconds: float) -> list[BatteryCell]:
-        return [cell for cell in self.__iter__() if not cell.voltage.initialized() or cell.voltage.age_seconds() > seconds]
+    def with_voltage_older_than(self, seconds: float) -> Iterator[BatteryCell]:
+        return (cell for cell in self.__iter__() if not cell.voltage.initialized() or cell.voltage.age_seconds() > seconds)
 
     def has_accurate_readings_older_than(self, seconds: float) -> bool:
         return any(not cell.voltage.initialized() or cell.accurate_voltage.age_seconds() > seconds for cell in self.__iter__())

@@ -75,9 +75,6 @@ class BatterySystemBalancer:
 
         possible_cells: BatteryCellList = self.cells()
 
-        if possible_cells.in_relax_time() or possible_cells.currently_balancing():
-            return
-
         if possible_cells.has_accurate_readings_older_than(seconds=self.ACCURATE_READINGS_MAX_AGE):
             self.request_accurate_readings()
             return
@@ -106,23 +103,21 @@ class BatterySystemBalancer:
             self.idle = True
             return
 
-        if cell_diff > 0.010:
-            possible_cells.set_relax_time(seconds=5.0)
-            self.balance_discharge_time = 120.0  # seconds
-            min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.010)
-        elif cell_diff > 0.005:
-            possible_cells.set_relax_time(seconds=10.0)
-            self.balance_discharge_time = 60.0  # seconds
-            min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.005)
-        else:
-            possible_cells.set_relax_time(seconds=20.0)
-            self.balance_discharge_time = 30.0  # seconds
-            min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.001)
+        def balance_seconds(voltage_diff: float) -> float:
+            balance_time: float = 6875.0 * voltage_diff - 8.75  # 2mv 5s -> 10mV 60s
+            return min(60.0, max(5.0, balance_time))
 
+        def relax_seconds(voltage_diff: float) -> float:
+            balance_time: float = -3750.0 * voltage_diff + 47.5  # 2mv 40s -> 10mV 10s
+            return min(40.0, max(10.0, balance_time))
+
+        min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.001)
         required_voltage: float = max(lowest_voltage + min_cell_diff, BatteryCell.soc_to_voltage(0.15))
-        cells_to_discharge: list[BatteryCell] = possible_cells.with_accurate_voltage_above(required_voltage)
-
-        for cell in cells_to_discharge:
-            cell.start_balance_discharge(self.balance_discharge_time)
+        for cell in possible_cells.with_accurate_voltage_above(required_voltage):
+            if cell.is_relaxing() or cell.is_balance_discharging():
+                continue
+            cell_to_balance_diff: float = cell.accurate_voltage.value - lowest_voltage
+            cell.relax_time = relax_seconds(cell_to_balance_diff)
+            cell.start_balance_discharge(balance_seconds(cell_to_balance_diff))
 
         # Cells are now discharging until the BMS slave resets the balance pins
