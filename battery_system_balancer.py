@@ -118,7 +118,7 @@ class BatterySystemBalancer:
         for cell in cells_to_discharge:
             if cell.is_relaxing() or cell.is_balance_discharging():
                 continue
-            cell_to_balance_diff: float = highest_voltage - cell.accurate_voltage.value
+            cell_to_balance_diff: float = cell.accurate_voltage.value - lowest_voltage
             cell.relax_time = relax_seconds(cell_to_balance_diff)
             cell.start_balance_discharge(balance_seconds(cell_to_balance_diff))
 
