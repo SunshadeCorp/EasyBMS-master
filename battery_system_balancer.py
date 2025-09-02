@@ -1,4 +1,5 @@
 import time
+from typing import Iterator
 
 from battery_cell import BatteryCell
 from battery_cell_list import BatteryCellList
@@ -46,8 +47,8 @@ class BatterySystemBalancer:
         self.ignore_slaves = ignore_slaves
         self.slave_communicator.send_balancing_ignore_slaves_state(self.ignore_slaves)
 
-    def modules(self) -> list[BatteryModule]:
-        return [module for module in self.battery_system.battery_modules if module.id not in self.ignore_slaves]
+    def modules(self) -> Iterator[BatteryModule]:
+        return (module for module in self.battery_system.battery_modules if module.id not in self.ignore_slaves)
 
     def cells(self) -> BatteryCellList:
         return BatteryCellList([cell for module in self.modules() for cell in module.cells])
@@ -68,12 +69,10 @@ class BatterySystemBalancer:
         if not self.enabled:
             return
 
-        modules = self.modules()
-        max_chip_temp = max(module.chip_temp.value for module in modules)
-        if max_chip_temp >= BatteryModule.UPPER_CHIP_TEMP_LIMIT_WARNING:
-            return
-
         possible_cells: BatteryCellList = self.cells()
+
+        if possible_cells.in_relax_time() or possible_cells.currently_balancing():
+            return
 
         if possible_cells.has_accurate_readings_older_than(seconds=self.ACCURATE_READINGS_MAX_AGE):
             self.request_accurate_readings()
@@ -113,11 +112,13 @@ class BatterySystemBalancer:
 
         min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.001)
         required_voltage: float = max(lowest_voltage + min_cell_diff, BatteryCell.soc_to_voltage(0.15))
-        for cell in possible_cells.with_accurate_voltage_above(required_voltage):
-            if cell.is_relaxing() or cell.is_balance_discharging():
+        for module in self.modules():
+            if module.chip_temp.value >= BatteryModule.UPPER_CHIP_TEMP_LIMIT_WARNING:
                 continue
-            cell_to_balance_diff: float = cell.accurate_voltage.value - lowest_voltage
-            cell.relax_time = relax_seconds(cell_to_balance_diff)
-            cell.start_balance_discharge(balance_seconds(cell_to_balance_diff))
+            cells: BatteryCellList = BatteryCellList(module.cells)
+            for cell in cells.with_accurate_voltage_above(required_voltage):
+                cell_to_balance_diff: float = cell.accurate_voltage.value - lowest_voltage
+                cell.relax_time = relax_seconds(cell_to_balance_diff)
+                cell.start_balance_discharge(balance_seconds(cell_to_balance_diff))
 
         # Cells are now discharging until the BMS slave resets the balance pins
