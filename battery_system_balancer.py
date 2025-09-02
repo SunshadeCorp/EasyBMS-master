@@ -71,9 +71,6 @@ class BatterySystemBalancer:
 
         possible_cells: BatteryCellList = self.cells()
 
-        if possible_cells.in_relax_time() or possible_cells.currently_balancing():
-            return
-
         if possible_cells.has_accurate_readings_older_than(seconds=self.ACCURATE_READINGS_MAX_AGE):
             self.request_accurate_readings()
             return
@@ -117,6 +114,8 @@ class BatterySystemBalancer:
                 continue
             cells: BatteryCellList = BatteryCellList(module.cells)
             for cell in cells.with_accurate_voltage_above(required_voltage):
+                if cell.is_relaxing() or cell.is_balance_discharging():
+                    continue
                 cell_to_balance_diff: float = cell.accurate_voltage.value - lowest_voltage
                 cell.relax_time = relax_seconds(cell_to_balance_diff)
                 cell.start_balance_discharge(balance_seconds(cell_to_balance_diff))
