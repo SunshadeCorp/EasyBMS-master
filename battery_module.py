@@ -10,7 +10,7 @@ from measurement import Measurement
 class BatteryModule:
     LOWER_MODULE_TEMP_LIMIT_IMPLAUSIBLE: float = -100.0  # °C
     UPPER_MODULE_TEMP_LIMIT_IMPLAUSIBLE: float = 500.0  # °C
-    LOWER_MODULE_TEMP_LIMIT_CRITICAL: float = -20.0  # °C
+    LOWER_MODULE_TEMP_LIMIT_CRITICAL: float = -40.0  # °C
     UPPER_MODULE_TEMP_LIMIT_CRITICAL: float = 50.0  # °C
     LOWER_MODULE_TEMP_LIMIT_WARNING: float = -10.0  # °C
     UPPER_MODULE_TEMP_LIMIT_WARNING: float = 45.0  # °C
