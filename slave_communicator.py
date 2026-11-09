@@ -267,8 +267,8 @@ class SlaveCommunicator:
     def _configure_esp_module(self, extracted_id):
         slave: dict = self._slave_mapping['slaves'][extracted_id]
         config = f"{slave['number']},"
-        config += f"{slave.get('total_voltage_measurer', False):d},"
-        config += f"{slave.get('total_current_measurer', False):d}"
+        config += f"{slave.get('total_current_measurer', False):d},"
+        config += f"{slave.get('master_can', False):d}"
         self._mqtt_client.publish(f'esp-module/{extracted_id}/set_config', config)
 
     def _handle_esp_module_message(self, extracted_id, topic, payload):  # noqa: C901
