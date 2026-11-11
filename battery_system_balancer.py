@@ -14,9 +14,7 @@ class BatterySystemBalancer:
 
     # DEFAULT_BALANCE_RELAX_TIME: float = 20.0  # seconds # unused
 
-    ACCURATE_READINGS_MAX_AGE: float = 20.0  # seconds
-    ACCURATE_READINGS_REQUEST_WAIT_TIME: float = 10.0  # seconds
-    ACCURATE_READINGS_REQUEST_WAIT_TIME_IDLE: float = 120.0  # seconds
+    VOLTAGE_MAX_AGE: float = 20.0  # seconds
 
     def __init__(self, battery_system: BatterySystem, slave_communicator: SlaveCommunicator):
         self.battery_system = battery_system
@@ -52,18 +50,6 @@ class BatterySystemBalancer:
     def cells(self) -> BatteryCellList:
         return BatteryCellList([cell for module in self.modules() for cell in module.cells])
 
-    def request_accurate_readings(self):
-        if self.idle:
-            request_wait_time: float = self.ACCURATE_READINGS_REQUEST_WAIT_TIME_IDLE
-        else:
-            request_wait_time: float = self.ACCURATE_READINGS_REQUEST_WAIT_TIME
-        for module in self.battery_system.battery_modules:
-            if module.id in self.ignore_slaves:
-                continue
-            if time.time() - module.last_accurate_reading_request_time > request_wait_time:
-                module.last_accurate_reading_request_time = time.time()
-                self.slave_communicator.send_accurate_reading_request(module.id)
-
     def balance(self) -> None:
         if not self.enabled:
             return
@@ -78,16 +64,12 @@ class BatterySystemBalancer:
         if possible_cells.in_relax_time() or possible_cells.currently_balancing():
             return
 
-        if possible_cells.has_accurate_readings_older_than(seconds=self.ACCURATE_READINGS_MAX_AGE):
-            self.request_accurate_readings()
-            return
-
         try:
-            highest_voltage = possible_cells.highest_accurate_voltage()
+            highest_voltage = possible_cells.highest_voltage()
         except TypeError:
             print(f'TypeError: some voltages not set! {self.battery_system}')
             return
-        lowest_voltage = possible_cells.lowest_accurate_voltage()
+        lowest_voltage = possible_cells.lowest_voltage()
         self.slave_communicator.send_balancer_cell_min_max(lowest_voltage, highest_voltage)
 
         cell_diff: float = highest_voltage - lowest_voltage
@@ -120,7 +102,7 @@ class BatterySystemBalancer:
             min_cell_diff: float = max(self.min_cell_diff_for_balancing, 0.001)
 
         required_voltage: float = max(lowest_voltage + min_cell_diff, BatteryCell.soc_to_voltage(0.15))
-        cells_to_discharge: list[BatteryCell] = possible_cells.with_accurate_voltage_above(required_voltage)
+        cells_to_discharge: list[BatteryCell] = possible_cells.with_voltage_above(required_voltage)
 
         for cell in cells_to_discharge:
             cell.start_balance_discharge(self.balance_discharge_time)

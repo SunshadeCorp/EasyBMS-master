@@ -68,9 +68,6 @@ class SlaveCommunicator:
         self._mqtt_client.publish(topic=f'esp-module/{module_number + 1}/cell/{cell_number + 1}/balance_request',
                                   payload=f'{int(balance_time_s * 1000)}')
 
-    def send_accurate_reading_request(self, module_number: int):
-        self._mqtt_client.publish(topic=f'esp-module/{module_number + 1}/read_accurate', payload='1')
-
     def send_balancer_cell_diff(self, cell_diff: float):
         self._mqtt_client.publish(topic='master/core/balancer_cell_diff', payload=f'{cell_diff:.3f}', retain=True)
 
@@ -222,7 +219,6 @@ class SlaveCommunicator:
             for j in range(12):
                 self._mqtt_client.subscribe(f'esp-module/{i + 1}/cell/{j + 1}/voltage')
                 self._mqtt_client.subscribe(f'esp-module/{i + 1}/cell/{j + 1}/is_balancing')
-                self._mqtt_client.subscribe(f'esp-module/{i + 1}/accurate/cell/{j + 1}/voltage')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/module_voltage')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/module_temps')
             self._mqtt_client.subscribe(f'esp-module/{i + 1}/chip_temp')
@@ -236,17 +232,11 @@ class SlaveCommunicator:
         self.send_limits()
 
     def _handle_cell_message(self, topic, battery_module: BatteryModule, payload):
-        accurate_reading = topic.startswith('accurate/')
-        if accurate_reading:
-            topic = topic[topic.find('/') + 1:]
         cell_number, sub_topic = self._topic_extract_number(topic)
         battery_cell: BatteryCell = battery_module.cells[cell_number - 1]
         if sub_topic == 'voltage':
             try:
-                if accurate_reading:
-                    battery_cell.accurate_voltage.update(float(payload))
-                else:
-                    battery_cell.voltage.update(float(payload))
+                battery_cell.voltage.update(float(payload))
             except ValueError:
                 print(f'esp {battery_module.id + 1} voltage >{payload}< bad data', flush=True)
         elif sub_topic == 'is_balancing':
@@ -280,7 +270,7 @@ class SlaveCommunicator:
                     self._handle_uptime_message(payload, battery_module, esp_number)
                 except ValueError:
                     print(f'esp {esp_number} {topic} >{payload}< bad data', flush=True)
-            elif topic.startswith('cell/') or topic.startswith('accurate/cell/'):
+            elif topic.startswith('cell/'):
                 self._handle_cell_message(topic, battery_module, payload)
             elif topic == 'module_voltage':
                 try:

@@ -29,7 +29,6 @@ class BatteryCell:
 
     def __init__(self, cell_id: int, module_id: int) -> None:
         self.voltage: Measurement = Measurement(self, self.limits)
-        self.accurate_voltage: Measurement = Measurement(self, self.limits)
         self.balance_pin_state: bool or None = False
         self.id: int = cell_id
         self.module_id: int = module_id
